@@ -1,0 +1,27 @@
+---
+import TestBackend from "../components/TestBackend.jsx";
+---
+
+<html lang="it">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>CodeForge Portfolio</title>
+	</head>
+	<body
+		class="bg-slate-900 text-white min-h-screen flex flex-col items-center justify-center p-4"
+	>
+		<h1
+			class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400"
+		>
+			CodeForge Portfolio
+		</h1>
+		<p class="mt-4 text-lg text-gray-400">
+			Frontend: Astro + Tailwind | Backend: Fastify
+		</p>
+		<TestBackend client:load />
+	</body>
+</html>

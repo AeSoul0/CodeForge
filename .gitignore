@@ -1,0 +1,13 @@
+# Moduli Node
+node_modules/
+
+# File di sistema Mac/Windows
+.DS_Store
+Thumbs.db
+
+# Cartelle dell'editor di codice
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj

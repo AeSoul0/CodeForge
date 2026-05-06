@@ -1,0 +1,18 @@
+# Dipendenze
+node_modules/
+
+# Variabili d'ambiente e segreti (FONDAMENTALE)
+.env
+.env.*
+!.env.example
+
+# File di log generati in caso di crash
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Eventuali build future o file temporanei
+dist/
+build/
+.cache/
