@@ -1,27 +1,196 @@
 ---
-import TestBackend from "../components/TestBackend.jsx";
+// ==========================================
+// 🧠 LOGICA DEL SERVER (Astro Frontmatter)
+// ==========================================
+
+// Importiamo il CSS globale dove risiede la magia di Tailwind v4
+import "../styles/global.css";
+
+// 1. DEFINIZIONE DEL TIPO (Interface):
+// Spieghiamo a TypeScript com'è fatto un progetto nel nostro database.
+// Questo risolve l'errore "implicitly has an any type".
+interface Project {
+	_id: string; // L'ID univoco creato da MongoDB
+	titolo: string;
+	descrizione: string;
+	tecnologie: string[]; // Un array di stringhe
+	linkGithub?: string; // Il punto di domanda indica che è opzionale
+	linkLive?: string;
+}
+
+// 2. INIZIALIZZAZIONE:
+// Creiamo una variabile 'projects' specificando che conterrà un array di Progetti.
+let projects: Project[] = [];
+
+try {
+	// Chiamiamo il nostro Backend Fastify sulla porta 3002
+	const response = await fetch("http://localhost:3002/api/projects");
+
+	if (response.ok) {
+		// Se la risposta è positiva, salviamo i dati nella variabile projects
+		projects = await response.json();
+	}
+} catch (error) {
+	// Se il backend è spento o ci sono problemi, logghiamo l'errore
+	console.error("Errore di connessione al backend:", error);
+}
 ---
 
 <html lang="it">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>CodeForge Portfolio</title>
-	</head>
+	<meta charset="utf-8" />
+	<link rel="icon" type="image/svg+xml" href="AEsouls_favicon.ico" />
+	<meta name="viewport" content="width=device-width" />
+	<title>ÆSouls | Portfolio</title>
+
+	<!-- Questo stile "inline" protegge la pagina durante il caricamento -->
+	<style is:inline>
+		html {
+			background-color: #020617; /* Corrisponde a bg-slate-950 */
+			color: #e2e8f0; /* Corrisponde a text-slate-200 */
+		}
+		/* Evita che le immagini o i blocchi saltino mentre caricano */
+		body {
+			visibility: hidden;
+		}
+		.wf-active body,
+		.loaded body {
+			visibility: visible;
+		}
+	</style>
+
+	<script is:inline>
+		// Forza la visibilità appena il DOM è pronto
+		document.addEventListener("DOMContentLoaded", () => {
+			document.documentElement.classList.add("loaded");
+		});
+	</script>
+
 	<body
-		class="bg-slate-900 text-white min-h-screen flex flex-col items-center justify-center p-4"
+		class="bg-slate-950 text-slate-200 font-sans min-h-screen selection:bg-cyan-500 selection:text-white"
 	>
-		<h1
-			class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400"
+		<!-- NAVBAR -->
+		<nav
+			class="max-w-5xl mx-auto px-6 py-8 flex justify-between items-center"
 		>
-			CodeForge Portfolio
-		</h1>
-		<p class="mt-4 text-lg text-gray-400">
-			Frontend: Astro + Tailwind | Backend: Fastify
-		</p>
-		<TestBackend client:load />
+			<span
+				class="text-2xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600"
+			>
+				CodeForge.
+			</span>
+			<ul class="hidden md:flex gap-8 text-sm font-medium text-slate-400">
+				<li class="hover:text-white cursor-pointer transition-colors">
+					Progetti
+				</li>
+				<li class="hover:text-white cursor-pointer transition-colors">
+					Esperienza
+				</li>
+				<li class="hover:text-white cursor-pointer transition-colors">
+					Contatti
+				</li>
+			</ul>
+		</nav>
+
+		<main class="max-w-5xl mx-auto px-6 py-20">
+			<!-- HERO SECTION -->
+			<section class="max-w-3xl">
+				<h1
+					class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6"
+				>
+					Costruisco esperienze <br />
+					<span
+						class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600"
+						>digitali.</span
+					>
+				</h1>
+				<p
+					class="text-lg text-slate-400 mb-10 leading-relaxed max-w-2xl"
+				>
+					Sviluppatore Full Stack appassionato di architetture pulite.
+					Specializzato in ecosistemi JavaScript moderni: Astro,
+					Fastify e MongoDB.
+				</p>
+				<div class="flex gap-4">
+					<button
+						class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-3 px-8 rounded-full transition-all hover:scale-105 shadow-[0_0_20px_rgba(6,182,212,0.3)]"
+					>
+						Vedi Progetti
+					</button>
+					<button
+						class="border border-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-8 rounded-full transition-all"
+					>
+						Contattami
+					</button>
+				</div>
+			</section>
+
+			<!-- SEZIONE PROGETTI -->
+			<section class="mt-40">
+				<h2 class="text-3xl font-bold mb-12 flex items-center gap-4">
+					I Miei Lavori
+					<span class="h-[1px] flex-grow bg-slate-800"></span>
+				</h2>
+
+				{
+					/* LOGICA DI RENDERING: Controlliamo se ci sono progetti nel DB */
+				}
+				{
+					projects.length === 0 ? (
+						/* CASO A: Database vuoto o errore di connessione */
+						<div class="p-12 rounded-3xl bg-slate-900/30 border border-slate-800 border-dashed text-center">
+							<div class="text-4xl mb-4">🍃</div>
+							<p class="text-slate-300 text-xl font-semibold">
+								Il database è pronto!
+							</p>
+							<p class="text-slate-500 mt-2 max-w-sm mx-auto">
+								Ma sembra che non ci siano ancora progetti
+								salvati. Usa il comando nel terminale per
+								aggiungere il tuo primo lavoro.
+							</p>
+						</div>
+					) : (
+						/* CASO B: Esistono progetti, li mostriamo a griglia */
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+							{projects.map((project: Project) => (
+								<article class="group relative p-8 rounded-3xl bg-slate-900 border border-slate-800 hover:border-cyan-500/50 transition-all duration-300">
+									<div class="absolute -top-4 -right-4 bg-cyan-500/10 text-cyan-400 text-[10px] font-bold px-3 py-1 rounded-full border border-cyan-500/20 opacity-0 group-hover:opacity-100 transition-opacity">
+										FULL STACK
+									</div>
+
+									<h3 class="text-2xl font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors">
+										{project.titolo}
+									</h3>
+
+									<p class="text-slate-400 mb-6 leading-relaxed">
+										{project.descrizione}
+									</p>
+
+									<div class="flex flex-wrap gap-2">
+										{project.tecnologie.map(
+											(tech: string) => (
+												<span class="px-3 py-1 text-xs font-semibold bg-slate-950 text-cyan-500 rounded-lg border border-slate-800">
+													{tech}
+												</span>
+											),
+										)}
+									</div>
+								</article>
+							))}
+						</div>
+					)
+				}
+			</section>
+		</main>
+
+		<!-- FOOTER MINIMALE -->
+		<footer
+			class="max-w-5xl mx-auto px-6 py-20 mt-20 border-t border-slate-900 text-center text-slate-600 text-sm"
+		>
+			&copy; {new Date().getFullYear()}
+			<span
+				class="text-white md:text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600"
+			>
+				ÆSouls. Progettato con dedizione notturna.
+			</span>
+		</footer>
 	</body>
 </html>
