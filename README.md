@@ -1,51 +1,47 @@
-Ecco un README professionale, moderno e completo, scritto apposta per il tuo nuovo brand **ÆSouls**. È progettato per fare un'ottima figura su GitHub e per spiegare esattamente l'architettura che hai costruito stasera.
+# 🚀 CodeForge | Portfolio Ecosystem
+
+**CodeForge** è un ecosistema digitale moderno e performante sviluppato da **Samuele Arabia**. Il progetto è composto da un frontend ultra-veloce realizzato con Astro e un backend robusto basato su Fastify, progettato per gestire e visualizzare una collezione dinamica di progetti tecnologici.
 
 ---
 
-# 🌌 ÆSouls - Full-Stack Portfolio Ecosystem
+## 🛠️ Stack Tecnologico
 
-**ÆSouls** è un ecosistema digitale moderno costruito per mostrare progetti di sviluppo attraverso un'architettura full-stack robusta, veloce e tipizzata. Il progetto separa nettamente la logica di presentazione (Frontend) dalla gestione dei dati (Backend), garantendo scalabilità e performance elevate.
+### Frontend
+- **Framework:** [Astro 6.3.1](https://astro.build/) (Islands Architecture per performance massime).
+- **UI Library:** [React 19.2.6](https://react.dev/) per la gestione di componenti interattivi.
+- **Styling:** [Tailwind CSS 4.2.4](https://tailwindcss.com/) per un design responsivo e moderno.
+- **Features:** Glassmorphism UI, animazioni particellari interattive via Canvas API e scroll fluido.
 
----
-
-## 🛠️ Tech Stack
-
-### **Frontend**
-
-* **Framework:** [Astro](https://astro.build/) (v4+) - Scelto per le performance imbattibili e il rendering ottimizzato.
-* **Styling:** [Tailwind CSS v4](https://tailwindcss.com/) - Utilizzato con motore Vite per un design fluido e ultra-moderno.
-* **Language:** [TypeScript](https://www.google.com/search?q=https://www.typescript.org/) - Per un codice sicuro, auto-documentato e privo di errori di runtime.
-* **Icons:** Supporto SVG/Favicon integrato.
-
-### **Backend**
-
-* **Runtime:** [Node.js]()
-* **Framework:** [Fastify]() - "The fast and low overhead web framework".
-* **Logging:** [Pino]() + `pino-pretty` - Sistema di log professionale con formattazione personalizzata in **GMT +2**.
-* **Database:** [MongoDB Atlas]() - Database NoSQL su cloud per una persistenza dei dati flessibile.
-* **ODM:** [Mongoose]() - Per la modellazione dei dati dei progetti.
+### Backend
+- **Runtime:** Node.js (>=22.12.0).
+- **Framework:** [Fastify 5.8.5](https://www.fastify.io/) (estremamente veloce e leggero).
+- **Database:** [MongoDB](https://www.mongodb.com/) tramite **Mongoose 9.6.2**.
+- **Logging:** [Pino-pretty 13.1.3](https://github.com/pinojs/pino-pretty) per log di sistema chiari e leggibili.
 
 ---
 
-## 📁 Struttura del Progetto
+## ✨ Caratteristiche Principali
+
+- **Design Premium:** Interfaccia basata su *Glassmorphism* (effetto vetro smerigliato) con bordi illuminati e hover glow.
+- **Sfondo Interattivo:** Sistema di particelle animato in JavaScript puro che reagisce al movimento del mouse.
+- **Sincronizzazione Real-time:** Il portfolio interroga dinamicamente il database MongoDB per mostrare i progetti aggiornati.
+- **Architettura Professionale:** Separazione netta tra logica di business (backend) e interfaccia utente (frontend).
+- **SEO & Performance:** Ottimizzato grazie alle capacità di rendering statico di Astro.
+
+---
+
+## 📂 Struttura del Progetto
 
 ```text
-ÆSouls/
-├── backend/
-│   ├── src/
-│   │   ├── config/          # Connessione al Database (MongoDB)
-│   │   ├── models/          # Schemi Mongoose (Project.js)
-│   │   ├── routes/          # API Endpoints (Health, Projects)
-│   │   └── index.js         # Entry point e configurazione Fastify
-│   └── .env                 # Credenziali database (non versionato)
-│
-└── frontend/
-    ├── public/              # Risorse statiche (Favicon, immagini)
-    ├── src/
-    │   ├── pages/           # Rotte Astro (index.astro)
-    │   └── styles/          # CSS globale e Tailwind v4
-    └── astro.config.mjs     # Configurazione Astro & Vite
-
+AeSouls-CodeForge/
+├── frontend/           # Codice sorgente Astro & React
+│   ├── src/pages/      # Route principali (index.astro)
+│   └── src/components/ # Componenti UI riutilizzabili
+├── backend/            # API REST con Fastify
+│   ├── src/models/     # Schemi Mongoose (es. Projects.js)
+│   ├── src/routes/     # Definizione degli endpoint API
+│   └── src/index.js    # Entry point del server
+└── package.json        # Gestione dipendenze globale
 ```
 
 ---
@@ -127,12 +123,4 @@ Invoke-RestMethod -Uri "http://localhost:3002/api/projects" -Method Post -Conten
 
 ---
 
-## 🌙 Dedizione Notturna
-
-Questo progetto è stato forgiato durante lunghe sessioni di coding notturno, con l'obiettivo di creare un prodotto che sia tanto bello nel codice quanto nell'interfaccia.
-
-**ÆSouls** - *Costruire esperienze digitali, un commit alla volta.*
-
----
-
-*Creato con ❤️ da Samuele (ÆSouls)*
+© 2026 ÆSouls
