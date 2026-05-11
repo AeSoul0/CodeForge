@@ -3,175 +3,615 @@
 // 🧠 LOGICA DEL SERVER (Astro Frontmatter)
 // ==========================================
 
-// Importiamo il CSS globale dove risiede la magia di Tailwind v4
 import "../styles/global.css";
+import TestBackend from "../components/TestBackend.jsx";
 
-// 1. DEFINIZIONE DEL TIPO (Interface):
-// Spieghiamo a TypeScript com'è fatto un progetto nel nostro database.
-// Questo risolve l'errore "implicitly has an any type".
 interface Project {
-	_id: string; // L'ID univoco creato da MongoDB
+	_id: string;
 	titolo: string;
 	descrizione: string;
-	tecnologie: string[]; // Un array di stringhe
-	linkGithub?: string; // Il punto di domanda indica che è opzionale
-	linkLive?: string;
+	tecnologie: string[];
 }
 
-// 2. INIZIALIZZAZIONE:
-// Creiamo una variabile 'projects' specificando che conterrà un array di Progetti.
 let projects: Project[] = [];
 
 try {
-	// Chiamiamo il nostro Backend Fastify sulla porta 3002
 	const response = await fetch("http://localhost:3002/api/projects");
-
 	if (response.ok) {
-		// Se la risposta è positiva, salviamo i dati nella variabile projects
 		projects = await response.json();
 	}
 } catch (error) {
-	// Se il backend è spento o ci sono problemi, logghiamo l'errore
 	console.error("Errore di connessione al backend:", error);
 }
 ---
 
-<html lang="it">
-	<meta charset="utf-8" />
-	<link rel="icon" type="image/svg+xml" href="AEsouls_favicon.ico" />
-	<meta name="viewport" content="width=device-width" />
-	<title>ÆSouls | Portfolio</title>
+<html lang="it" class="scroll-smooth">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="AEsouls_favicon.ico" />
+		<meta name="viewport" content="width=device-width" />
+		<title>CodeForge | ÆSouls Portfolio</title>
 
-	<!-- Questo stile "inline" protegge la pagina durante il caricamento -->
-	<style is:inline>
-		html {
-			background-color: #020617; /* Corrisponde a bg-slate-950 */
-			color: #e2e8f0; /* Corrisponde a text-slate-200 */
-		}
-		/* Evita che le immagini o i blocchi saltino mentre caricano */
-		body {
-			visibility: hidden;
-		}
-		.wf-active body,
-		.loaded body {
-			visibility: visible;
-		}
-	</style>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+			rel="stylesheet"
+		/>
 
-	<script is:inline>
-		// Forza la visibilità appena il DOM è pronto
-		document.addEventListener("DOMContentLoaded", () => {
-			document.documentElement.classList.add("loaded");
-		});
-	</script>
+		<style is:global>
+			html,
+			body {
+				transition:
+					background-color 0.5s ease,
+					color 0.5s ease;
+			}
+			html {
+				background-color: #020617;
+				color: #e2e8f0;
+			}
+			body {
+				visibility: hidden;
+			}
+			.loaded body {
+				visibility: visible;
+			}
+
+			/* Sfondo Animato Liquido */
+			@keyframes blob {
+				0% {
+					transform: translate(0px, 0px) scale(1);
+				}
+				33% {
+					transform: translate(50px, -50px) scale(1.1);
+				}
+				66% {
+					transform: translate(-40px, 40px) scale(0.9);
+				}
+				100% {
+					transform: translate(0px, 0px) scale(1);
+				}
+			}
+			.animate-blob {
+				animation: blob 15s infinite alternate ease-in-out;
+			}
+			.animation-delay-2000 {
+				animation-delay: 2s;
+			}
+			.animation-delay-4000 {
+				animation-delay: 4s;
+			}
+
+			@keyframes bounce-pop {
+				0% {
+					transform: scale(1);
+				}
+				40% {
+					transform: scale(1.3);
+				}
+				60% {
+					transform: scale(0.85);
+				}
+				80% {
+					transform: scale(1.1);
+				}
+				100% {
+					transform: scale(1);
+				}
+			}
+			.hover-bounce:hover {
+				animation: bounce-pop 0.4s linear forwards;
+				transform-origin: center;
+			}
+
+			#particleCanvas {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				z-index: 1;
+				pointer-events: none;
+			}
+
+			/* ========================================== */
+			/* 🔮 1. VERO GLASSMORPHISM (Frosted Glass)   */
+			/* ========================================== */
+			.glass-card {
+				/* Un leggerissimo tocco di bianco invece del nero, crea l'effetto lastra di vetro */
+				background: linear-gradient(
+					135deg,
+					rgba(255, 255, 255, 0.05) 0%,
+					rgba(255, 255, 255, 0.01) 100%
+				);
+				backdrop-filter: blur(24px);
+				-webkit-backdrop-filter: blur(24px);
+				/* Riflesso sui bordi superiore e sinistro come vero vetro illuminato */
+				border-top: 1px solid rgba(255, 255, 255, 0.15);
+				border-left: 1px solid rgba(255, 255, 255, 0.15);
+				border-right: 1px solid rgba(255, 255, 255, 0.05);
+				border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+				box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+				transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+			}
+
+			/* ========================================== */
+			/* 💡 2. GLOW ILLUMINAZIONE INFALLIBILE       */
+			/* ========================================== */
+			.hover-glow:hover {
+				transform: translateY(-8px);
+				border-color: rgba(59, 130, 246, 0.8) !important;
+				box-shadow:
+					0 8px 32px 0 rgba(0, 0, 0, 0.3),
+					0 0 30px 5px rgba(59, 130, 246, 0.5),
+					inset 0 0 15px rgba(59, 130, 246, 0.2) !important;
+			}
+
+			/* ========================================== */
+			/* 🌙 3. SWITCH TEMA AD-HOC PER CODEFORGE     */
+			/* ========================================== */
+			.cf-theme-switch {
+				cursor: pointer;
+				display: flex;
+				align-items: center;
+				-webkit-tap-highlight-color: transparent;
+			}
+			.cf-theme-switch input {
+				display: none;
+			}
+
+			.cf-switch-track {
+				width: 60px;
+				height: 30px;
+				background: rgba(15, 23, 42, 0.8);
+				border: 1px solid rgba(255, 255, 255, 0.1);
+				border-radius: 30px;
+				position: relative;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 0 6px;
+				box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
+			}
+
+			.cf-switch-icon {
+				width: 14px;
+				height: 14px;
+				color: #94a3b8;
+				z-index: 1;
+				transition: color 0.3s;
+			}
+
+			.cf-switch-thumb {
+				position: absolute;
+				top: 3px;
+				left: 3px;
+				width: 22px;
+				height: 22px;
+				background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+				border-radius: 50%;
+				transition: 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+				box-shadow: 0 0 10px rgba(14, 165, 233, 0.6);
+				z-index: 2;
+			}
+
+			.cf-theme-switch input:checked + .cf-switch-track .cf-switch-thumb {
+				transform: translateX(30px);
+				background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+				box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+			}
+
+			/* ========================================== */
+			/* ☀️ 4. LIGHT MODE OVERRIDES                 */
+			/* ========================================== */
+			html.light-mode body {
+				background-color: #f8fafc !important; /* Grigio super chiaro */
+				color: #0f172a !important; /* Testo scuro */
+			}
+
+			html.light-mode .text-white {
+				color: #0f172a !important;
+			}
+			html.light-mode .text-slate-200 {
+				color: #1e293b !important;
+			}
+			html.light-mode .text-slate-300 {
+				color: #334155 !important;
+			}
+			html.light-mode .text-slate-400 {
+				color: #475569 !important;
+			}
+
+			/* Blob più visibili in light mode */
+			html.light-mode .blob-1 {
+				background-color: rgba(99, 102, 241, 0.5);
+			}
+			html.light-mode .blob-2 {
+				background-color: rgba(6, 182, 212, 0.4);
+			}
+			html.light-mode .blob-3 {
+				background-color: rgba(59, 130, 246, 0.4);
+			}
+
+			/* Vetro versione Light */
+			html.light-mode .glass-card {
+				background: linear-gradient(
+					135deg,
+					rgba(255, 255, 255, 0.7) 0%,
+					rgba(255, 255, 255, 0.4) 100%
+				);
+				border-top: 1px solid rgba(255, 255, 255, 1);
+				border-left: 1px solid rgba(255, 255, 255, 1);
+				box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+			}
+
+			/* Adattamento bottoni social nella navbar in Light Mode */
+			html.light-mode nav .glass-panel {
+				background-color: rgba(255, 255, 255, 0.8) !important;
+				border-color: rgba(0, 0, 0, 0.1) !important;
+			}
+			html.light-mode .bg-slate-900\/40 {
+				background-color: rgba(255, 255, 255, 0.7) !important;
+			}
+		</style>
+	</head>
 
 	<body
-		class="bg-slate-950 text-slate-200 font-sans min-h-screen selection:bg-cyan-500 selection:text-white"
+		class="bg-slate-950 text-slate-200 min-h-screen flex flex-col selection:bg-cyan-500 selection:text-white relative"
+		style="font-family: 'Outfit', sans-serif;"
 	>
-		<!-- NAVBAR -->
-		<nav
-			class="max-w-5xl mx-auto px-6 py-8 flex justify-between items-center"
+		<div
+			class="fixed inset-0 z-0 overflow-hidden pointer-events-none opacity-80"
 		>
-			<span
-				class="text-2xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600"
+			<div
+				class="blob-1 absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] rounded-full bg-indigo-600/40 blur-[120px] animate-blob"
 			>
-				CodeForge.
-			</span>
-			<ul class="hidden md:flex gap-8 text-sm font-medium text-slate-400">
-				<li class="hover:text-white cursor-pointer transition-colors">
-					Progetti
-				</li>
-				<li class="hover:text-white cursor-pointer transition-colors">
-					Esperienza
-				</li>
-				<li class="hover:text-white cursor-pointer transition-colors">
-					Contatti
-				</li>
-			</ul>
+			</div>
+			<div
+				class="blob-2 absolute top-[20%] right-[-10%] w-[35rem] h-[35rem] rounded-full bg-cyan-500/30 blur-[120px] animate-blob animation-delay-2000"
+			>
+			</div>
+			<div
+				class="blob-3 absolute bottom-[-20%] left-[20%] w-[45rem] h-[45rem] rounded-full bg-blue-600/30 blur-[150px] animate-blob animation-delay-4000"
+			>
+			</div>
+		</div>
+
+		<canvas id="particleCanvas"></canvas>
+
+		<nav
+			class="max-w-6xl mx-auto px-6 py-6 w-full flex justify-between items-center z-50 relative pointer-events-auto"
+		>
+			<div class="flex items-center gap-4 md:gap-6">
+				<label class="cf-theme-switch" title="Cambia Tema">
+					<input type="checkbox" id="theme-checkbox" checked />
+					<div class="cf-switch-track">
+						<svg
+							class="cf-switch-icon"
+							xmlns="http://www.w3.org/2000/svg"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							><circle cx="12" cy="12" r="5"></circle><line
+								x1="12"
+								y1="1"
+								x2="12"
+								y2="3"></line><line
+								x1="12"
+								y1="21"
+								x2="12"
+								y2="23"></line><line
+								x1="4.22"
+								y1="4.22"
+								x2="5.64"
+								y2="5.64"></line><line
+								x1="18.36"
+								y1="18.36"
+								x2="19.78"
+								y2="19.78"></line><line
+								x1="1"
+								y1="12"
+								x2="3"
+								y2="12"></line><line
+								x1="21"
+								y1="12"
+								x2="23"
+								y2="12"></line><line
+								x1="4.22"
+								y1="19.78"
+								x2="5.64"
+								y2="18.36"></line><line
+								x1="18.36"
+								y1="5.64"
+								x2="19.78"
+								y2="4.22"></line></svg
+						>
+						<svg
+							class="cf-switch-icon"
+							xmlns="http://www.w3.org/2000/svg"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							><path
+								d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+							></path></svg
+						>
+						<div class="cf-switch-thumb"></div>
+					</div>
+				</label>
+
+				<span
+					class="text-2xl md:text-3xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 drop-shadow-[0_0_15px_rgba(6,182,212,0.5)]"
+				>
+					CodeForge.
+				</span>
+			</div>
+
+			<div
+				class="flex items-center gap-2 bg-slate-900/40 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full shadow-lg transition-colors"
+			>
+				<span
+					class="hidden md:block text-xs font-bold text-slate-300 mr-2 uppercase tracking-wider"
+				>
+					Trovami su
+				</span>
+				<a
+					href="#"
+					aria-label="LinkedIn"
+					class="w-9 h-9 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-colors hover-bounce hover:bg-[#0a66c2] shadow-inner"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="18"
+						height="18"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						><path
+							d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"
+						></path><rect x="2" y="9" width="4" height="12"
+						></rect><circle cx="4" cy="4" r="2"></circle></svg
+					>
+				</a>
+				<a
+					href="#"
+					aria-label="GitHub"
+					class="w-9 h-9 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-colors hover-bounce hover:bg-slate-800 shadow-inner"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="18"
+						height="18"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						><path
+							d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"
+						></path></svg
+					>
+				</a>
+				<a
+					href="#"
+					aria-label="WhatsApp"
+					class="w-9 h-9 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-colors hover-bounce hover:bg-[#25D366] shadow-inner"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="20"
+						height="20"
+						viewBox="0 0 24 24"
+						fill="currentColor"
+						><path
+							d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"
+						></path></svg
+					>
+				</a>
+			</div>
 		</nav>
 
-		<main class="max-w-5xl mx-auto px-6 py-20">
-			<!-- HERO SECTION -->
-			<section class="max-w-3xl">
-				<h1
-					class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6"
+		<main
+			class="max-w-6xl mx-auto px-6 py-8 flex-grow relative z-10 pointer-events-auto"
+		>
+			<div
+				class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-[minmax(220px,auto)]"
+			>
+				<article
+					class="glass-card hover-glow lg:col-span-2 lg:row-span-2 rounded-[2rem] p-10 flex flex-col justify-center group overflow-hidden relative"
 				>
-					Costruisco esperienze <br />
-					<span
-						class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600"
-						>digitali.</span
+					<div
+						class="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-blue-900/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-0"
 					>
-				</h1>
-				<p
-					class="text-lg text-slate-400 mb-10 leading-relaxed max-w-2xl"
-				>
-					Sviluppatore Full Stack appassionato di architetture pulite.
-					Specializzato in ecosistemi JavaScript moderni: Astro,
-					Fastify e MongoDB.
-				</p>
-				<div class="flex gap-4">
-					<button
-						class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-3 px-8 rounded-full transition-all hover:scale-105 shadow-[0_0_20px_rgba(6,182,212,0.3)]"
+					</div>
+					<h1
+						class="text-5xl lg:text-6xl font-extrabold tracking-tight mb-6 text-white relative z-10"
 					>
-						Vedi Progetti
-					</button>
-					<button
-						class="border border-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-8 rounded-full transition-all"
+						Costruisco esperienze <br />
+						<span
+							class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 drop-shadow-md"
+							>digitali.</span
+						>
+					</h1>
+					<a
+						href="#progetti"
+						class="bg-cyan-500/10 hover:bg-cyan-500 border border-cyan-500/30 text-cyan-400 hover:text-slate-950 font-bold py-3 px-8 rounded-full transition-all duration-300 hover:scale-105 inline-block w-fit relative z-10 backdrop-blur-md"
 					>
-						Contattami
-					</button>
-				</div>
-			</section>
+						Esplora i Lavori
+					</a>
+				</article>
 
-			<!-- SEZIONE PROGETTI -->
-			<section class="mt-40">
-				<h2 class="text-3xl font-bold mb-12 flex items-center gap-4">
-					I Miei Lavori
-					<span class="h-[1px] flex-grow bg-slate-800"></span>
+				<article
+					class="glass-card hover-glow lg:col-span-2 lg:row-span-1 rounded-[2rem] grid group overflow-hidden"
+				>
+					<div
+						class="col-start-1 row-start-1 flex flex-col items-center justify-center p-8 transition-all duration-500 ease-in-out group-hover:-translate-y-8 group-hover:opacity-0 z-20 pointer-events-none"
+					>
+						<div
+							class="text-5xl mb-2 drop-shadow-[0_0_15px_rgba(6,182,212,0.5)]"
+						>
+							👨‍💻
+						</div>
+						<h2
+							class="text-4xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 drop-shadow-md"
+						>
+							CHI SONO
+						</h2>
+						<span
+							class="text-slate-400 text-xs font-bold tracking-widest mt-3 flex items-center gap-2 animate-pulse uppercase bg-slate-900/40 px-4 py-1.5 rounded-full border border-white/10"
+						>
+							<svg
+								class="w-4 h-4 text-cyan-400"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+								><path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
+								></path></svg
+							>
+							Passa il cursore
+						</span>
+					</div>
+
+					<div
+						class="col-start-1 row-start-1 p-8 flex flex-col justify-center transition-all duration-500 ease-in-out translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 z-10"
+					>
+						<div class="flex items-center gap-3 mb-4">
+							<span class="text-3xl">👋</span>
+							<h3
+								class="text-2xl font-bold text-white tracking-tight"
+							>
+								Ciao, sono <span
+									class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500"
+									>Samuele Arabia</span>
+							</h3>
+						</div>
+						<p class="text-slate-300 text-sm leading-relaxed mb-4">
+							<span
+								class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-blue-400 border border-blue-500/30 bg-blue-500/10 text-xs font-bold uppercase tracking-wider mr-2 mb-1 shadow-sm"
+							>
+								🎓 Ingegnere Informatico
+							</span>
+							Appassionato di tecnologia fin da bambino, esploro costantemente
+							nuovi paradigmi di sviluppo. Il mio obiettivo è trasformare
+							idee complesse in interfacce <strong
+								class="font-medium text-slate-100"
+								>pulite</strong
+							> e <strong class="font-medium text-slate-100"
+								>performanti</strong
+							>.
+						</p>
+						<p
+							class="text-slate-400 text-xs leading-relaxed border-t border-slate-700/50 pt-4 mt-auto flex items-center gap-2"
+						>
+							<span class="flex-shrink-0 text-cyan-500 text-lg"
+								>✨</span
+							>
+							<span
+								><strong
+									class="text-cyan-400 font-semibold tracking-wide uppercase"
+									>CodeForge</strong
+								> è la mia fucina digitale per raccogliere e sperimentare
+								idee.</span
+							>
+						</p>
+					</div>
+				</article>
+
+				<article
+					class="glass-card hover-glow lg:col-span-1 lg:row-span-1 rounded-[2rem] p-8 flex flex-col justify-center items-center text-center group"
+				>
+					<div
+						class="text-5xl mb-4 group-hover:-translate-y-2 transition-transform duration-300 drop-shadow-lg"
+					>
+						⚛️
+					</div>
+					<h3 class="text-white font-bold text-lg">Frontend</h3>
+					<p class="text-slate-400 text-sm mt-2">
+						Astro, React, Tailwind
+					</p>
+				</article>
+
+				<article
+					class="glass-card hover-glow lg:col-span-1 lg:row-span-1 rounded-[2rem] p-8 flex flex-col justify-center items-center text-center group"
+				>
+					<div
+						class="text-5xl mb-4 group-hover:-translate-y-2 transition-transform duration-300 drop-shadow-lg"
+					>
+						🗄️
+					</div>
+					<h3 class="text-white font-bold text-lg">Backend</h3>
+					<p class="text-slate-400 text-sm mt-2">
+						Node, Fastify, MongoDB
+					</p>
+				</article>
+			</div>
+
+			<section id="progetti" class="mt-32">
+				<h2
+					class="text-3xl font-bold mb-12 flex items-center gap-4 drop-shadow-md"
+				>
+					Progetti Recenti
+					<span class="h-[1px] flex-grow bg-slate-800/50"></span>
 				</h2>
 
 				{
-					/* LOGICA DI RENDERING: Controlliamo se ci sono progetti nel DB */
-				}
-				{
 					projects.length === 0 ? (
-						/* CASO A: Database vuoto o errore di connessione */
-						<div class="p-12 rounded-3xl bg-slate-900/30 border border-slate-800 border-dashed text-center">
-							<div class="text-4xl mb-4">🍃</div>
-							<p class="text-slate-300 text-xl font-semibold">
-								Il database è pronto!
-							</p>
-							<p class="text-slate-500 mt-2 max-w-sm mx-auto">
-								Ma sembra che non ci siano ancora progetti
-								salvati. Usa il comando nel terminale per
-								aggiungere il tuo primo lavoro.
+						<div class="glass-card p-12 rounded-[2rem] border-dashed text-center">
+							<p class="text-slate-400">
+								In attesa di nuovi progetti dal database...
 							</p>
 						</div>
 					) : (
-						/* CASO B: Esistono progetti, li mostriamo a griglia */
-						<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-							{projects.map((project: Project) => (
-								<article class="group relative p-8 rounded-3xl bg-slate-900 border border-slate-800 hover:border-cyan-500/50 transition-all duration-300">
-									<div class="absolute -top-4 -right-4 bg-cyan-500/10 text-cyan-400 text-[10px] font-bold px-3 py-1 rounded-full border border-cyan-500/20 opacity-0 group-hover:opacity-100 transition-opacity">
-										FULL STACK
-									</div>
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+							{projects.map((project) => (
+								<article class="glass-card hover-glow p-8 rounded-[2rem] group relative overflow-hidden">
+									<a
+										href="#"
+										class="absolute top-8 right-8 text-slate-400 hover:text-white hover:scale-110 transition-all z-20"
+										title="Vedi Codice su GitHub"
+									>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="24"
+											height="24"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2"
+											stroke-linecap="round"
+											stroke-linejoin="round"
+										>
+											<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+										</svg>
+									</a>
 
-									<h3 class="text-2xl font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors">
+									<h3 class="text-2xl font-bold text-white mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-cyan-400 group-hover:to-blue-600 transition-all duration-300 relative z-10 w-[90%]">
 										{project.titolo}
 									</h3>
-
-									<p class="text-slate-400 mb-6 leading-relaxed">
+									<p class="text-slate-300 text-sm leading-relaxed mb-8 relative z-10">
 										{project.descrizione}
 									</p>
 
-									<div class="flex flex-wrap gap-2">
-										{project.tecnologie.map(
-											(tech: string) => (
-												<span class="px-3 py-1 text-xs font-semibold bg-slate-950 text-cyan-500 rounded-lg border border-slate-800">
-													{tech}
-												</span>
-											),
-										)}
+									<div class="flex flex-wrap gap-3 relative z-10">
+										{project.tecnologie.map((tech) => (
+											<span class="px-4 py-2 text-xs font-bold bg-slate-900/40 text-cyan-400 rounded-full border border-white/10 shadow-lg shadow-cyan-900/10 cursor-default transition-all duration-300 ease-out hover:-translate-y-1 hover:scale-105 hover:border-blue-400 hover:bg-blue-500/10 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] uppercase tracking-wide backdrop-blur-md">
+												{tech}
+											</span>
+										))}
 									</div>
 								</article>
 							))}
@@ -181,16 +621,148 @@ try {
 			</section>
 		</main>
 
-		<!-- FOOTER MINIMALE -->
 		<footer
-			class="max-w-5xl mx-auto px-6 py-20 mt-20 border-t border-slate-900 text-center text-slate-600 text-sm"
+			class="max-w-6xl mx-auto px-6 py-12 w-full border-t border-slate-800/50 flex flex-col md:flex-row justify-between items-center gap-6 text-sm relative z-10"
 		>
-			&copy; {new Date().getFullYear()}
-			<span
-				class="text-white md:text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600"
-			>
-				ÆSouls. Progettato con dedizione notturna.
-			</span>
+			<div class="flex items-center gap-2 text-slate-500">
+				<span>&copy; 2026</span>
+				<span
+					class="font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 drop-shadow-sm"
+				>
+					ÆSouls
+				</span>
+			</div>
+			<div class="text-slate-500 text-center md:text-right">
+				<p>
+					Forgiato con passione &bull; <span
+						class="text-slate-400 font-mono">CodeForge v1.0</span>
+				</p>
+			</div>
 		</footer>
+
+		<script is:inline>
+			document.addEventListener("DOMContentLoaded", () => {
+				document.documentElement.classList.add("loaded");
+
+				// ==========================================
+				// 💡 LOGICA SWITCH TEMA (JS NATIVO)
+				// ==========================================
+				const themeToggle = document.getElementById("theme-checkbox");
+				const htmlElement = document.documentElement;
+
+				// Controlla il localStorage per ricordare la scelta
+				const savedTheme = localStorage.getItem("theme");
+				if (savedTheme === "light") {
+					htmlElement.classList.add("light-mode");
+					themeToggle.checked = false;
+				} else {
+					themeToggle.checked = true;
+				}
+
+				// Al click cambia classe e salva nel browser
+				themeToggle.addEventListener("change", (e) => {
+					if (!e.target.checked) {
+						htmlElement.classList.add("light-mode");
+						localStorage.setItem("theme", "light");
+					} else {
+						htmlElement.classList.remove("light-mode");
+						localStorage.setItem("theme", "dark");
+					}
+				});
+
+				// ==========================================
+				// 🧬 LOGICA RETE NEURALE (PARTICELLE)
+				// ==========================================
+				const canvas = document.getElementById("particleCanvas");
+				const ctx = canvas.getContext("2d");
+				let width, height;
+				let particles = [];
+				let mouse = { x: null, y: null };
+
+				function resize() {
+					width = canvas.width = window.innerWidth;
+					height = canvas.height = window.innerHeight;
+				}
+				window.addEventListener("resize", resize);
+				resize();
+
+				window.addEventListener("mousemove", (e) => {
+					mouse.x = e.clientX;
+					mouse.y = e.clientY;
+				});
+				window.addEventListener("mouseout", () => {
+					mouse.x = null;
+					mouse.y = null;
+				});
+
+				class Particle {
+					constructor() {
+						this.x = Math.random() * width;
+						this.y = Math.random() * height;
+						this.vx = (Math.random() - 0.5) * 0.8;
+						this.vy = (Math.random() - 0.5) * 0.8;
+						this.radius = Math.random() * 1.5 + 0.5;
+						this.baseColor =
+							Math.random() > 0.5
+								? "6, 182, 212"
+								: "59, 130, 246";
+					}
+					update() {
+						this.x += this.vx;
+						this.y += this.vy;
+						if (this.x < 0 || this.x > width) this.vx = -this.vx;
+						if (this.y < 0 || this.y > height) this.vy = -this.vy;
+					}
+					draw() {
+						ctx.beginPath();
+						ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+						ctx.fillStyle = `rgba(${this.baseColor}, 0.8)`;
+						ctx.fill();
+					}
+				}
+
+				for (let i = 0; i < 80; i++) {
+					particles.push(new Particle());
+				}
+
+				function animate() {
+					ctx.clearRect(0, 0, width, height);
+					for (let i = 0; i < particles.length; i++) {
+						particles[i].update();
+						particles[i].draw();
+
+						for (let j = i; j < particles.length; j++) {
+							let dx = particles[i].x - particles[j].x;
+							let dy = particles[i].y - particles[j].y;
+							let distance = Math.sqrt(dx * dx + dy * dy);
+							if (distance < 100) {
+								ctx.beginPath();
+								ctx.strokeStyle = `rgba(${particles[i].baseColor}, ${0.2 - distance / 500})`;
+								ctx.lineWidth = 1;
+								ctx.moveTo(particles[i].x, particles[i].y);
+								ctx.lineTo(particles[j].x, particles[j].y);
+								ctx.stroke();
+							}
+						}
+
+						if (mouse.x != null && mouse.y != null) {
+							let dx = particles[i].x - mouse.x;
+							let dy = particles[i].y - mouse.y;
+							let distance = Math.sqrt(dx * dx + dy * dy);
+							if (distance < 150) {
+								ctx.beginPath();
+								ctx.strokeStyle = `rgba(6, 182, 212, ${0.4 - distance / 375})`;
+								ctx.lineWidth = 1.2;
+								ctx.moveTo(particles[i].x, particles[i].y);
+								ctx.lineTo(mouse.x, mouse.y);
+								ctx.stroke();
+							}
+						}
+					}
+					requestAnimationFrame(animate);
+				}
+				animate();
+			});
+		</script>
 	</body>
 </html>
