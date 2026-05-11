@@ -1,75 +1,62 @@
-Ecco un README professionale, moderno e completo, scritto apposta per il tuo nuovo brand **ÆSouls**. È progettato per fare un'ottima figura su GitHub e per spiegare esattamente l'architettura che hai costruito stasera.
+# 🚀 CodeForge | Portfolio Ecosystem
 
----
-
-# 🌌 ÆSouls - Full-Stack Portfolio Ecosystem
-
-**ÆSouls** è un ecosistema digitale moderno costruito per mostrare progetti di sviluppo attraverso un'architettura full-stack robusta, veloce e tipizzata. Il progetto separa nettamente la logica di presentazione (Frontend) dalla gestione dei dati (Backend), garantendo scalabilità e performance elevate.
+**CodeForge** is a modern, high-performance digital ecosystem developed by **Samuele Arabia**. The project consists of an ultra-fast frontend built with Astro and a robust backend powered by Fastify, designed to manage and showcase a dynamic collection of technological projects.
 
 ---
 
 ## 🛠️ Tech Stack
 
-### **Frontend**
+### Frontend
+- **Framework:** [Astro 6.3.1](https://astro.build/) (utilizing Islands Architecture for maximum performance).
+- **UI Library:** [React 19.2.6](https://react.dev/) for interactive components.
+- **Styling:** [Tailwind CSS 4.2.4](https://tailwindcss.com/) for a modern, responsive design.
+- **Features:** Glassmorphism UI, interactive particle animations via Canvas API, and smooth scrolling.
 
-* **Framework:** [Astro](https://astro.build/) (v4+) - Scelto per le performance imbattibili e il rendering ottimizzato.
-* **Styling:** [Tailwind CSS v4](https://tailwindcss.com/) - Utilizzato con motore Vite per un design fluido e ultra-moderno.
-* **Language:** [TypeScript](https://www.google.com/search?q=https://www.typescript.org/) - Per un codice sicuro, auto-documentato e privo di errori di runtime.
-* **Icons:** Supporto SVG/Favicon integrato.
-
-### **Backend**
-
-* **Runtime:** [Node.js]()
-* **Framework:** [Fastify]() - "The fast and low overhead web framework".
-* **Logging:** [Pino]() + `pino-pretty` - Sistema di log professionale con formattazione personalizzata in **GMT +2**.
-* **Database:** [MongoDB Atlas]() - Database NoSQL su cloud per una persistenza dei dati flessibile.
-* **ODM:** [Mongoose]() - Per la modellazione dei dati dei progetti.
+### Backend
+- **Runtime:** Node.js (>=22.12.0).
+- **Framework:** [Fastify 5.8.5](https://www.fastify.io/) (extremely fast and lightweight).
+- **Database:** [MongoDB](https://www.mongodb.com/) via **Mongoose 9.6.2**.
+- **Logging:** [Pino-pretty 13.1.3](https://github.com/pinojs/pino-pretty) for clear, readable system logs.
 
 ---
 
-## 📁 Struttura del Progetto
+## ✨ Key Features
+
+- **Premium Design:** A "Midnight High-Tech" interface based on *Glassmorphism* (frosted glass effect) with illuminated borders and hover glow effects.
+- **Interactive Background:** A custom JavaScript particle system that reacts to mouse movements.
+- **Real-time Synchronization:** The portfolio dynamically fetches data from a MongoDB database to display up-to-date projects.
+- **Professional Architecture:** Clean separation between business logic (backend) and user interface (frontend).
+- **SEO & Performance:** Optimized using Astro's static rendering capabilities.
+
+---
+
+## 📂 Project Structure
 
 ```text
-ÆSouls/
-├── backend/
-│   ├── src/
-│   │   ├── config/          # Connessione al Database (MongoDB)
-│   │   ├── models/          # Schemi Mongoose (Project.js)
-│   │   ├── routes/          # API Endpoints (Health, Projects)
-│   │   └── index.js         # Entry point e configurazione Fastify
-│   └── .env                 # Credenziali database (non versionato)
-│
-└── frontend/
-    ├── public/              # Risorse statiche (Favicon, immagini)
-    ├── src/
-    │   ├── pages/           # Rotte Astro (index.astro)
-    │   └── styles/          # CSS globale e Tailwind v4
-    └── astro.config.mjs     # Configurazione Astro & Vite
+AeSouls-CodeForge/
+├── frontend/           # Astro & React source code
+│   ├── src/pages/      # Main routes (index.astro)
+│   └── src/components/ # Reusable UI components
+├── backend/            # REST API with Fastify
+│   ├── src/models/     # Mongoose schemas (e.g., Projects.js)
+│   ├── src/routes/     # API endpoint definitions
+│   └── src/index.js    # Server entry point
+└── package.json        # Global dependency management
 
 ```
 
 ---
 
-## 🚀 Funzionalità Principali
+## 🚀 Getting Started
 
-1. **Logging Avanzato:** Il backend utilizza un logger personalizzato che monitora ogni richiesta con timestamp precisi sincronizzati sull'orario italiano (**GMT +2**).
-2. **API RESTful:** Endpoints pronti per operazioni CRUD (Create, Read) sui progetti.
-3. **Database Cloud:** Integrazione nativa con MongoDB Atlas per gestire i contenuti in tempo reale.
-4. **UI Dark Mode:** Interfaccia ispirata all'estetica "Midnight High-Tech", ottimizzata per sviluppatori e recruiter.
-5. **Type Safety:** Uso rigoroso di Interfacce TypeScript nel frontend per la gestione dei dati provenienti dalle API.
+### 1. Prerequisites
 
----
+* Node.js installed.
+* An active MongoDB cluster (e.g., MongoDB Atlas).
 
-## 🚦 Come Iniziare
+### 2. Backend Configuration
 
-### 1. Requisiti
-
-* Node.js installato.
-* Un cluster MongoDB attivo (Atlas).
-
-### 2. Configurazione Backend
-
-Entra nella cartella backend e installa le dipendenze:
+Navigate to the `backend` folder and install dependencies:
 
 ```bash
 cd backend
@@ -77,23 +64,23 @@ npm install
 
 ```
 
-Crea un file `.env` con la tua stringa di connessione:
+Create a `.env` file with your connection string:
 
 ```env
-MONGO_URI=mongodb+srv://tuo_utente:tua_password@cluster.mongodb.net/aesouls
+MONGO_URI=mongodb+srv://your_user:your_password@cluster.mongodb.net/aesouls
 
 ```
 
-Avvia il server:
+Start the server:
 
 ```bash
 npm run dev
 
 ```
 
-### 3. Configurazione Frontend
+### 3. Frontend Configuration
 
-Entra nella cartella frontend e installa le dipendenze:
+Navigate to the `frontend` folder and install dependencies:
 
 ```bash
 cd frontend
@@ -101,7 +88,7 @@ npm install
 
 ```
 
-Avvia il sito:
+Start the development site:
 
 ```bash
 npm run dev
@@ -112,27 +99,19 @@ npm run dev
 
 ## 📡 API Endpoints
 
-| Metodo | Endpoint | Descrizione |
+| Method | Endpoint | Description |
 | --- | --- | --- |
-| `GET` | `/api/health` | Verifica lo stato di salute del server. |
-| `GET` | `/api/projects` | Recupera tutti i progetti dal database. |
-| `POST` | `/api/projects` | Carica un nuovo progetto nel portfolio. |
+| `GET` | `/api/health` | Check the server health status. |
+| `GET` | `/api/projects` | Fetch all projects from the database. |
+| `POST` | `/api/projects` | Upload a new project to the portfolio. |
 
-### Esempio di inserimento progetto (PowerShell):
+### Example: Adding a Project (PowerShell)
 
 ```powershell
-Invoke-RestMethod -Uri "http://localhost:3002/api/projects" -Method Post -ContentType "application/json" -Body '{"titolo": "ÆSouls", "descrizione": "Portfolio Full-Stack", "tecnologie": ["Astro", "Fastify"]}'
+Invoke-RestMethod -Uri "http://localhost:3002/api/projects" -Method Post -ContentType "application/json" -Body '{"titolo": "ÆSouls", "descrizione": "Full-Stack Portfolio", "tecnologie": ["Astro", "Fastify"]}'
 
 ```
 
----
+© 2026 ÆSouls
 
-## 🌙 Dedizione Notturna
 
-Questo progetto è stato forgiato durante lunghe sessioni di coding notturno, con l'obiettivo di creare un prodotto che sia tanto bello nel codice quanto nell'interfaccia.
-
-**ÆSouls** - *Costruire esperienze digitali, un commit alla volta.*
-
----
-
-*Creato con ❤️ da Samuele (ÆSouls)*
