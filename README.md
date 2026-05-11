@@ -1,4 +1,3 @@
-```markdown
 # 🚀 CodeForge | Portfolio Ecosystem
 
 **CodeForge** is a modern, high-performance digital ecosystem developed by **Samuele Arabia**. The project consists of an ultra-fast frontend built with Astro and a robust backend powered by Fastify, designed to manage and showcase a dynamic collection of technological projects.
@@ -113,10 +112,6 @@ Invoke-RestMethod -Uri "http://localhost:3002/api/projects" -Method Post -Conten
 
 ```
 
----
-
 © 2026 ÆSouls
 
-```
 
-```
