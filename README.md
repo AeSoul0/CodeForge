@@ -1,5 +1,3 @@
-Ecco una versione professionale in inglese del file `README.md` per il progetto **CodeForge**, basata sui file sorgente e sulla documentazione esistente.
-
 ```markdown
 # 🚀 CodeForge | Portfolio Ecosystem
 
