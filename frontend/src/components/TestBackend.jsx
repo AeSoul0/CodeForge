@@ -5,7 +5,11 @@ export default function TestBackend() {
     const [error, setError] = useState(false);
 
     useEffect(() => {
-        fetch('http://localhost:3002/api/health')
+        // Dynamic URL
+        const apiUrl = import.meta.env.PUBLIC_API_URL || "http://localhost:3002";
+
+        // Api/Health check on backend
+        fetch(`${apiUrl}/api/health`)
             .then(response => {
                 if (!response.ok) throw new Error("Backend non raggiungibile");
                 return response.json();
