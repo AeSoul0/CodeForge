@@ -14,11 +14,15 @@ interface Project {
 	linkGithub?: string;
 }
 
+// Fetch projects from database
 let projects: Project[] = [];
+
+// Use environment variable on Vercel, otherwise use localhost for development
+const apiUrl = import.meta.env.PUBLIC_API_URL || "http://localhost:3002";
 
 // Fetch projects from database
 try {
-	const response = await fetch("http://localhost:3002/api/projects");
+	const response = await fetch(`${apiUrl}/api/projects`);
 	if (response.ok) {
 		projects = await response.json();
 	}
