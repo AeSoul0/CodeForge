@@ -1,55 +1,58 @@
-import 'dotenv/config'; // Carica le variabili segrete dal file .env (come l'URL del DB)
+import 'dotenv/config'; // Load secret variables from the .env file (like the DB URL)
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { connectDB } from './config/db.js';
 import healthRoutes from './routes/health.js';
-import projectRoutes from './routes/projectRoutes.js'; // Assicurati che la 'R' sia maiuscola!
+import projectRoutes from './routes/projectRoutes.js';
 
-// Inizializziamo Fastify con la configurazione del logger che abbiamo scelto insieme
+// Initialize Fastify with the chosen logger configuration
 const fastify = Fastify({
     logger: {
-        level: 'info', // Mostra i log informativi di base
+        level: 'info', // Show basic informative logs
         transport: {
             target: 'pino-pretty',
             options: {
-                translateTime: 'SYS:HH:mm:ss', // Ora locale dell'Italia
-                ignore: 'pid,hostname,reqId',           // Pulizia per non affaticare la vista
-                colorize: true,                         // Colori attivi nel terminale
-                singleLine: true,                       // Tutto su una riga per ordine
+                translateTime: 'SYS:HH:mm:ss', // Local system time
+                ignore: 'pid,hostname,reqId',  // Clean up to reduce visual clutter
+                colorize: true,                // Enable terminal colors
+                singleLine: true,              // Everything on a single line for tidiness
             }
         }
     }
 });
 
-// Abilitiamo il CORS: permette al frontend (localhost:2003) di parlare con il backend (3002)
+// Enable CORS
 await fastify.register(cors, { origin: '*' });
 
-// Registriamo le rotte dei progetti (il "ponte" creato poco fa)
-fastify.register(projectRoutes);
+// --- ADDED: Base route to prevent 404 errors in Render logs ---
+fastify.get('/', async () => {
+    return { status: 'ok', message: 'CodeForge Backend is live!' };
+});
 
-// Registriamo la rotta di salute con un prefisso (es: /api/health)
+// Register existing routes
+fastify.register(projectRoutes);
 fastify.register(healthRoutes, { prefix: '/api' });
 
-// Funzione principale di avvio
+// Main startup function
 const start = async () => {
     try {
-        // 1. Prima di tutto, proviamo a connetterci a MongoDB Cloud
+        // 1. Database connection
         await connectDB();
 
-        // 2. Se il DB risponde, allora apriamo la porta 3002 per ricevere visite
+        // 2. Port and Host configuration for Render
         const PORT = process.env.PORT || 3002;
+
+        // It's crucial that the host is '0.0.0.0' for Render deployments
         await fastify.listen({ port: PORT, host: '0.0.0.0' });
 
-        // Messaggio di conferma finale nel terminale
-        console.log('🚀 Server pronto e database sincronizzato! Vai su http://localhost:3002\n');
+        console.log(`🚀 Server ready on port ${PORT}`);
 
     } catch (err) {
-        // Se c'è un errore critico (es: password DB sbagliata), fermiamo tutto
-        console.error('❌ Impossibile avviare il server :');
+        console.error('❌ Failed to start the server:');
         fastify.log.error(err);
-        process.exit(1); // Spegne il processo Node.js
+        process.exit(1); // Exit the Node.js process
     }
 };
 
-// Eseguiamo la funzione di avvio
+// Execute the startup function
 start();
