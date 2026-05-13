@@ -37,7 +37,8 @@ const start = async () => {
         await connectDB();
 
         // 2. Se il DB risponde, allora apriamo la porta 3002 per ricevere visite
-        await fastify.listen({ port: 3002 });
+        const PORT = process.env.PORT || 3002;
+        await fastify.listen({ port: PORT, host: '0.0.0.0' });
 
         // Messaggio di conferma finale nel terminale
         console.log('🚀 Server pronto e database sincronizzato! Vai su http://localhost:3002\n');
