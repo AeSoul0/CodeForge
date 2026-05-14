@@ -122,4 +122,4 @@ Invoke-RestMethod -Uri "http://localhost:3002/api/projects" -Method Post -Conten
 
 ```
 
-*© 2026 [ÆSouls*]
+*© 2026 ÆSouls
