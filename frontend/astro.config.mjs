@@ -13,5 +13,6 @@ export default defineConfig({
   },
   server: {
     port: 2003,
+    host: true,
   }
 });
