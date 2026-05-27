@@ -1,6 +1,6 @@
 # 🚀 CodeForge | Portfolio Ecosystem
 
-**CodeForge** is a modern, high-performance digital ecosystem developed by [AeSouls]. It features an ultra-fast frontend built with Astro and a robust backend powered by Fastify, designed to seamlessly manage and showcase a dynamic collection of technological projects.
+**CodeForge** is a modern, high-performance digital ecosystem developed by [AeSoul]. It features an ultra-fast frontend built with Astro and a robust backend powered by Fastify, designed to seamlessly manage and showcase a dynamic collection of technological projects.
 
 ---
 
@@ -122,4 +122,4 @@ Invoke-RestMethod -Uri "http://localhost:3002/api/projects" -Method Post -Conten
 
 ```
 
-© 2026 ÆSouls
+© 2026 ÆSoul
