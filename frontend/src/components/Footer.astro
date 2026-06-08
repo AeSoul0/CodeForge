@@ -1,21 +1,25 @@
 ---
 /**
- * src/components/Footer.astro
- * * Architecture Component: Footer Infrastructure
- * Responsibility: Displays copyright data and versioning information.
+ * @file src/components/Footer.astro
+ * @description Standard full-width application footer rendering metadata logs.
  */
 ---
 
-<footer 
-    class="max-w-6xl mx-auto px-6 py-12 w-full flex flex-col md:flex-row justify-between items-center gap-6 text-sm relative z-10"
+<footer
+    class="max-w-6xl mx-auto px-6 py-12 w-full flex flex-col md:flex-row justify-between items-center gap-6 text-xs relative z-10 mt-auto"
 >
+    <!-- Author Attribution -->
     <div class="text-slate-500">
-        © 2026 <span
+        &copy; 2026
+        <span
             class="font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 ml-1"
-            >ÆSoul0</span
         >
+            ÆSoul
+        </span>. All rights reserved.
     </div>
-    <div class="text-slate-600 font-mono text-xs">
-        CodeForge v1.0
+
+    <!-- System/Build version identifier logs -->
+    <div class="text-slate-600 font-mono tracking-wider">
+        CodeForge v1.2
     </div>
 </footer>

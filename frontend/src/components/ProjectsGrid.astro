@@ -1,9 +1,7 @@
 ---
 /**
- * src/components/ProjectsGrid.astro
- * * Architecture Component: Interactive Projects Grid
- * Responsibility: Renders the project matrix and provides client-side filtering
- * capabilities to allow users to isolate projects by technology stack.
+ * @file src/components/ProjectsGrid.astro
+ * @description Renders the projects fetched from the database and manages URL hash scroll tracking.
  */
 
 export interface Project {
@@ -19,63 +17,28 @@ export interface Props {
 }
 
 const { projects } = Astro.props;
-
-/**
- * Server-Side Data Aggregation:
- * Extract a unique, alphabetically sorted list of all technologies used across all projects.
- * We enforce uppercase to prevent case-sensitivity bugs (e.g., "react" vs "React").
- */
-const allTechs = projects.flatMap((p) =>
-    p.tecnologie.map((t) => t.toUpperCase()),
-);
-const uniqueTechs = ["ALL", ...new Set(allTechs)].sort();
 ---
 
 <section id="progetti">
-    <div
-        class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6"
-    >
-        <h2
-            class="text-3xl font-bold flex items-center gap-4 text-white shrink-0"
-        >
-            Recent Projects
-        </h2>
+    <h2 class="text-3xl font-bold mb-10 flex items-center gap-4 text-white">
+        Recent Projects
+    </h2>
 
-        <div class="flex flex-wrap gap-2 md:justify-end" id="filter-container">
-            {
-                uniqueTechs.map((tech) => (
-                    <button
-                        class="filter-btn px-4 py-1.5 rounded-full text-[10px] sm:text-xs font-bold tracking-wider uppercase transition-all duration-300 border border-white/10 text-slate-400 hover:text-white hover:border-cyan-400/50 focus:outline-none"
-                        data-filter={tech}
-                    >
-                        {tech}
-                    </button>
-                ))
-            }
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="projects-grid">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         {
             projects.length === 0 ? (
                 <p class="text-slate-500 italic">
-                    Gathering project telemetry from the database backend...
+                    Waiting for projects from database...
                 </p>
             ) : (
                 projects.map((p) => (
-                    // We inject the normalized technologies into a data-attribute for the client script to read
-                    <article
-                        class="project-card glass-card hover-glow p-8 group relative overflow-hidden transition-all duration-500"
-                        data-techs={p.tecnologie
-                            .map((t) => t.toUpperCase())
-                            .join(",")}
-                    >
+                    <article class="glass-card hover-glow p-8 group relative overflow-hidden">
                         <a
                             href={p.linkGithub || "#"}
                             target="_blank"
                             rel="noopener noreferrer"
                             class="absolute top-6 right-6 text-slate-500 hover:text-white transition-all duration-300 hover:scale-110 hover:-translate-y-1 z-20"
-                            title="Inspect Source Code on GitHub"
+                            title="View Code on GitHub"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -95,9 +58,11 @@ const uniqueTechs = ["ALL", ...new Set(allTechs)].sort();
                         <h3 class="text-xl font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors relative z-10 w-[90%]">
                             {p.titolo}
                         </h3>
+
                         <p class="text-slate-400 text-sm leading-relaxed mb-6 relative z-10">
                             {p.descrizione}
                         </p>
+
                         <div class="flex flex-wrap gap-2 relative z-10">
                             {p.tecnologie.map((tech) => (
                                 <span class="px-2 py-1 text-[9px] font-bold bg-white/5 text-cyan-300 rounded-full border border-white/10 uppercase">
@@ -113,59 +78,31 @@ const uniqueTechs = ["ALL", ...new Set(allTechs)].sort();
 </section>
 
 <script is:inline>
+    /**
+     * @description Scroll event listener to dynamically update the URL hash
+     * when the user scrolls into the projects section.
+     */
     document.addEventListener("DOMContentLoaded", () => {
-        const filterBtns = document.querySelectorAll(".filter-btn");
-        const projectCards = document.querySelectorAll(".project-card");
+        const progettiSection = document.getElementById("progetti");
+        if (progettiSection) {
+            window.addEventListener("scroll", () => {
+                const scrollPosition = window.scrollY + window.innerHeight / 2;
+                const projectsTopPosition = progettiSection.offsetTop;
 
-        // Helper function to set a button to the "Active" visual state
-        const setActiveButton = (targetBtn) => {
-            filterBtns.forEach((btn) => {
-                btn.classList.remove(
-                    "bg-cyan-500/10",
-                    "text-cyan-300",
-                    "border-cyan-400/50",
-                );
-                btn.classList.add("text-slate-400", "border-white/10");
-            });
-            targetBtn.classList.remove("text-slate-400", "border-white/10");
-            targetBtn.classList.add(
-                "bg-cyan-500/10",
-                "text-cyan-300",
-                "border-cyan-400/50",
-            );
-        };
-
-        // Initialize UI: Set "ALL" as the default active button
-        const allBtn = Array.from(filterBtns).find(
-            (btn) => btn.dataset.filter === "ALL",
-        );
-        if (allBtn) setActiveButton(allBtn);
-
-        // Bind click events to the filtering engine
-        filterBtns.forEach((btn) => {
-            btn.addEventListener("click", () => {
-                const selectedFilter = btn.dataset.filter;
-                setActiveButton(btn);
-
-                // Iterate through DOM nodes and toggle visibility based on data attributes
-                projectCards.forEach((card) => {
-                    if (selectedFilter === "ALL") {
-                        card.style.display = "block";
-                        // Trigger a micro-animation by resetting opacity
-                        card.style.opacity = "0";
-                        setTimeout(() => (card.style.opacity = "1"), 50);
-                    } else {
-                        const cardTechs = card.dataset.techs.split(",");
-                        if (cardTechs.includes(selectedFilter)) {
-                            card.style.display = "block";
-                            card.style.opacity = "0";
-                            setTimeout(() => (card.style.opacity = "1"), 50);
-                        } else {
-                            card.style.display = "none";
-                        }
+                if (scrollPosition >= projectsTopPosition) {
+                    if (window.location.hash !== "#progetti") {
+                        history.replaceState(null, null, "#progetti");
                     }
-                });
+                } else {
+                    if (window.location.hash === "#progetti") {
+                        history.replaceState(
+                            null,
+                            null,
+                            window.location.pathname + window.location.search,
+                        );
+                    }
+                }
             });
-        });
+        }
     });
 </script>

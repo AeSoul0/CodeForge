@@ -11,6 +11,9 @@ import connectDB from './config/db';
 import projectRoutes from './routes/projectRoutes';
 import healthRoutes from './routes/health';
 
+import * as dotenv from 'dotenv';
+dotenv.config(); // 🧠 Load the .env file directly into Node
+
 // Instantiate the Fastify server with internal logging enabled
 const fastify: FastifyInstance = Fastify({ logger: true });
 
@@ -25,7 +28,7 @@ const startServer = async () => {
         // 2. Register Global Middlewares
         // Restrict incoming requests to trusted origins to prevent CSRF and unauthorized usage
         await fastify.register(cors, {
-            origin: [process.env.FRONTEND_URL || 'http://localhost:4321', 'https://iltuoportfolio.vercel.app'],
+            origin: [process.env.FRONTEND_URL || 'http://localhost:2003', 'https://iltuoportfolio.vercel.app'],
             methods: ['GET', 'POST', 'PUT', 'DELETE'],
             allowedHeaders: ['Content-Type', 'x-api-key'],
         });

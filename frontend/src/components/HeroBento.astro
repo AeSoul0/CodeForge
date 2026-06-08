@@ -1,9 +1,8 @@
 ---
 /**
- * src/components/HeroBento.astro
- * * Architecture Component: Hero Bento Grid
- * Responsibility: Renders the primary above-the-fold identity modules (Value Proposition,
- * Bio interaction card, and Tech Stack highlights).
+ * @file src/components/HeroBento.astro
+ * @description Bento layout.
+ * clear visual feedback on user hover interactions.
  */
 ---
 
@@ -17,6 +16,7 @@
             class="absolute inset-0 bg-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0"
         >
         </div>
+
         <h1
             class="text-5xl lg:text-6xl font-extrabold tracking-tight mb-8 text-white relative z-10 leading-[1.1]"
         >
@@ -26,30 +26,33 @@
                 >experiences.</span
             >
         </h1>
+
         <a href="#progetti" class="btn-explore relative z-10">
             Explore Works
             <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
+                class="w-3.5 h-3.5"
                 fill="none"
+                viewBox="0 0 24 24"
                 stroke="currentColor"
-                stroke-width="3"
+                stroke-width="2.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
             >
-                <path d="M5 12h14M12 5l7 7-7 7"></path>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
             </svg>
         </a>
     </article>
 
+    <!-- CARD ABOUT ME -->
     <article
-        class="glass-card hover-glow lg:col-span-2 lg:row-span-1 grid group overflow-hidden cursor-pointer focus:outline-none active:scale-[0.97] transition-all duration-300"
+        id="about-card"
+        class="glass-card hover-glow lg:col-span-2 lg:row-span-1 grid group overflow-hidden cursor-pointer focus-within:outline-none active:scale-[0.97] transition-all duration-300"
         tabindex="0"
     >
         <div
-            class="col-start-1 row-start-1 flex flex-col items-center justify-center p-8 transition-all duration-500 ease-in-out group-hover:opacity-0 group-focus:opacity-0 group-hover:-translate-y-8 group-focus:-translate-y-8 z-20"
+            class="col-start-1 row-start-1 flex flex-col items-center justify-center p-8 transition-all duration-500 ease-in-out group-hover:opacity-0 group-focus-within:opacity-0 group-hover:-translate-y-8 group-focus-within:-translate-y-8 z-20 group-hover:pointer-events-none group-focus-within:pointer-events-none"
         >
             <div
                 class="w-16 h-16 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center mb-5 text-white shadow-2xl relative"
@@ -65,10 +68,11 @@
                     stroke-linecap="round"
                     stroke-linejoin="round"
                 >
-                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"
-                    ></path><circle cx="12" cy="7" r="4"></circle>
+                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
                 </svg>
             </div>
+
             <h2
                 class="text-2xl font-black tracking-[0.2em] text-white uppercase"
             >
@@ -77,13 +81,12 @@
 
             <div class="mt-4 flex items-center gap-2.5">
                 <div class="tap-only items-center gap-2 animate-tap-pulse">
-                    <div class="relative flex items-center justify-center">
-                        <img
-                            src="/tap.png"
-                            alt="Tap context icon"
-                            class="w-5 h-5 object-contain invert"
-                        />
-                    </div>
+                    <!-- SOSTITUITO L'SVG CON L'IMMAGINE TAP.PNG -->
+                    <img
+                        src="/tap.png"
+                        alt="Tap icon"
+                        class="w-5 h-5 object-contain opacity-90"
+                    />
                     <span
                         class="text-cyan-400 text-[10px] font-bold uppercase tracking-widest"
                         >Tap to reveal</span
@@ -96,10 +99,9 @@
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                         stroke-width="2.5"
+                        ><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"
+                        ></path></svg
                     >
-                        <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"
-                        ></path>
-                    </svg>
                     <span
                         class="text-cyan-400 text-[10px] font-bold uppercase tracking-widest"
                         >Hover to reveal</span
@@ -109,7 +111,7 @@
         </div>
 
         <div
-            class="col-start-1 row-start-1 p-8 flex flex-col justify-center transition-all duration-500 ease-in-out opacity-0 translate-y-8 group-hover:opacity-100 group-focus:opacity-100 group-hover:translate-y-0 group-focus:translate-y-0 z-10"
+            class="col-start-1 row-start-1 p-8 flex flex-col justify-center transition-all duration-500 ease-in-out opacity-0 translate-y-8 group-hover:opacity-100 group-focus-within:opacity-100 group-hover:translate-y-0 group-focus-within:translate-y-0 z-30 pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto"
         >
             <h3 class="text-xl font-bold text-white mb-3">
                 Hi, I'm <span
@@ -117,6 +119,7 @@
                     >Samuele Arabia</span
                 >
             </h3>
+
             <p class="text-slate-300 text-[13px] leading-relaxed mb-5">
                 <span
                     class="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-bold uppercase mr-1.5 shadow-[0_0_10px_rgba(59,130,246,0.1)]"
@@ -126,83 +129,180 @@
                 Passionately building digital experiences through clean code and modern
                 architecture.
             </p>
+
             <div
-                class="mt-auto pt-4 border-t border-white/[0.05] flex items-center gap-3"
+                class="mt-auto pt-4 border-t border-white/[0.05] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full"
             >
-                <div
-                    class="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shadow-inner flex-shrink-0"
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shadow-inner flex-shrink-0"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <polyline points="16 18 22 12 16 6"></polyline>
+                            <polyline points="8 6 2 12 8 18"></polyline>
+                        </svg>
+                    </div>
+                    <p class="text-slate-400 text-sm">
+                        Focused on <span class="text-white font-semibold"
+                            >full-stack development</span
+                        >.
+                    </p>
+                </div>
+
+                <!-- CV BUTTON -->
+                <a
+                    href="/CV.pdf"
+                    download="Samuele_Arabia_CV.pdf"
+                    id="cv-download-btn"
+                    class="download-btn flex items-center gap-2 px-4 py-2
+    bg-gradient-to-r from-cyan-500/10 to-blue-500/10
+    border border-cyan-500/20
+    text-cyan-300 text-[11px] font-bold uppercase tracking-wider
+    rounded-xl transition-all duration-300 flex-shrink-0
+    hover:border-cyan-500/30 hover:text-cyan-100 hover:shadow-[0_0_6px_rgba(34,211,238,0.1)] hover:-translate-y-0.5
+    relative cursor-pointer"
+                    title="Download Curriculum Vitae"
                 >
+                    <span>Download CV</span>
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
+                        width="14"
+                        height="14"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        stroke-width="2"
+                        stroke-width="2.5"
                         stroke-linecap="round"
                         stroke-linejoin="round"
                     >
-                        <polyline points="16 18 22 12 16 6"></polyline><polyline
-                            points="8 6 2 12 8 18"></polyline>
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                        ></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
                     </svg>
-                </div>
-                <p class="text-slate-400 text-sm">
-                    Focused on <span class="text-white font-semibold"
-                        >full-stack development</span
-                    >.
-                </p>
+                </a>
             </div>
         </div>
     </article>
 
+    <!-- CARD FRONTEND -->
     <article
-        class="glass-card hover-glow p-8 flex flex-col justify-center items-center text-center group"
+        class="glass-card hover-glow lg:col-span-1 lg:row-span-1 p-8 flex flex-col justify-center items-center text-center group"
     >
         <div
             class="w-12 h-12 bg-cyan-500/10 text-cyan-400 rounded-xl flex items-center justify-center mb-3 group-hover:-translate-y-1 transition-transform"
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
+                class="w-6 h-6"
                 fill="none"
+                viewBox="0 0 24 24"
                 stroke="currentColor"
                 stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
             >
-                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline
-                    points="2 17 12 22 22 17"></polyline><polyline
-                    points="2 12 12 17 22 12"></polyline>
+                <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+                <polyline points="10 12 7 9 10 6"></polyline>
+                <polyline points="14 6 17 9 14 12"></polyline>
             </svg>
         </div>
         <h3 class="text-white font-bold text-sm">Frontend</h3>
         <p class="text-slate-400 text-[10px] mt-1">Astro · React · Tailwind</p>
     </article>
 
+    <!-- CARD BACKEND -->
     <article
-        class="glass-card hover-glow p-8 flex flex-col justify-center items-center text-center group"
+        class="glass-card hover-glow lg:col-span-1 lg:row-span-1 p-8 flex flex-col justify-center items-center text-center group"
     >
         <div
             class="w-12 h-12 bg-blue-500/10 text-blue-400 rounded-xl flex items-center justify-center mb-3 group-hover:-translate-y-1 transition-transform"
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
+                class="w-6 h-6"
                 fill="none"
+                viewBox="0 0 24 24"
                 stroke="currentColor"
                 stroke-width="2"
                 stroke-linecap="round"
                 stroke-linejoin="round"
             >
-                <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
-                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path><path
-                    d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"></path>
+                <rect x="2" y="2" width="20" height="6" rx="1"></rect>
+                <rect x="2" y="9" width="20" height="6" rx="1"></rect>
+                <rect x="2" y="16" width="20" height="6" rx="1"></rect>
+                <line x1="6" y1="5" x2="6.01" y2="5"></line>
+                <line x1="6" y1="12" x2="6.01" y2="12"></line>
+                <line x1="6" y1="19" x2="6.01" y2="19"></line>
             </svg>
         </div>
         <h3 class="text-white font-bold text-sm">Backend</h3>
         <p class="text-slate-400 text-[10px] mt-1">Node · Fastify · MongoDB</p>
     </article>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const btn = document.getElementById("cv-download-btn");
+        const aboutCard = document.getElementById("about-card");
+
+        // --- 1. DOWNLOAD BUTTON HANDLING ---
+        if (btn) {
+            btn.addEventListener("click", (e) => {
+                // Prevent the click from propagating to the "About Me" card
+                e.stopPropagation();
+
+                const parentCard = btn.closest("article");
+
+                // Slight delay to ensure the download triggers before hiding the card
+                setTimeout(() => {
+                    if (parentCard) parentCard.blur();
+                    btn.blur();
+                    // Move focus to the body to reset the card state entirely
+                    document.body.focus();
+                }, 100);
+            });
+        }
+
+        // --- 2. "ABOUT ME" CARD HANDLING ---
+        if (aboutCard) {
+            // A. Mobile/Touch logic (acts as a toggle: click to open, click to close)
+            let wasAlreadyOpen = false;
+
+            aboutCard.addEventListener("pointerdown", () => {
+                // Check if the card is already focused before the click finishes
+                wasAlreadyOpen = document.activeElement === aboutCard;
+            });
+
+            aboutCard.addEventListener("click", () => {
+                // If it was already open and gets clicked again, close it
+                if (wasAlreadyOpen) {
+                    aboutCard.blur();
+                    document.body.focus();
+                    wasAlreadyOpen = false;
+                }
+            });
+
+            // B. Desktop hover/click logic fix
+            // Force focus loss when the mouse leaves the card area.
+            // This ensures that even if the user clicks the card (giving it focus),
+            // it will flip back down smoothly as soon as the cursor moves away.
+            aboutCard.addEventListener("mouseleave", () => {
+                aboutCard.blur();
+                document.body.focus();
+            });
+        }
+    });
+</script>

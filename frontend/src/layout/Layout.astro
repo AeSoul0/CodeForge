@@ -1,25 +1,24 @@
 ---
 /**
- * src/layouts/Layout.astro
- * * Architecture Layer: Root Layout
- * Responsibility: Provides the fundamental HTML document structure, metadata (SEO),
- * global CSS tokens, and core client-side scripting. Wraps all page content via <slot />.
+ * @file src/layout/Layout.astro
+ * @description Master Layout file establishing HTML skeleton, fonts, global CSS effects, and animated background blobs.
  */
 
 export interface Props {
-    title: string;
+    title?: string;
 }
 
-const { title } = Astro.props;
+const { title = "CodeForge | ÆSoul" } = Astro.props;
 ---
 
 <html lang="en" class="scroll-smooth">
     <head>
         <meta charset="utf-8" />
-        <link rel="icon" type="image/svg+xml" href="AeSoul_favicon.ico" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" type="image/svg+xml" href="/AeSoul_favicon.ico" />
+        <meta name="viewport" content="width=device-width" />
         <title>{title}</title>
 
+        <!-- Preconnecting and loading fonts for optimized typography performance -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
@@ -28,10 +27,7 @@ const { title } = Astro.props;
         />
 
         <style is:global>
-            /* ==========================================
-               🎨 GLOBAL DESIGN SYSTEM & TOKENS
-               ========================================== */
-
+            /* Global CSS resets and theme initialization */
             html,
             body {
                 margin: 0;
@@ -41,6 +37,7 @@ const { title } = Astro.props;
                 font-family: "Outfit", sans-serif;
             }
 
+            /* Prevent flash of unstyled/uninitialized layout content */
             body {
                 visibility: hidden;
             }
@@ -48,6 +45,7 @@ const { title } = Astro.props;
                 visibility: visible;
             }
 
+            /* Keyframe animations for fluid ambient background blobs */
             @keyframes blob {
                 0% {
                     transform: translate(0px, 0px) scale(1);
@@ -65,13 +63,8 @@ const { title } = Astro.props;
             .animate-blob {
                 animation: blob 12s infinite alternate ease-in-out;
             }
-            .animation-delay-2000 {
-                animation-delay: 2s;
-            }
-            .animation-delay-4000 {
-                animation-delay: 4s;
-            }
 
+            /* Core design token: Glassmorphism layout structure */
             .glass-card {
                 background: rgba(255, 255, 255, 0.03);
                 backdrop-filter: blur(20px) saturate(160%);
@@ -86,6 +79,7 @@ const { title } = Astro.props;
                 position: relative;
             }
 
+            /* Interactive state: Outer cybernetic glow effect */
             .hover-glow:hover {
                 transform: translateY(-6px);
                 border-color: rgba(59, 130, 246, 0.8) !important;
@@ -95,6 +89,7 @@ const { title } = Astro.props;
                     inset 0 0 15px rgba(59, 130, 246, 0.1);
             }
 
+            /* Call to Action components visual styling */
             .btn-explore {
                 display: inline-flex;
                 align-items: center;
@@ -116,6 +111,7 @@ const { title } = Astro.props;
                 transform: scale(1.05);
             }
 
+            /* Cybernetic section separation layouts */
             .section-divider {
                 height: 2px;
                 width: 100%;
@@ -129,6 +125,44 @@ const { title } = Astro.props;
                 box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
             }
 
+            /* Social link components container & hovering micro-interactions */
+            .social-link {
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 36px;
+                height: 36px;
+                color: #94a3b8;
+                text-decoration: none;
+                border-radius: 50%;
+                transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            }
+            .social-link svg {
+                width: 18px;
+                height: 18px;
+                transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            }
+            .social-link.linkedin:hover {
+                background-color: #0a66c2;
+                color: #fff;
+                transform: scale(1.15) translateY(-3px);
+                box-shadow: 0 8px 20px rgba(10, 102, 194, 0.4);
+            }
+            .social-link.github:hover {
+                background-color: #1a1e22;
+                color: #fff;
+                transform: scale(1.15) translateY(-3px);
+                box-shadow: 0 8px 20px rgba(255, 255, 255, 0.15);
+            }
+            .social-link.whatsapp:hover {
+                background-color: #25d366;
+                color: #fff;
+                transform: scale(1.15) translateY(-3px);
+                box-shadow: 0 8px 20px rgba(37, 211, 102, 0.4);
+            }
+
+            /* Responsive Device Interaction Utilities */
             .tap-only {
                 display: flex;
             }
@@ -144,6 +178,7 @@ const { title } = Astro.props;
                 }
             }
 
+            /* Soft visual pulsation animation for non-hover displays */
             @keyframes pulse-fade-blur {
                 0%,
                 100% {
@@ -160,37 +195,32 @@ const { title } = Astro.props;
             }
         </style>
     </head>
+
     <body
-        class="min-h-screen flex flex-col relative selection:bg-cyan-500 selection:text-white"
+        class="min-h-screen flex flex-col relative selection:bg-cyan-500 selection:text-white overflow-x-hidden"
     >
+        <!-- Fluid background glow nodes -->
+        <div
+            class="fixed inset-0 z-0 overflow-hidden pointer-events-none opacity-60"
+        >
+            <div
+                class="absolute top-[-10%] left-[-10%] w-[50rem] h-[50rem] rounded-full bg-blue-600/30 blur-[120px] animate-blob"
+            >
+            </div>
+            <div
+                class="absolute top-[20%] right-[-10%] w-[40rem] h-[40rem] rounded-full bg-cyan-500/20 blur-[120px] animate-blob"
+                style="animation-delay: 2s;"
+            >
+            </div>
+        </div>
+
+        <!-- Application runtime core injection node -->
         <slot />
 
         <script is:inline>
+            // Graceful execution flag once DOM and layout structures are initialized
             document.addEventListener("DOMContentLoaded", () => {
-                // Display layout securely to prevent FOUC
                 document.documentElement.classList.add("loaded");
-
-                // Scroll Telemetry logic for History Hash manipulation
-                const projectsSection = document.getElementById("progetti");
-                if (projectsSection) {
-                    window.addEventListener("scroll", () => {
-                        const viewportScrollContext =
-                            window.scrollY + window.innerHeight / 2;
-                        const targetThreshold = projectsSection.offsetTop;
-                        if (viewportScrollContext >= targetThreshold) {
-                            if (window.location.hash !== "#progetti")
-                                history.replaceState(null, null, "#progetti");
-                        } else {
-                            if (window.location.hash === "#progetti")
-                                history.replaceState(
-                                    null,
-                                    null,
-                                    window.location.pathname +
-                                        window.location.search,
-                                );
-                        }
-                    });
-                }
             });
         </script>
     </body>
