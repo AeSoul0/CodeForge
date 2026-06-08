@@ -1,0 +1,182 @@
+---
+/**
+ * 
+ *
+ * Architecture Component: ParticleCanvas
+ * Responsibility: Encapsulates the 2D HTML5 Canvas rendering loop, mouse interaction matrixes,
+ * and strict visibility/intersection hardware resource lifecycle controls.
+ */
+---
+
+<canvas id="particleCanvas"></canvas>
+
+<style>
+    /* Scoped layout constraints for the background rendering layer */
+    #particleCanvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        pointer-events: none;
+    }
+</style>
+
+<script is:inline>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Enforce visible body state once DOM trees are parsed completely
+        document.documentElement.classList.add("loaded");
+
+        const canvas = document.getElementById("particleCanvas");
+        if (!canvas) return;
+
+        const ctx = canvas.getContext("2d");
+        let w,
+            h,
+            particles = [];
+        let mouse = { x: null, y: null };
+
+        /**
+         * Dynamically synchronizes canvas buffer dimensions with the active browser window geometry.
+         */
+        const resize = () => {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        };
+        window.addEventListener("resize", resize);
+        resize();
+
+        // Real-time tracking of cursor position parameters for vector calculation
+        window.addEventListener("mousemove", (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+        window.addEventListener("mouseout", () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        /**
+         * Particle Entity Prototype representing a singular vector node in the graph grid.
+         */
+        class P {
+            constructor() {
+                this.x = Math.random() * w;
+                this.y = Math.random() * h;
+                this.vx = Math.random() - 0.5;
+                this.vy = Math.random() - 0.5;
+                this.baseColor =
+                    Math.random() > 0.5 ? "6, 182, 212" : "99, 130, 246";
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > w) this.vx *= -1;
+                if (this.y < 0 || this.y > h) this.vy *= -1;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 1, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${this.baseColor}, 0.7)`;
+                ctx.fill();
+            }
+        }
+
+        // Populate ecosystem array instance with nodes
+        for (let i = 0; i < 60; i++) particles.push(new P());
+
+        let animationFrameId = null;
+
+        /**
+         * Core execution frame rendering loop. Computes multi-body proximity bounds,
+         * links local graph paths, and scales opacity based on floating-point distances.
+         */
+        function anim() {
+            ctx.clearRect(0, 0, w, h);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                for (let j = i + 1; j < particles.length; j++) {
+                    let dx = particles[i].x - particles[j].x;
+                    let dy = particles[i].y - particles[j].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(${particles[i].baseColor}, ${0.15 - distance / 670})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+                if (mouse.x != null && mouse.y != null) {
+                    let dx = particles[i].x - mouse.x;
+                    let dy = particles[i].y - mouse.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 150) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(6, 182, 212, ${0.3 - distance / 500})`;
+                        ctx.lineWidth = 1;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(mouse.x, mouse.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            animationFrameId = requestAnimationFrame(anim);
+        }
+
+        function startAnimation() {
+            if (!animationFrameId) anim();
+        }
+
+        function stopAnimation() {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+        }
+
+        /**
+         * Hardware preservation architecture mapping viewport context limits.
+         */
+        const structuralObserverOptions = {
+            root: null,
+            threshold: 0.01,
+        };
+
+        const canvasVisibilityObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (
+                    entry.isIntersecting &&
+                    document.visibilityState === "visible"
+                ) {
+                    startAnimation();
+                } else {
+                    stopAnimation();
+                }
+            });
+        }, structuralObserverOptions);
+
+        canvasVisibilityObserver.observe(canvas);
+
+        /**
+         * Visibility API sync to stop rendering if application container tab loses focus.
+         */
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") {
+                const canvasBounds = canvas?.getBoundingClientRect();
+                if (
+                    canvasBounds &&
+                    canvasBounds.top < window.innerHeight &&
+                    canvasBounds.bottom > 0
+                ) {
+                    startAnimation();
+                }
+            } else {
+                stopAnimation();
+            }
+        });
+    });
+</script>
