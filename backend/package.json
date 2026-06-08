@@ -2,13 +2,13 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "src/index.js",
- "scripts": {
-  "dev": "tsx watch src/index.ts",
-  "build": "tsc",
-  "start": "node dist/index.js",
-  "add-project": "tsx src/services/scripts/add-project.ts"
-},
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "add-project": "tsx src/services/scripts/add-project.ts"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
