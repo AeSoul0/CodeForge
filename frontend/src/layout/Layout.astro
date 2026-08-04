@@ -4,11 +4,15 @@
  * @description Master Layout file establishing HTML skeleton, fonts, global CSS effects, and animated background blobs.
  */
 
+import { injectSpeedInsights } from '@vercel/speed-insights';
+
 export interface Props {
     title?: string;
 }
 
 const { title = "CodeForge | ÆSoul" } = Astro.props;
+
+injectSpeedInsights();
 ---
 
 <html lang="en" class="scroll-smooth">
