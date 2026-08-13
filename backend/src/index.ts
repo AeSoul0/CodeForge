@@ -1,54 +1,76 @@
 /**
- * backend/src/index.ts
- * * Architecture Layer: Application Bootstrap
- * Responsibility: Initializes the Fastify server instance, registers global plugins (CORS),
- * establishes the database connection, and mounts the API routing modules.
+ * @file backend/src/index.ts
+ * @description Main entry point for the Fastify server.
  */
 
-import Fastify, { FastifyInstance } from 'fastify';
+import fastify from 'fastify';
 import cors from '@fastify/cors';
-import connectDB from './config/db';
+import helmet from '@fastify/helmet';
+import rateLimit from '@fastify/rate-limit';
 import projectRoutes from './routes/projectRoutes';
-import healthRoutes from './routes/health';
+import connectDB from './config/db'; 
 
-import * as dotenv from 'dotenv';
-dotenv.config(); // 🧠 Load the .env file directly into Node
+import 'dotenv/config';
 
-// Instantiate the Fastify server with internal logging enabled
-const fastify: FastifyInstance = Fastify({ logger: true });
+const app = fastify({ logger: true });
 
-/**
- * Server Initialization & Boot Sequence
- */
-const startServer = async () => {
+async function startServer() {
     try {
-        // 1. Establish connection to the MongoDB cluster
+        // --- 1. CONNETTI AL DATABASE MONGODB ---
         await connectDB();
 
-        // 2. Register Global Middlewares
-        // Restrict incoming requests to trusted origins to prevent CSRF and unauthorized usage
-        await fastify.register(cors, {
-            origin: [process.env.FRONTEND_URL || 'http://localhost:2003', 'https://iltuoportfolio.vercel.app'],
+        // --- 2. MIDDLEWARES ---
+        await app.register(helmet, { global: true });
+        await app.register(rateLimit, {
+            max: 100,
+            timeWindow: '1 minute',
+            errorResponseBuilder: () => ({
+                statusCode: 429,
+                error: 'Too Many Requests',
+                message: 'Rate limit exceeded. Please try again later.'
+            })
+        });
+        await app.register(cors, {
+            origin: [
+                process.env.FRONTEND_URL || 'http://localhost:4321',
+                'http://127.0.0.1:4321'
+            ],
             methods: ['GET', 'POST', 'PUT', 'DELETE'],
-            allowedHeaders: ['Content-Type', 'x-api-key'],
         });
 
-        // 3. Mount Route Controllers
-        await fastify.register(healthRoutes);
-        await fastify.register(projectRoutes);
+        // --- 3. GESTIONE ERRORI GLOBALE ---
+        app.setErrorHandler((error: any, request, reply) => {
+            request.log.error(error);
+            const statusCode = error.statusCode || 500;
+            const isProduction = process.env.NODE_ENV === 'production';
 
-        // 4. Bind Server to Port
-        const PORT = parseInt(process.env.PORT || '3002', 10);
+            reply.status(statusCode).send({
+                success: false,
+                statusCode,
+                error: statusCode === 404 ? 'Not Found' : 'Internal Server Error',
+                message: (statusCode === 500 && isProduction)
+                    ? 'An unexpected error occurred on the server.'
+                    : error.message,
+                ...(isProduction ? {} : { stack: error.stack })
+            });
+        });
 
-        // Listen on '0.0.0.0' to ensure compatibility with cloud deployment platforms (like Render/Vercel)
-        await fastify.listen({ port: PORT, host: '0.0.0.0' });
+        // --- 4. REGISTRAZIONE ROTTE ---
+        await app.register(projectRoutes, { prefix: '/api/projects' });
 
-        fastify.log.info(`🚀 CodeForge Backend successfully booted on port ${PORT}`);
-    } catch (error) {
-        fastify.log.error({ err: error }, '❌ Fatal Error during server bootstrap');
+        app.get('/api/health', async () => {
+            return { status: 'ok', uptime: process.uptime() };
+        });
+
+        // --- 5. START SERVER ---
+        const port = parseInt(process.env.PORT || '3002', 10);
+        await app.listen({ port, host: '127.0.0.1' });
+        console.log(`🚀 CodeForge Backend locked and loaded on port ${port}`);
+
+    } catch (err) {
+        app.log.error(err);
         process.exit(1);
     }
-};
+}
 
-// Execute the boot sequence
 startServer();

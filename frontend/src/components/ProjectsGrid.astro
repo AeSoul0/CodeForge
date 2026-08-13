@@ -1,7 +1,7 @@
 ---
 /**
  * @file src/components/ProjectsGrid.astro
- * @description Renders the projects fetched from the database and manages URL hash scroll tracking.
+ * @description Renders database projects with dynamic domain filtering and a Recruiter/Dev toggle mode.
  */
 
 export interface Project {
@@ -9,6 +9,7 @@ export interface Project {
     titolo: string;
     descrizione: string;
     tecnologie: string[];
+    categoria: string;
     linkGithub?: string;
 }
 
@@ -17,92 +18,170 @@ export interface Props {
 }
 
 const { projects } = Astro.props;
+
+// Extract unique domain categories
+const allCategories = [...new Set(projects.map(p => p.categoria).filter(Boolean))];
 ---
 
 <section id="progetti">
-    <h2 class="text-3xl font-bold mb-10 flex items-center gap-4 text-white">
-        Recent Projects
-    </h2>
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 relative z-10">
+        <h2 class="text-3xl font-bold flex items-center gap-4 text-white">
+            Recent Projects
+        </h2>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Dev / Recruiter View Toggle Controls -->
+        <div class="flex items-center gap-2 bg-white/5 p-1 rounded-full border border-white/10 backdrop-blur-md">
+            <button class="view-toggle-btn active px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 bg-cyan-500 text-white shadow-[0_0_10px_rgba(6,182,212,0.4)]" data-mode="recruiter">
+                💼 Recruiter
+            </button>
+            <button class="view-toggle-btn px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white" data-mode="dev">
+                👨‍💻 Dev
+            </button>
+        </div>
+    </div>
+
+    <!-- Category Filters -->
+    <div class="flex flex-wrap gap-2 mb-10 relative z-10" id="tech-filters">
+        <button class="cat-btn active px-3 py-1 rounded-full text-xs font-bold transition-all bg-cyan-500 text-white shadow-[0_0_10px_rgba(6,182,212,0.4)]" data-filter="all">
+            All Domains
+        </button>
+        {allCategories.map(cat => (
+            <button class="cat-btn px-3 py-1 rounded-full text-xs font-bold transition-all bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10" data-filter={cat.toLowerCase()}>
+                {cat}
+            </button>
+        ))}
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="projects-container">
         {
             projects.length === 0 ? (
                 <p class="text-slate-500 italic">
                     Waiting for projects from database...
                 </p>
             ) : (
-                projects.map((p) => (
-                    <article class="glass-card hover-glow p-8 group relative overflow-hidden">
-                        <a
-                            href={p.linkGithub || "#"}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="absolute top-6 right-6 text-slate-500 hover:text-white transition-all duration-300 hover:scale-110 hover:-translate-y-1 z-20"
-                            title="View Code on GitHub"
+                projects.map((p) => {
+                    const formattedStack = p.tecnologie ? p.tecnologie.map(t => '"' + t + '"').join(', ') : '';
+
+                    return (
+                        <article 
+                            class="project-card glass-card hover-glow p-8 group relative overflow-hidden flex flex-col justify-between"
+                            data-category={(p.categoria || 'full-stack').toLowerCase()}
                         >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="20"
-                                height="20"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                            >
-                                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
-                            </svg>
-                        </a>
+                            <a href={p.linkGithub || "#"} target="_blank" rel="noopener noreferrer" class="absolute top-6 right-6 text-slate-500 hover:text-white transition-all duration-300 hover:scale-110 hover:-translate-y-1 z-20" title="View Code on GitHub">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+                                </svg>
+                            </a>
 
-                        <h3 class="text-xl font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors relative z-10 w-[90%]">
-                            {p.titolo}
-                        </h3>
+                            <div>
+                                <div class="mb-2">
+                                    <span class="text-[10px] font-black tracking-widest text-cyan-500 uppercase">{p.categoria}</span>
+                                </div>
+                                
+                                <h3 class="text-xl font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors relative z-10 w-[90%]">
+                                    {p.titolo}
+                                </h3>
 
-                        <p class="text-slate-400 text-sm leading-relaxed mb-6 relative z-10">
-                            {p.descrizione}
-                        </p>
+                                <!-- RECRUITER VIEW (Default visible) -->
+                                <div class="recruiter-only relative z-10">
+                                    <p class="text-slate-400 text-sm leading-relaxed mb-6">
+                                        {p.descrizione}
+                                    </p>
+                                </div>
 
-                        <div class="flex flex-wrap gap-2 relative z-10">
-                            {p.tecnologie.map((tech) => (
-                                <span class="px-2 py-1 text-[9px] font-bold bg-white/5 text-cyan-300 rounded-full border border-white/10 uppercase">
-                                    {tech}
-                                </span>
-                            ))}
-                        </div>
-                    </article>
-                ))
+                                <!-- DEV VIEW (Hidden by CSS default) -->
+                                <div class="dev-only relative z-10 mb-6">
+                                    <div class="bg-black/50 p-3 rounded border border-white/5 font-mono text-xs text-green-400 leading-relaxed shadow-inner">
+                                        <span class="text-cyan-500">const</span> stack = [{formattedStack}];
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Technology Badges -->
+                            <div class="flex flex-wrap gap-2 relative z-10 mt-auto">
+                                {(p.tecnologie || []).map((tech) => (
+                                    <span class="px-2 py-1 text-[9px] font-bold bg-white/5 text-cyan-300 rounded-full border border-white/10 uppercase">
+                                        {tech}
+                                    </span>
+                                ))}
+                            </div>
+                        </article>
+                    );
+                })
             )
         }
     </div>
 </section>
 
-<script is:inline>
-    /**
-     * @description Scroll event listener to dynamically update the URL hash
-     * when the user scrolls into the projects section.
-     */
-    document.addEventListener("DOMContentLoaded", () => {
-        const progettiSection = document.getElementById("progetti");
-        if (progettiSection) {
-            window.addEventListener("scroll", () => {
-                const scrollPosition = window.scrollY + window.innerHeight / 2;
-                const projectsTopPosition = progettiSection.offsetTop;
+<style>
+    /* Prevent flashing both views: hide dev-only by default */
+    .dev-only {
+        display: none;
+    }
+    :global(body[data-view="dev"]) .dev-only {
+        display: block !important;
+    }
+    :global(body[data-view="dev"]) .recruiter-only {
+        display: none !important;
+    }
+</style>
 
-                if (scrollPosition >= projectsTopPosition) {
-                    if (window.location.hash !== "#progetti") {
-                        history.replaceState(null, null, "#progetti");
+<script is:inline>
+    document.addEventListener("DOMContentLoaded", () => {
+        // --- 1. INSTANT CATEGORY FILTERS (0ms delay) ---
+        const filterButtons = document.querySelectorAll('.cat-btn');
+        const projectCards = document.querySelectorAll('.project-card');
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                filterButtons.forEach(btn => {
+                    btn.classList.remove('active', 'bg-cyan-500', 'text-white', 'shadow-[0_0_10px_rgba(6,182,212,0.4)]');
+                    btn.classList.add('bg-white/5', 'text-slate-300');
+                });
+                
+                button.classList.remove('bg-white/5', 'text-slate-300');
+                button.classList.add('active', 'bg-cyan-500', 'text-white', 'shadow-[0_0_10px_rgba(6,182,212,0.4)]');
+
+                const filterValue = button.getAttribute('data-filter');
+
+                // Instant show/hide without setTimeout delays
+                projectCards.forEach(card => {
+                    const cardCategory = card.getAttribute('data-category') || '';
+                    if (filterValue === 'all' || cardCategory === filterValue) {
+                        card.classList.remove('hidden');
+                    } else {
+                        card.classList.add('hidden');
                     }
+                });
+            });
+        });
+
+        // --- 2. DEV / RECRUITER TOGGLE LOGIC ---
+        const toggleButtons = document.querySelectorAll('.view-toggle-btn');
+        
+        const updateView = (mode) => {
+            document.body.setAttribute('data-view', mode);
+            localStorage.setItem('portfolioView', mode);
+            
+            toggleButtons.forEach(btn => {
+                if (btn.getAttribute('data-mode') === mode) {
+                    btn.classList.add('bg-cyan-500', 'text-white', 'shadow-[0_0_10px_rgba(6,182,212,0.4)]');
+                    btn.classList.remove('text-slate-400', 'hover:text-white', 'bg-transparent');
                 } else {
-                    if (window.location.hash === "#progetti") {
-                        history.replaceState(
-                            null,
-                            null,
-                            window.location.pathname + window.location.search,
-                        );
-                    }
+                    btn.classList.remove('bg-cyan-500', 'text-white', 'shadow-[0_0_10px_rgba(6,182,212,0.4)]');
+                    btn.classList.add('text-slate-400', 'hover:text-white', 'bg-transparent');
                 }
             });
-        }
+        };
+
+        const initialMode = localStorage.getItem('portfolioView') || 'recruiter';
+        updateView(initialMode);
+
+        toggleButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const mode = e.currentTarget.getAttribute('data-mode');
+                updateView(mode);
+            });
+        });
     });
 </script>

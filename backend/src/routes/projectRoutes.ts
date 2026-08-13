@@ -1,47 +1,52 @@
 /**
- * backend/src/routes/projectRoutes.ts
- * * Architecture Layer: Routing & Transport
- * Responsibility: Maps URL endpoints to Controllers, enforces JSON schema validation, 
- * and applies security middlewares.
+ * @file backend/src/routes/projectRoutes.ts
+ * @description API Routes mapping for Projects. Includes JSON Schema validation and Authentication middlewares.
  */
 
 import { FastifyInstance } from 'fastify';
-import * as projectController from '../controllers/projectController';
+import { getProjects, createProject } from '../controllers/projectController';
 
 export default async function projectRoutes(fastify: FastifyInstance) {
 
-    // ==========================================
-    // 🟢 PUBLIC ROUTES
-    // ==========================================
+    // ---------------------------------------------------------------------------
+    // [GET] /api/projects : Public route to fetch all projects
+    // ---------------------------------------------------------------------------
+    fastify.get('/', getProjects);
 
-    fastify.get('/api/projects', projectController.getProjectsHandler);
+    // ---------------------------------------------------------------------------
+    // [POST] /api/projects : Protected route to create a new project
+    // ---------------------------------------------------------------------------
 
-    // ==========================================
-    // 🔴 PROTECTED ROUTES
-    // ==========================================
-
-    fastify.post('/api/projects', {
-        schema: {
-            body: {
-                type: 'object',
-                required: ['titolo', 'descrizione', 'tecnologie'],
-                properties: {
-                    titolo: { type: 'string', minLength: 3 },
-                    descrizione: { type: 'string', minLength: 10 },
-                    image: { type: 'string', format: 'uri' },
-                    tecnologie: { type: 'array', items: { type: 'string' } },
-                    linkGithub: { type: 'string', format: 'uri' }
-                }
+    // ROADMAP Arch-1: Fastify JSON Schema Validation
+    // Ensures payload structure is strict, preventing NoSQL injections and malformed data
+    const createProjectSchema = {
+        body: {
+            type: 'object',
+            required: ['titolo', 'descrizione', 'tecnologie'],
+            properties: {
+                titolo: { type: 'string', minLength: 3 },
+                descrizione: { type: 'string', minLength: 10 },
+                tecnologie: { type: 'array', items: { type: 'string' } },
+                linkGithub: { type: 'string' }
             }
-        },
-        preHandler: async (request, reply) => {
-            const apiKey = request.headers['x-api-key'] as string;
+        }
+    };
 
-            if (!apiKey || apiKey !== process.env.ADMIN_API_KEY) {
+    fastify.post('/', {
+        schema: createProjectSchema,
+
+        // ROADMAP Sec-1: Auth Middleware via x-api-key
+        // Protects the DB from unauthorized write operations
+        preHandler: async (request, reply) => {
+            const apiKey = request.headers['x-api-key'];
+            const adminKey = process.env.ADMIN_API_KEY || 'super_secret_dev_key'; // Fallback for local testing
+
+            if (!apiKey || apiKey !== adminKey) {
                 return reply.status(401).send({
-                    error: 'Unauthorized. The required administrative API key is missing or invalid.'
+                    success: false,
+                    error: 'Unauthorized. Invalid or missing x-api-key.'
                 });
             }
         }
-    }, projectController.createProjectHandler);
+    }, createProject);
 }

@@ -2,6 +2,7 @@
 /**
  * @file src/components/ParticleCanvas.astro
  * @description Self-contained HTML5 Canvas component computing real-time mouse interactive network node simulations.
+ * Now optimized with IntersectionObserver to halt rendering when out of viewport.
  */
 ---
 
@@ -30,6 +31,10 @@
             h,
             particles = [];
         let mouse = { x: null, y: null };
+
+        // Visibility state for performance optimization
+        let isVisible = true;
+        let animationFrameId = null;
 
         // Updates drawing bounds dynamically without disrupting viewport scaling
         const resize = () => {
@@ -82,6 +87,15 @@
 
         // Main execution rendering loop running inside the native animation thread
         function animate() {
+            // Performance optimization: Pause computation when canvas is off-screen
+            if (!isVisible) {
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                }
+                return;
+            }
+
             ctx.clearRect(0, 0, w, h);
 
             for (let i = 0; i < particles.length; i++) {
@@ -120,8 +134,26 @@
                     }
                 }
             }
-            requestAnimationFrame(animate);
+            animationFrameId = requestAnimationFrame(animate);
         }
+
+        // Intersection Observer to monitor viewport visibility and preserve hardware resources
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    isVisible = entry.isIntersecting;
+                    // Resume the animation loop if the canvas re-enters the viewport
+                    if (isVisible && !animationFrameId) {
+                        animate();
+                    }
+                });
+            },
+            { threshold: 0.05 },
+        ); // Triggers when at least 5% is visible
+
+        observer.observe(canvas);
+
+        // Trigger initial animation
         animate();
     });
 </script>

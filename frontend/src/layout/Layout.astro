@@ -1,14 +1,18 @@
 ---
 /**
  * @file src/layout/Layout.astro
- * @description Master Layout file establishing HTML skeleton, fonts, global CSS effects, and animated background blobs.
+ * @description Master Layout file establishing HTML skeleton, fonts, global CSS effects, animated background blobs, and SEO/OpenGraph meta tags.
  */
 
 export interface Props {
     title?: string;
+    description?: string;
 }
 
-const { title = "CodeForge | ÆSoul" } = Astro.props;
+const {
+    title = "CodeForge | ÆSoul",
+    description = "A responsive personal web portfolio showcasing my full-stack projects, architectures, and embedded systems experience.",
+} = Astro.props;
 ---
 
 <html lang="en" class="scroll-smooth">
@@ -16,7 +20,33 @@ const { title = "CodeForge | ÆSoul" } = Astro.props;
         <meta charset="utf-8" />
         <link rel="icon" type="image/svg+xml" href="/AeSoul_favicon.ico" />
         <meta name="viewport" content="width=device-width" />
+
+        <!-- Primary Meta Tags -->
         <title>{title}</title>
+        <meta name="title" content={title} />
+        <meta name="description" content={description} />
+        <meta name="author" content="AeSoul" />
+
+        <!-- Dynamic OpenGraph Tags for SEO & Social Previews -->
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={Astro.url} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <!-- Make sure to place a high-quality preview image (e.g., og-image.png) in your /public folder -->
+        <meta
+            property="og:image"
+            content={new URL("/og-image.png", Astro.url)}
+        />
+
+        <!-- Twitter Optimization -->
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={Astro.url} />
+        <meta property="twitter:title" content={title} />
+        <meta property="twitter:description" content={description} />
+        <meta
+            property="twitter:image"
+            content={new URL("/og-image.png", Astro.url)}
+        />
 
         <!-- Preconnecting and loading fonts for optimized typography performance -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -45,6 +75,90 @@ const { title = "CodeForge | ÆSoul" } = Astro.props;
                 visibility: visible;
             }
 
+            /* ======================================================
+               INITIAL GLOBAL LOADER
+               ====================================================== */
+            #initial-loader {
+                position: fixed;
+                inset: 0;
+                background-color: #0f172a; /* Schermo blu scuro */
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition:
+                    opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1),
+                    visibility 0.6s ease-out;
+            }
+
+            #initial-loader.fade-out {
+                opacity: 0;
+                visibility: hidden;
+                pointer-events: none;
+            }
+
+            /* Anti-aliasing e Hardware Acceleration Fix */
+            .logo-shadow-container {
+                filter: drop-shadow(0 0 20px rgba(6, 182, 212, 0.5));
+                animation: customPulse 1.5s cubic-bezier(0.4, 0, 0.6, 1)
+                    infinite;
+                /* Forza il rendering sulla GPU per evitare artefatti visivi */
+                -webkit-transform: translate3d(0, 0, 0);
+                transform: translate3d(0, 0, 0);
+            }
+
+            .logo-pulse-wrapper {
+                width: 110px;
+                height: 110px;
+                border-radius: 2rem;
+                overflow: hidden;
+                /* Fix per il clipping del border-radius su WebKit (Safari/Chrome) */
+                -webkit-mask-image: -webkit-radial-gradient(white, black);
+                mask-image: radial-gradient(white, black);
+                background-color: #020617; /* Sfondo nel caso l'SVG sia trasparente */
+            }
+
+            .logo-pulse-wrapper img {
+                display: block;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            @keyframes customPulse {
+                0%,
+                100% {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+                50% {
+                    opacity: 0.5;
+                    transform: scale(0.92);
+                }
+            }
+
+            /* ======================================================
+               UNIFIED BUTTON ANIMATIONS (Filtri & Toggle)
+               ====================================================== */
+            /* Questa regola forza tutti i pulsanti ad avere la stessa animazione fluida */
+            .cat-btn,
+            .view-toggle-btn {
+                transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+                will-change:
+                    transform, background-color, box-shadow, border-color;
+            }
+            .cat-btn:hover,
+            .view-toggle-btn:hover {
+                transform: scale(1.05) !important;
+            }
+            .cat-btn:active,
+            .view-toggle-btn:active {
+                transform: scale(0.95) !important;
+            }
+
+            /* ======================================================
+               BACKGROUND BLOBS & UI COMPONENTS
+               ====================================================== */
             /* Keyframe animations for fluid ambient background blobs */
             @keyframes blob {
                 0% {
@@ -199,6 +313,18 @@ const { title = "CodeForge | ÆSoul" } = Astro.props;
     <body
         class="min-h-screen flex flex-col relative selection:bg-cyan-500 selection:text-white overflow-x-hidden"
     >
+        <!-- ==========================================
+             CUSTOM LOGO LOADER
+             ========================================== -->
+        <div id="initial-loader">
+            <div class="logo-shadow-container">
+                <div class="logo-pulse-wrapper">
+                    <!-- Assicurati che l'immagine sia in /public/AeSoul_logo.svg -->
+                    <img src="/AeSoul_logo.svg" alt="ÆSoul Loading" />
+                </div>
+            </div>
+        </div>
+
         <!-- Fluid background glow nodes -->
         <div
             class="fixed inset-0 z-0 overflow-hidden pointer-events-none opacity-60"
@@ -218,6 +344,17 @@ const { title = "CodeForge | ÆSoul" } = Astro.props;
         <slot />
 
         <script is:inline>
+            // Rimozione morbida del loader iniziale una volta che il browser ha disegnato la UI
+            window.addEventListener("load", () => {
+                const loader = document.getElementById("initial-loader");
+                if (loader) {
+                    setTimeout(() => {
+                        loader.classList.add("fade-out");
+                        setTimeout(() => loader.remove(), 600); // Rimuove dal DOM dopo la transizione CSS
+                    }, 150); // Piccolo ritardo per mascherare i ricalcoli di layout
+                }
+            });
+
             // Graceful execution flag once DOM and layout structures are initialized
             document.addEventListener("DOMContentLoaded", () => {
                 document.documentElement.classList.add("loaded");

@@ -1,0 +1,88 @@
+# .github/workflows/ci.yml
+# ------------------------------------------------------------------------------
+# @description GitHub Actions workflow for Continuous Integration (CI).
+# This pipeline automatically triggers on pushes and pull requests to the main 
+# branch, ensuring that code quality (linting) and business logic (testing) 
+# remain intact before any merge operations.
+# ------------------------------------------------------------------------------
+
+name: CodeForge CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  backend-checks:
+    name: Backend Lint & Test
+    runs-on: ubuntu-latest
+    
+    # Specify the working directory since the project is a monorepo
+    defaults:
+      run:
+        working-directory: ./backend
+
+    strategy:
+      matrix:
+        # Test against the current Active LTS and Maintenance LTS Node versions
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          # Enable caching for faster workflow execution
+          cache: 'npm'
+          cache-dependency-path: './backend/package-lock.json'
+
+      - name: Install dependencies
+        # 'npm ci' is used in automated environments for strict, clean installs
+        run: npm ci
+
+      - name: Run Linter
+        # Fails the pipeline if code style violations are detected.
+        # Ensure you have a "lint" script defined in backend/package.json.
+        run: npm run lint --if-present
+
+      - name: Execute Vitest Suite
+        # Runs the automated tests we configured in the previous roadmap phase.
+        run: npm run test
+
+  frontend-checks:
+    name: Frontend Build & Lint
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: './frontend/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Linter
+        run: npm run lint --if-present
+
+      - name: Test Build (Astro)
+        # Verifies that the frontend compiles successfully for production
+        run: npm run build

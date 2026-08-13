@@ -1,0 +1,57 @@
+# /docker-compose.yml
+# ------------------------------------------------------------------------------
+# @description Complete Docker Compose configuration for local development.
+# Orchestrates Frontend (Nginx), Backend (Fastify), and Database (MongoDB).
+# ------------------------------------------------------------------------------
+version: '3.8'
+
+services:
+  # --- FRONTEND (ASTRO + NGINX) ---
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: codeforge_frontend
+    ports:
+      # Map local port 4321 to container port 80 (Nginx)
+      - "4321:80"
+    depends_on:
+      - backend
+    networks:
+      - codeforge_network
+
+  # --- BACKEND (FASTIFY + NODE.JS) ---
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: codeforge_backend
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - MONGO_URI=mongodb://mongodb:27017/codeforge_db
+      - ADMIN_API_KEY=local_development_key_123
+      - FRONTEND_URL=http://localhost:4321
+    depends_on:
+      - mongodb
+    networks:
+      - codeforge_network
+
+  # --- DATABASE (MONGODB) ---
+  mongodb:
+    image: mongo:6.0-focal
+    container_name: codeforge_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - codeforge_network
+
+networks:
+  codeforge_network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
