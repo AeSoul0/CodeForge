@@ -4,15 +4,14 @@
  * @description Master Layout file establishing HTML skeleton, fonts, global CSS effects, animated background blobs, and SEO/OpenGraph meta tags.
  */
 
+import { injectSpeedInsights } from '@vercel/speed-insights';
+
 export interface Props {
     title?: string;
     description?: string;
 }
 
-const {
-    title = "CodeForge | ÆSoul",
-    description = "A responsive personal web portfolio showcasing my full-stack projects, architectures, and embedded systems experience.",
-} = Astro.props;
+const { title = "CodeForge | ÆSoul" } = Astro.props;
 ---
 
 <html lang="en" class="scroll-smooth">
