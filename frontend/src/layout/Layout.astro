@@ -1,62 +1,93 @@
 ---
 /**
  * @file src/layout/Layout.astro
- * @description Master Layout file establishing HTML skeleton, fonts, global CSS effects, animated background blobs, and SEO/OpenGraph meta tags.
+ * @description Master Layout establishing the global HTML skeleton,
+ * typography, ambient background, loader, global UI utilities,
+ * and SEO/OpenGraph metadata.
  */
-
-import { injectSpeedInsights } from '@vercel/speed-insights';
 
 export interface Props {
     title?: string;
     description?: string;
 }
 
-const { title = "CodeForge | ÆSoul" } = Astro.props;
+const {
+    title = "CodeForge | ÆSoul",
+    description = "Portfolio ufficiale di ÆSoul - Full-Stack Developer & Software Architect.",
+} = Astro.props;
+
+const canonicalUrl = Astro.url.href;
+const ogImageUrl = new URL("/og-image.png", Astro.url).href;
 ---
 
-<html lang="en" class="scroll-smooth">
+<html lang="it" class="scroll-smooth">
     <head>
         <meta charset="utf-8" />
-        <link rel="icon" type="image/svg+xml" href="/AeSoul_favicon.ico" />
-        <meta name="viewport" content="width=device-width" />
 
-        <!-- Primary Meta Tags -->
+        <link rel="icon" type="image/x-icon" href="/AeSoul_favicon.ico" />
+
+        <!-- Critical loader asset -->
+        <link
+            rel="preload"
+            href="/AeSoul_logo.svg"
+            as="image"
+            type="image/svg+xml"
+        />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <!-- ======================================================
+             PRIMARY META TAGS
+             ====================================================== -->
+
         <title>{title}</title>
+
         <meta name="title" content={title} />
         <meta name="description" content={description} />
         <meta name="author" content="AeSoul" />
 
-        <!-- Dynamic OpenGraph Tags for SEO & Social Previews -->
+        <link rel="canonical" href={canonicalUrl} />
+
+        <!-- ======================================================
+             OPEN GRAPH
+             ====================================================== -->
+
         <meta property="og:type" content="website" />
-        <meta property="og:url" content={Astro.url} />
+        <meta property="og:url" content={canonicalUrl} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
-        <!-- Make sure to place a high-quality preview image (e.g., og-image.png) in your /public folder -->
-        <meta
-            property="og:image"
-            content={new URL("/og-image.png", Astro.url)}
-        />
+        <meta property="og:image" content={ogImageUrl} />
+        <meta property="og:image:alt" content={title} />
 
-        <!-- Twitter Optimization -->
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:url" content={Astro.url} />
-        <meta property="twitter:title" content={title} />
-        <meta property="twitter:description" content={description} />
-        <meta
-            property="twitter:image"
-            content={new URL("/og-image.png", Astro.url)}
-        />
+        <!-- ======================================================
+             TWITTER / X
+             ====================================================== -->
 
-        <!-- Preconnecting and loading fonts for optimized typography performance -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={canonicalUrl} />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={ogImageUrl} />
+        <meta name="twitter:image:alt" content={title} />
+
+        <!-- ======================================================
+             FONTS
+             ====================================================== -->
+
         <link rel="preconnect" href="https://fonts.googleapis.com" />
+
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
         <link
             href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
             rel="stylesheet"
         />
 
         <style is:global>
-            /* Global CSS resets and theme initialization */
+            /* ======================================================
+               GLOBAL RESET
+               ====================================================== */
+
             html,
             body {
                 margin: 0;
@@ -66,28 +97,47 @@ const { title = "CodeForge | ÆSoul" } = Astro.props;
                 font-family: "Outfit", sans-serif;
             }
 
-            /* Prevent flash of unstyled/uninitialized layout content */
-            body {
-                visibility: hidden;
+            html {
+                scroll-behavior: smooth;
             }
-            .loaded body {
-                visibility: visible;
+
+            body {
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+                text-rendering: optimizeLegibility;
             }
 
             /* ======================================================
                INITIAL GLOBAL LOADER
                ====================================================== */
+
             #initial-loader {
                 position: fixed;
                 inset: 0;
-                background-color: #0f172a; /* Schermo blu scuro */
-                z-index: 9999;
+                z-index: 99999;
+
                 display: flex;
                 align-items: center;
                 justify-content: center;
+
+                background-color: #0f172a;
+
+                opacity: 1;
+                visibility: visible;
+                pointer-events: auto;
+
                 transition:
-                    opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1),
-                    visibility 0.6s ease-out;
+                    opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+                    visibility 0.5s ease;
+            }
+
+            /*
+             * The loader itself is never hidden.
+             * Only the logo waits for decoding.
+             */
+            #initial-loader.logo-pending .logo-shadow-container {
+                opacity: 0;
+                visibility: hidden;
             }
 
             #initial-loader.fade-out {
@@ -96,25 +146,41 @@ const { title = "CodeForge | ÆSoul" } = Astro.props;
                 pointer-events: none;
             }
 
-            /* Anti-aliasing e Hardware Acceleration Fix */
             .logo-shadow-container {
+                opacity: 1;
+                visibility: visible;
+
                 filter: drop-shadow(0 0 20px rgba(6, 182, 212, 0.5));
+
                 animation: customPulse 1.5s cubic-bezier(0.4, 0, 0.6, 1)
                     infinite;
-                /* Forza il rendering sulla GPU per evitare artefatti visivi */
-                -webkit-transform: translate3d(0, 0, 0);
+
                 transform: translate3d(0, 0, 0);
+
+                will-change: transform, opacity;
+
+                transition:
+                    opacity 120ms ease,
+                    visibility 120ms ease;
             }
 
             .logo-pulse-wrapper {
                 width: 110px;
                 height: 110px;
+
                 border-radius: 2rem;
                 overflow: hidden;
-                /* Fix per il clipping del border-radius su WebKit (Safari/Chrome) */
+
                 -webkit-mask-image: -webkit-radial-gradient(white, black);
+
                 mask-image: radial-gradient(white, black);
-                background-color: #020617; /* Sfondo nel caso l'SVG sia trasparente */
+
+                background-color: #020617;
+
+                transform: translate3d(0, 0, 0);
+
+                backface-visibility: hidden;
+                -webkit-backface-visibility: hidden;
             }
 
             .logo-pulse-wrapper img {
@@ -122,6 +188,14 @@ const { title = "CodeForge | ÆSoul" } = Astro.props;
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
+
+                transform: translate3d(0, 0, 0);
+
+                backface-visibility: hidden;
+                -webkit-backface-visibility: hidden;
+
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
             }
 
             @keyframes customPulse {
@@ -130,6 +204,7 @@ const { title = "CodeForge | ÆSoul" } = Astro.props;
                     opacity: 1;
                     transform: scale(1);
                 }
+
                 50% {
                     opacity: 0.5;
                     transform: scale(0.92);
@@ -137,201 +212,306 @@ const { title = "CodeForge | ÆSoul" } = Astro.props;
             }
 
             /* ======================================================
-               UNIFIED BUTTON ANIMATIONS (Filtri & Toggle)
+               GENERIC HOVER UTILITY
                ====================================================== */
-            /* Questa regola forza tutti i pulsanti ad avere la stessa animazione fluida */
-            .cat-btn,
-            .view-toggle-btn {
-                transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-                will-change:
-                    transform, background-color, box-shadow, border-color;
+
+            .hover-glow {
+                transition:
+                    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+                    box-shadow 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+                    border-color 0.3s ease;
             }
-            .cat-btn:hover,
-            .view-toggle-btn:hover {
-                transform: scale(1.05) !important;
-            }
-            .cat-btn:active,
-            .view-toggle-btn:active {
-                transform: scale(0.95) !important;
+
+            .hover-glow:hover {
+                transform: translate3d(0, -6px, 0);
+
+                border-color: rgba(255, 255, 255, 0.14) !important;
+
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
             }
 
             /* ======================================================
-               BACKGROUND BLOBS & UI COMPONENTS
+               BACKGROUND BLOBS
                ====================================================== */
-            /* Keyframe animations for fluid ambient background blobs */
+
             @keyframes blob {
                 0% {
-                    transform: translate(0px, 0px) scale(1);
+                    transform: translate3d(0, 0, 0) scale(1);
                 }
+
                 33% {
-                    transform: translate(30px, -30px) scale(1.1);
+                    transform: translate3d(30px, -30px, 0) scale(1.1);
                 }
+
                 66% {
-                    transform: translate(-20px, 20px) scale(0.9);
+                    transform: translate3d(-20px, 20px, 0) scale(0.9);
                 }
+
                 100% {
-                    transform: translate(0px, 0px) scale(1);
+                    transform: translate3d(0, 0, 0) scale(1);
                 }
-            }
-            .animate-blob {
-                animation: blob 12s infinite alternate ease-in-out;
             }
 
-            /* Core design token: Glassmorphism layout structure */
+            .animate-blob {
+                animation: blob 12s infinite alternate ease-in-out;
+
+                will-change: transform;
+            }
+
+            /* ======================================================
+               GLASS CARD BASE
+               ====================================================== */
+
             .glass-card {
+                position: relative;
+
                 background: rgba(255, 255, 255, 0.03);
+
                 backdrop-filter: blur(20px) saturate(160%);
                 -webkit-backdrop-filter: blur(20px) saturate(160%);
+
                 border-top: 1px solid rgba(255, 255, 255, 0.1);
                 border-left: 1px solid rgba(255, 255, 255, 0.1);
                 border-right: 1px solid rgba(255, 255, 255, 0.02);
                 border-bottom: 1px solid rgba(255, 255, 255, 0.02);
-                box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-                transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+
                 border-radius: 2rem;
-                position: relative;
+
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+                transition:
+                    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+                    box-shadow 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+                    border-color 0.3s ease;
             }
 
-            /* Interactive state: Outer cybernetic glow effect */
-            .hover-glow:hover {
-                transform: translateY(-6px);
-                border-color: rgba(59, 130, 246, 0.8) !important;
-                box-shadow:
-                    0 15px 35px rgba(0, 0, 0, 0.5),
-                    0 0 25px rgba(59, 130, 246, 0.3),
-                    inset 0 0 15px rgba(59, 130, 246, 0.1);
-            }
+            /* ======================================================
+               EXPLORE BUTTON
+               ====================================================== */
 
-            /* Call to Action components visual styling */
             .btn-explore {
                 display: inline-flex;
                 align-items: center;
                 gap: 0.5rem;
+
                 padding: 0.6rem 1.4rem;
+
                 border-radius: 9999px;
+
                 font-weight: 600;
                 font-size: 0.8rem;
+
                 color: #fff;
+
                 background: rgba(6, 182, 212, 0.1);
+
                 border: 1px solid rgba(6, 182, 212, 0.3);
-                transition: all 0.3s ease;
+
                 text-decoration: none;
                 width: fit-content;
-            }
-            .btn-explore:hover {
-                background: rgba(6, 182, 212, 0.2);
-                border-color: rgba(6, 182, 212, 0.8);
-                transform: scale(1.05);
+
+                transition:
+                    transform 0.3s cubic-bezier(0.22, 1.2, 0.36, 1),
+                    background-color 0.3s ease,
+                    border-color 0.3s ease;
             }
 
-            /* Cybernetic section separation layouts */
+            .btn-explore:hover {
+                background: rgba(6, 182, 212, 0.2);
+
+                border-color: rgba(6, 182, 212, 0.8);
+
+                transform: translate3d(0, -2px, 0) scale(1.03);
+            }
+
+            .btn-explore:active {
+                transform: translate3d(0, 0, 0) scale(0.97);
+            }
+
+            /* ======================================================
+               SECTION DIVIDER
+               ====================================================== */
+
             .section-divider {
-                height: 2px;
                 width: 100%;
+                height: 2px;
+
+                /*
+                 * Reduced from 4rem to 2.5rem so the content
+                 * below the hero sits slightly higher without
+                 * changing the hero position itself.
+                 */
+                margin: 2.5rem 0;
+
                 background: linear-gradient(
                     90deg,
                     transparent 0%,
                     rgba(6, 182, 212, 0.6) 50%,
                     transparent 100%
                 );
-                margin: 4rem 0;
+
                 box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
             }
 
-            /* Social link components container & hovering micro-interactions */
+            /* ======================================================
+               SOCIAL LINKS
+               ====================================================== */
+
             .social-link {
                 position: relative;
+
                 display: flex;
                 align-items: center;
                 justify-content: center;
+
                 width: 36px;
                 height: 36px;
+
                 color: #94a3b8;
                 text-decoration: none;
+
                 border-radius: 50%;
-                transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+                transition:
+                    transform 0.3s cubic-bezier(0.22, 1.2, 0.36, 1),
+                    background-color 0.3s ease,
+                    color 0.3s ease,
+                    box-shadow 0.3s ease;
             }
+
             .social-link svg {
                 width: 18px;
                 height: 18px;
-                transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+                transition: transform 0.3s cubic-bezier(0.22, 1.2, 0.36, 1);
             }
+
             .social-link.linkedin:hover {
                 background-color: #0a66c2;
                 color: #fff;
-                transform: scale(1.15) translateY(-3px);
+
+                transform: translate3d(0, -3px, 0) scale(1.15);
+
                 box-shadow: 0 8px 20px rgba(10, 102, 194, 0.4);
             }
+
             .social-link.github:hover {
                 background-color: #1a1e22;
                 color: #fff;
-                transform: scale(1.15) translateY(-3px);
+
+                transform: translate3d(0, -3px, 0) scale(1.15);
+
                 box-shadow: 0 8px 20px rgba(255, 255, 255, 0.15);
             }
+
             .social-link.whatsapp:hover {
                 background-color: #25d366;
                 color: #fff;
-                transform: scale(1.15) translateY(-3px);
+
+                transform: translate3d(0, -3px, 0) scale(1.15);
+
                 box-shadow: 0 8px 20px rgba(37, 211, 102, 0.4);
             }
 
-            /* Responsive Device Interaction Utilities */
+            /* ======================================================
+               RESPONSIVE INTERACTION
+               ====================================================== */
+
             .tap-only {
                 display: flex;
             }
+
             .hover-only {
                 display: none;
             }
+
             @media (hover: hover) {
                 .tap-only {
                     display: none;
                 }
+
                 .hover-only {
                     display: flex;
                 }
             }
 
-            /* Soft visual pulsation animation for non-hover displays */
+            /* ======================================================
+               TAP PULSE
+               ====================================================== */
+
             @keyframes pulse-fade-blur {
                 0%,
                 100% {
                     opacity: 1;
-                    filter: blur(0px);
+                    filter: blur(0);
                 }
+
                 50% {
                     opacity: 0.6;
                     filter: blur(0.5px);
                 }
             }
+
             .animate-tap-pulse {
                 animation: pulse-fade-blur 2s infinite ease-in-out;
+            }
+
+            /* ======================================================
+               ACCESSIBILITY
+               ====================================================== */
+
+            @media (prefers-reduced-motion: reduce) {
+                html {
+                    scroll-behavior: auto;
+                }
+
+                *,
+                *::before,
+                *::after {
+                    animation-duration: 0.01ms !important;
+                    animation-iteration-count: 1 !important;
+                    transition-duration: 0.01ms !important;
+                }
             }
         </style>
     </head>
 
     <body
-        class="min-h-screen flex flex-col relative selection:bg-cyan-500 selection:text-white overflow-x-hidden"
+        class="min-h-screen flex flex-col relative selection:bg-cyan-500 selection:text-white overflow-x-hidden bg-[#020617]"
     >
-        <!-- ==========================================
-             CUSTOM LOGO LOADER
-             ========================================== -->
-        <div id="initial-loader">
+        <!-- ======================================================
+             INITIAL GLOBAL LOADER
+             ====================================================== -->
+
+        <div id="initial-loader" class="logo-pending" aria-hidden="true">
             <div class="logo-shadow-container">
                 <div class="logo-pulse-wrapper">
-                    <!-- Assicurati che l'immagine sia in /public/AeSoul_logo.svg -->
-                    <img src="/AeSoul_logo.svg" alt="ÆSoul Loading" />
+                    <img
+                        id="loader-logo"
+                        src="/AeSoul_logo.svg"
+                        alt="ÆSoul Loading"
+                        width="110"
+                        height="110"
+                        fetchpriority="high"
+                        decoding="sync"
+                    />
                 </div>
             </div>
         </div>
 
-        <!-- Fluid background glow nodes -->
+        <!-- ======================================================
+             AMBIENT BACKGROUND
+             ====================================================== -->
+
         <div
             class="fixed inset-0 z-0 overflow-hidden pointer-events-none opacity-60"
+            aria-hidden="true"
         >
             <div
                 class="absolute top-[-10%] left-[-10%] w-[50rem] h-[50rem] rounded-full bg-blue-600/30 blur-[120px] animate-blob"
             >
             </div>
+
             <div
                 class="absolute top-[20%] right-[-10%] w-[40rem] h-[40rem] rounded-full bg-cyan-500/20 blur-[120px] animate-blob"
                 style="animation-delay: 2s;"
@@ -339,25 +519,98 @@ const { title = "CodeForge | ÆSoul" } = Astro.props;
             </div>
         </div>
 
-        <!-- Application runtime core injection node -->
-        <slot />
+        <!-- ======================================================
+             MAIN CONTENT
+             ====================================================== -->
+
+        <main class="relative z-10 flex-1 w-full flex flex-col">
+            <slot />
+        </main>
+
+        <!-- ======================================================
+             LOADER SCRIPT
+             ====================================================== -->
 
         <script is:inline>
-            // Rimozione morbida del loader iniziale una volta che il browser ha disegnato la UI
-            window.addEventListener("load", () => {
-                const loader = document.getElementById("initial-loader");
-                if (loader) {
-                    setTimeout(() => {
-                        loader.classList.add("fade-out");
-                        setTimeout(() => loader.remove(), 600); // Rimuove dal DOM dopo la transizione CSS
-                    }, 150); // Piccolo ritardo per mascherare i ricalcoli di layout
-                }
-            });
+            (() => {
+                let loaderDismissed = false;
 
-            // Graceful execution flag once DOM and layout structures are initialized
-            document.addEventListener("DOMContentLoaded", () => {
-                document.documentElement.classList.add("loaded");
-            });
+                const getLoader = () =>
+                    document.getElementById("initial-loader");
+
+                const dismissLoader = () => {
+                    if (loaderDismissed) return;
+
+                    const loader = getLoader();
+
+                    if (!loader) {
+                        loaderDismissed = true;
+                        return;
+                    }
+
+                    loaderDismissed = true;
+
+                    /*
+                     * The background is already visible immediately.
+                     * Only the logo was waiting for decoding.
+                     */
+                    loader.classList.remove("logo-pending");
+
+                    /*
+                     * Give the browser time to paint the decoded
+                     * logo before starting the loader fade.
+                     */
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            loader.classList.add("fade-out");
+
+                            window.setTimeout(() => {
+                                loader.remove();
+                            }, 550);
+                        });
+                    });
+                };
+
+                const prepareLoader = async () => {
+                    const loader = getLoader();
+
+                    const logo = document.getElementById("loader-logo");
+
+                    if (!loader) return;
+
+                    try {
+                        if (logo && typeof logo.decode === "function") {
+                            await logo.decode();
+                        } else if (logo && !logo.complete) {
+                            await new Promise((resolve) => {
+                                logo.addEventListener("load", resolve, {
+                                    once: true,
+                                });
+
+                                logo.addEventListener("error", resolve, {
+                                    once: true,
+                                });
+                            });
+                        }
+                    } catch {
+                        /*
+                         * Never block the page because of
+                         * an image decoding issue.
+                         */
+                    }
+
+                    loader.classList.remove("logo-pending");
+                };
+
+                prepareLoader();
+
+                window.addEventListener("load", dismissLoader, { once: true });
+
+                /*
+                 * Safety fallback.
+                 */
+                window.setTimeout(dismissLoader, 3000);
+            })();
         </script>
     </body>
 </html>

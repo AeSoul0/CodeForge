@@ -1,187 +1,530 @@
 ---
 /**
  * @file src/components/ProjectsGrid.astro
- * @description Renders database projects with dynamic domain filtering and a Recruiter/Dev toggle mode.
+ * @description Renders database projects with category filtering
+ * and Recruiter/Dev view toggle.
  */
 
 export interface Project {
-    _id: string;
-    titolo: string;
-    descrizione: string;
-    tecnologie: string[];
-    categoria: string;
-    linkGithub?: string;
+	_id: string;
+	titolo: string;
+	descrizione: string;
+	tecnologie: string[];
+	categoria: string;
+	linkGithub?: string;
 }
 
 export interface Props {
-    projects: Project[];
+	projects: Project[];
 }
 
 const { projects } = Astro.props;
 
-// Extract unique domain categories
-const allCategories = [...new Set(projects.map(p => p.categoria).filter(Boolean))];
+const allCategories = [
+	...new Set(
+		projects
+			.map((project) => project.categoria)
+			.filter(Boolean),
+	),
+];
 ---
 
 <section id="progetti">
-    <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 relative z-10">
-        <h2 class="text-3xl font-bold flex items-center gap-4 text-white">
-            Recent Projects
-        </h2>
+	<!-- ======================================================
+	     HEADER
+	     ====================================================== -->
 
-        <!-- Dev / Recruiter View Toggle Controls -->
-        <div class="flex items-center gap-2 bg-white/5 p-1 rounded-full border border-white/10 backdrop-blur-md">
-            <button class="view-toggle-btn active px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 bg-cyan-500 text-white shadow-[0_0_10px_rgba(6,182,212,0.4)]" data-mode="recruiter">
-                💼 Recruiter
-            </button>
-            <button class="view-toggle-btn px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white" data-mode="dev">
-                👨‍💻 Dev
-            </button>
-        </div>
-    </div>
+	<div class="flex items-center justify-between mb-8 relative z-10">
+		<h2 class="text-3xl font-bold text-white">
+			Recent Projects
+		</h2>
+	</div>
 
-    <!-- Category Filters -->
-    <div class="flex flex-wrap gap-2 mb-10 relative z-10" id="tech-filters">
-        <button class="cat-btn active px-3 py-1 rounded-full text-xs font-bold transition-all bg-cyan-500 text-white shadow-[0_0_10px_rgba(6,182,212,0.4)]" data-filter="all">
-            All Domains
-        </button>
-        {allCategories.map(cat => (
-            <button class="cat-btn px-3 py-1 rounded-full text-xs font-bold transition-all bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10" data-filter={cat.toLowerCase()}>
-                {cat}
-            </button>
-        ))}
-    </div>
+	<!-- ======================================================
+	     CATEGORY FILTERS
+	     ====================================================== -->
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="projects-container">
-        {
-            projects.length === 0 ? (
-                <p class="text-slate-500 italic">
-                    Waiting for projects from database...
-                </p>
-            ) : (
-                projects.map((p) => {
-                    const formattedStack = p.tecnologie ? p.tecnologie.map(t => '"' + t + '"').join(', ') : '';
+	<div
+		id="tech-filters"
+		class="flex flex-wrap gap-2 mb-10 relative z-10"
+	>
+		<button
+			class="cat-btn active"
+			data-filter="all"
+			type="button"
+			aria-pressed="true"
+		>
+			All Domains
+		</button>
 
-                    return (
-                        <article 
-                            class="project-card glass-card hover-glow p-8 group relative overflow-hidden flex flex-col justify-between"
-                            data-category={(p.categoria || 'full-stack').toLowerCase()}
-                        >
-                            <a href={p.linkGithub || "#"} target="_blank" rel="noopener noreferrer" class="absolute top-6 right-6 text-slate-500 hover:text-white transition-all duration-300 hover:scale-110 hover:-translate-y-1 z-20" title="View Code on GitHub">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
-                                </svg>
-                            </a>
+		{
+			allCategories.map((category) => (
+				<button
+					class="cat-btn"
+					data-filter={category.toLowerCase()}
+					type="button"
+					aria-pressed="false"
+				>
+					{category}
+				</button>
+			))
+		}
+	</div>
 
-                            <div>
-                                <div class="mb-2">
-                                    <span class="text-[10px] font-black tracking-widest text-cyan-500 uppercase">{p.categoria}</span>
-                                </div>
-                                
-                                <h3 class="text-xl font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors relative z-10 w-[90%]">
-                                    {p.titolo}
-                                </h3>
+	<!-- ======================================================
+	     PROJECT GRID
+	     ====================================================== -->
 
-                                <!-- RECRUITER VIEW (Default visible) -->
-                                <div class="recruiter-only relative z-10">
-                                    <p class="text-slate-400 text-sm leading-relaxed mb-6">
-                                        {p.descrizione}
-                                    </p>
-                                </div>
+	<div
+		id="projects-container"
+		class="grid grid-cols-1 md:grid-cols-2 gap-6"
+	>
+		{
+			projects.length === 0 ? (
+				<p class="text-slate-500 italic">
+					Waiting for projects from database...
+				</p>
+			) : (
+				projects.map((project) => (
+					<article
+						class="project-card glass-card hover-glow p-8 group relative overflow-hidden flex flex-col justify-between"
+						data-category={(
+							project.categoria ||
+							"full-stack"
+						).toLowerCase()}
+					>
+						<!-- ==================================================
+						     GITHUB LINK
+						     ================================================== -->
 
-                                <!-- DEV VIEW (Hidden by CSS default) -->
-                                <div class="dev-only relative z-10 mb-6">
-                                    <div class="bg-black/50 p-3 rounded border border-white/5 font-mono text-xs text-green-400 leading-relaxed shadow-inner">
-                                        <span class="text-cyan-500">const</span> stack = [{formattedStack}];
-                                    </div>
-                                </div>
-                            </div>
+						{project.linkGithub && (
+							<a
+								href={project.linkGithub}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="github-link absolute top-6 right-6 z-20"
+								title="View Code on GitHub"
+								aria-label={`View ${project.titolo} on GitHub`}
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="20"
+									height="20"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									aria-hidden="true"
+									class="github-icon"
+								>
+									<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+								</svg>
+							</a>
+						)}
 
-                            <!-- Technology Badges -->
-                            <div class="flex flex-wrap gap-2 relative z-10 mt-auto">
-                                {(p.tecnologie || []).map((tech) => (
-                                    <span class="px-2 py-1 text-[9px] font-bold bg-white/5 text-cyan-300 rounded-full border border-white/10 uppercase">
-                                        {tech}
-                                    </span>
-                                ))}
-                            </div>
-                        </article>
-                    );
-                })
-            )
-        }
-    </div>
+						<!-- ==================================================
+						     PROJECT CONTENT
+						     ================================================== -->
+
+						<div class="relative z-10">
+							<div class="mb-2">
+								<span
+									class="project-category text-[10px] font-black tracking-widest uppercase"
+								>
+									{project.categoria}
+								</span>
+							</div>
+
+							<h3 class="project-title text-xl font-bold text-white mb-3 w-[90%]">
+								{project.titolo}
+							</h3>
+
+							<p class="text-slate-400 text-sm leading-relaxed mb-6">
+								{project.descrizione}
+							</p>
+						</div>
+
+						<!-- ==================================================
+						     TECHNOLOGY BADGES
+						     ================================================== -->
+
+						<div class="flex flex-wrap gap-2 relative z-10 mt-auto">
+							{(project.tecnologie ?? []).map(
+								(technology) => (
+									<span class="tech-badge px-2 py-1 text-[9px] font-bold rounded-full border uppercase">
+										{technology}
+									</span>
+								),
+							)}
+						</div>
+					</article>
+				))
+			)
+		}
+	</div>
 </section>
 
 <style>
-    /* Prevent flashing both views: hide dev-only by default */
-    .dev-only {
-        display: none;
-    }
-    :global(body[data-view="dev"]) .dev-only {
-        display: block !important;
-    }
-    :global(body[data-view="dev"]) .recruiter-only {
-        display: none !important;
-    }
+	/* ======================================================
+	   TEXT RENDERING
+	   ====================================================== */
+
+	.project-title,
+	.project-category,
+	.github-link,
+	.github-icon,
+	.tech-badge,
+	.cat-btn {
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+
+	.project-title {
+		color: #ffffff !important;
+		font-style: normal;
+		font-synthesis: none;
+		text-shadow: none !important;
+	}
+
+	.project-category {
+		display: inline-block;
+		color: #22d3ee;
+	}
+
+	/* ======================================================
+	   PROJECT CARD
+	   ====================================================== */
+
+	.project-card {
+		transform: translateY(0);
+		transform-origin: center center;
+
+		transition:
+			transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+			box-shadow 420ms cubic-bezier(0.22, 1, 0.36, 1),
+			border-color 300ms ease;
+	}
+
+	.project-card.hover-glow:hover {
+		transform: translateY(-6px);
+
+		border-color: rgba(59, 130, 246, 0.55) !important;
+
+		box-shadow:
+			0 15px 35px rgba(0, 0, 0, 0.5),
+			0 0 22px rgba(59, 130, 246, 0.18),
+			inset 0 0 10px rgba(59, 130, 246, 0.04);
+	}
+
+	/* ======================================================
+	   GITHUB
+	   Borderless. Leggermente più grande, si solleva e
+	   si illumina con un glow bianco molto discreto.
+	   ====================================================== */
+
+	.github-link {
+		display: grid;
+		place-items: center;
+
+		width: 26px;
+		height: 26px;
+
+		color: #64748b;
+
+		transition: color 320ms ease;
+	}
+
+	.github-icon {
+		display: block;
+		width: 22px;
+		height: 22px;
+
+		transform-origin: center bottom;
+
+		transition:
+			transform 650ms cubic-bezier(0.16, 1, 0.3, 1),
+			filter 650ms cubic-bezier(0.16, 1, 0.3, 1),
+			color 320ms ease;
+	}
+
+	.github-link:hover {
+		color: #f1f5f9;
+	}
+
+	.github-link:hover .github-icon {
+		transform: translateY(-3px) scale(1.10);
+
+		filter:
+			drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12))
+			drop-shadow(0 0 2px rgba(255, 255, 255, 0.06))
+			drop-shadow(0 0 4px rgba(255, 255, 255, 0.02));
+	}
+
+	.github-link:active .github-icon {
+		transform: translateY(-1px) scale(1.04);
+	}
+
+	/* ======================================================
+	   TECHNOLOGY BADGES
+	   ====================================================== */
+
+	.tech-badge {
+		color: #a5f3fc;
+		background-color: rgba(34, 211, 238, 0.045);
+		border-color: rgba(34, 211, 238, 0.12);
+
+		transition:
+			transform 280ms cubic-bezier(0.22, 1.25, 0.36, 1),
+			background-color 200ms ease,
+			border-color 200ms ease,
+			color 200ms ease;
+	}
+
+	.tech-badge:hover {
+		transform:
+			translateY(-2px)
+			scale(1.03);
+
+		color: #cffafe;
+		background-color: rgba(34, 211, 238, 0.08);
+		border-color: rgba(34, 211, 238, 0.22);
+	}
+
+	/* ======================================================
+	   CATEGORY FILTER BUTTONS
+	   Palette aligned with Explore Works
+	   ====================================================== */
+
+	.cat-btn {
+		position: relative;
+
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+
+		min-height: 30px;
+		padding: 0.42rem 0.8rem;
+
+		border: 1px solid rgba(255, 255, 255, 0.10);
+		border-radius: 9999px;
+
+		background: rgba(255, 255, 255, 0.03);
+		color: #cbd5e1;
+
+		font-size: 0.72rem;
+		font-weight: 700;
+		line-height: 1;
+
+		transform: translateY(0);
+		transform-origin: center;
+
+		transition:
+			transform 280ms cubic-bezier(0.22, 1.25, 0.36, 1),
+			background-color 220ms ease,
+			color 220ms ease,
+			border-color 220ms ease,
+			box-shadow 280ms ease;
+	}
+
+	.cat-btn:hover {
+		transform:
+			translateY(-1px)
+			scale(1.015);
+
+		background: rgba(34, 211, 238, 0.045);
+		border-color: rgba(34, 211, 238, 0.26);
+		color: #67e8f9;
+
+		box-shadow:
+			0 5px 14px rgba(0, 0, 0, 0.14),
+			0 0 14px rgba(34, 211, 238, 0.05);
+	}
+
+	.cat-btn:active {
+		transform: translateY(0) scale(0.98);
+	}
+
+	/*
+	 * All Domains + Full Stack:
+	 * same visual language as Explore Works.
+	 */
+
+	.cat-btn[data-filter="all"],
+	.cat-btn[data-filter="full-stack"] {
+		background: rgba(255, 255, 255, 0.03);
+		border-color: rgba(255, 255, 255, 0.10);
+		color: #e2e8f0;
+	}
+
+	.cat-btn[data-filter="all"].active,
+	.cat-btn[data-filter="full-stack"].active {
+		background: rgba(34, 211, 238, 0.045);
+		border-color: rgba(34, 211, 238, 0.28);
+		color: #67e8f9;
+
+		box-shadow:
+			0 5px 16px rgba(8, 145, 178, 0.08),
+			0 0 14px rgba(34, 211, 238, 0.04),
+			inset 0 1px 0 rgba(255, 255, 255, 0.07);
+	}
+
+	.cat-btn[data-filter="all"].active:hover,
+	.cat-btn[data-filter="full-stack"].active:hover {
+		background: rgba(34, 211, 238, 0.065);
+		border-color: rgba(34, 211, 238, 0.36);
+		color: #a5f3fc;
+
+		box-shadow:
+			0 7px 18px rgba(8, 145, 178, 0.11),
+			0 0 18px rgba(34, 211, 238, 0.07),
+			inset 0 1px 0 rgba(255, 255, 255, 0.09);
+	}
+
+	/* ======================================================
+	   ACCESSIBILITY
+	   ====================================================== */
+
+	@media (prefers-reduced-motion: reduce) {
+		.project-card,
+		.github-link,
+		.github-icon,
+		.tech-badge,
+		.cat-btn {
+			transition: none !important;
+		}
+
+		.project-card.hover-glow:hover,
+		.github-link:hover,
+		.tech-badge:hover,
+		.cat-btn:hover {
+			transform: none !important;
+		}
+
+		.github-link:hover .github-icon {
+			transform: none !important;
+			filter: none !important;
+		}
+	}
 </style>
 
 <script is:inline>
-    document.addEventListener("DOMContentLoaded", () => {
-        // --- 1. INSTANT CATEGORY FILTERS (0ms delay) ---
-        const filterButtons = document.querySelectorAll('.cat-btn');
-        const projectCards = document.querySelectorAll('.project-card');
+	document.addEventListener("DOMContentLoaded", () => {
+		const section =
+			document.getElementById("progetti");
 
-        filterButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                filterButtons.forEach(btn => {
-                    btn.classList.remove('active', 'bg-cyan-500', 'text-white', 'shadow-[0_0_10px_rgba(6,182,212,0.4)]');
-                    btn.classList.add('bg-white/5', 'text-slate-300');
-                });
-                
-                button.classList.remove('bg-white/5', 'text-slate-300');
-                button.classList.add('active', 'bg-cyan-500', 'text-white', 'shadow-[0_0_10px_rgba(6,182,212,0.4)]');
+		const filterButtons =
+			document.querySelectorAll(".cat-btn");
 
-                const filterValue = button.getAttribute('data-filter');
+		const projectCards =
+			document.querySelectorAll(".project-card");
 
-                // Instant show/hide without setTimeout delays
-                projectCards.forEach(card => {
-                    const cardCategory = card.getAttribute('data-category') || '';
-                    if (filterValue === 'all' || cardCategory === filterValue) {
-                        card.classList.remove('hidden');
-                    } else {
-                        card.classList.add('hidden');
-                    }
-                });
-            });
-        });
+		/*
+		 * ======================================================
+		 * CATEGORY FILTERS
+		 * ======================================================
+		 */
 
-        // --- 2. DEV / RECRUITER TOGGLE LOGIC ---
-        const toggleButtons = document.querySelectorAll('.view-toggle-btn');
-        
-        const updateView = (mode) => {
-            document.body.setAttribute('data-view', mode);
-            localStorage.setItem('portfolioView', mode);
-            
-            toggleButtons.forEach(btn => {
-                if (btn.getAttribute('data-mode') === mode) {
-                    btn.classList.add('bg-cyan-500', 'text-white', 'shadow-[0_0_10px_rgba(6,182,212,0.4)]');
-                    btn.classList.remove('text-slate-400', 'hover:text-white', 'bg-transparent');
-                } else {
-                    btn.classList.remove('bg-cyan-500', 'text-white', 'shadow-[0_0_10px_rgba(6,182,212,0.4)]');
-                    btn.classList.add('text-slate-400', 'hover:text-white', 'bg-transparent');
-                }
-            });
-        };
+		filterButtons.forEach((button) => {
+			button.addEventListener("click", () => {
+				filterButtons.forEach((btn) => {
+					const isActive = btn === button;
 
-        const initialMode = localStorage.getItem('portfolioView') || 'recruiter';
-        updateView(initialMode);
+					btn.classList.toggle(
+						"active",
+						isActive,
+					);
 
-        toggleButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const mode = e.currentTarget.getAttribute('data-mode');
-                updateView(mode);
-            });
-        });
-    });
+					btn.setAttribute(
+						"aria-pressed",
+						String(isActive),
+					);
+				});
+
+				const filterValue =
+					button.getAttribute(
+						"data-filter",
+					) || "all";
+
+				projectCards.forEach((card) => {
+					const cardCategory =
+						card.getAttribute(
+							"data-category",
+						) || "";
+
+					const visible =
+						filterValue === "all" ||
+						cardCategory === filterValue;
+
+					card.classList.toggle(
+						"hidden",
+						!visible,
+					);
+				});
+			});
+		});
+
+		/*
+		 * ======================================================
+		 * URL / RECENT PROJECTS OBSERVER
+		 * ======================================================
+		 */
+
+		if (!section) return;
+
+		const observer =
+			new IntersectionObserver(
+				([entry]) => {
+					if (!entry) return;
+
+					const isInProjects =
+						entry.isIntersecting;
+
+					const currentHash =
+						window.location.hash;
+
+					if (isInProjects) {
+						if (
+							currentHash !==
+							"#progetti"
+						) {
+							history.replaceState(
+								null,
+								"",
+								"#progetti",
+							);
+						}
+					} else if (
+						currentHash ===
+						"#progetti"
+					) {
+						history.replaceState(
+							null,
+							"",
+							window.location.pathname +
+								window.location.search,
+						);
+					}
+				},
+				{
+					threshold: 0.25,
+					rootMargin: "0px 0px -10% 0px",
+				},
+			);
+
+		observer.observe(section);
+
+		/*
+		 * Keep the observer clean when leaving the page.
+		 */
+
+		window.addEventListener(
+			"beforeunload",
+			() => {
+				observer.disconnect();
+			},
+			{ once: true },
+		);
+	});
 </script>
