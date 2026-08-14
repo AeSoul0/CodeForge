@@ -5,7 +5,11 @@
  * Strictly typed using the IProject interface from the data model.
  */
 
-import Project, { IProject } from '../models/Projects';
+import Project from '../models/Projects';
+
+// The project model exports the Mongoose model as the default export, so derive the
+// document instance type from the model itself instead of importing a missing named type.
+type IProject = InstanceType<typeof Project>;
 
 /**
  * Retrieves the complete catalog of projects from the database.
