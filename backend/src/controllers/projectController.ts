@@ -5,15 +5,17 @@
  * Handles retrieval, creation, partial updates, and deletion of
  * project records while keeping database access isolated from
  * the route definitions.
+ *
+ * Projects can belong to multiple macro-domain categories.
  */
 
 import {
     FastifyRequest,
     FastifyReply,
-} from 'fastify';
+} from "fastify";
 
-import mongoose from 'mongoose';
-import Project from '../models/Projects';
+import mongoose from "mongoose";
+import Project from "../models/Projects";
 
 /**
  * Shape of the payload accepted when creating a project.
@@ -22,7 +24,7 @@ interface CreateProjectPayload {
     titolo: string;
     descrizione: string;
     tecnologie: string[];
-    categoria?: string;
+    categorie?: string[];
     linkGithub?: string;
     image?: string;
 }
@@ -37,7 +39,7 @@ interface UpdateProjectPayload {
     titolo?: string;
     descrizione?: string;
     tecnologie?: string[];
-    categoria?: string;
+    categorie?: string[];
     linkGithub?: string | null;
     image?: string | null;
 }
@@ -89,11 +91,14 @@ export const createProject = async (
             request.body as CreateProjectPayload;
 
         const newProject =
-            await Project.create(projectData);
+            await Project.create(
+                projectData,
+            );
 
         return reply.status(201).send({
             success: true,
-            message: 'Project created successfully.',
+            message:
+                "Project created successfully.",
             data: newProject,
         });
     } catch (error) {
@@ -123,10 +128,14 @@ export const updateProject = async (
         /**
          * Validate the MongoDB ObjectId before querying the database.
          */
-        if (!mongoose.Types.ObjectId.isValid(id)) {
+        if (
+            !mongoose.Types.ObjectId.isValid(
+                id,
+            )
+        ) {
             return reply.status(400).send({
                 success: false,
-                error: 'Invalid project ID.',
+                error: "Invalid project ID.",
             });
         }
 
@@ -134,28 +143,37 @@ export const updateProject = async (
             request.body as UpdateProjectPayload;
 
         /**
-         * Remove undefined values so that PATCH requests only
-         * modify fields explicitly provided by the caller.
+         * Remove undefined values so PATCH only modifies
+         * fields explicitly provided by the caller.
          */
-        const filteredUpdateData = Object.fromEntries(
-            Object.entries(updateData).filter(
-                ([, value]) =>
-                    value !== undefined,
-            ),
-        );
+        const filteredUpdateData =
+            Object.fromEntries(
+                Object.entries(
+                    updateData,
+                ).filter(
+                    ([, value]) =>
+                        value !==
+                        undefined,
+                ),
+            );
 
         if (
-            Object.keys(filteredUpdateData).length === 0
+            Object.keys(
+                filteredUpdateData,
+            ).length === 0
         ) {
             return reply.status(400).send({
                 success: false,
                 error:
-                    'No fields provided for update.',
+                    "No fields provided for update.",
             });
         }
 
         /**
          * Update the project and return the resulting document.
+         *
+         * runValidators ensures the Mongoose schema rules
+         * are still applied to the updated fields.
          */
         const updatedProject =
             await Project.findByIdAndUpdate(
@@ -170,13 +188,14 @@ export const updateProject = async (
         if (!updatedProject) {
             return reply.status(404).send({
                 success: false,
-                error: 'Project not found.',
+                error: "Project not found.",
             });
         }
 
         return reply.send({
             success: true,
-            message: 'Project updated successfully.',
+            message:
+                "Project updated successfully.",
             data: updatedProject,
         });
     } catch (error) {
@@ -204,10 +223,14 @@ export const deleteProject = async (
         /**
          * Validate the MongoDB ObjectId before attempting deletion.
          */
-        if (!mongoose.Types.ObjectId.isValid(id)) {
+        if (
+            !mongoose.Types.ObjectId.isValid(
+                id,
+            )
+        ) {
             return reply.status(400).send({
                 success: false,
-                error: 'Invalid project ID.',
+                error: "Invalid project ID.",
             });
         }
 
@@ -215,18 +238,21 @@ export const deleteProject = async (
          * Permanently delete the project from MongoDB.
          */
         const deletedProject =
-            await Project.findByIdAndDelete(id);
+            await Project.findByIdAndDelete(
+                id,
+            );
 
         if (!deletedProject) {
             return reply.status(404).send({
                 success: false,
-                error: 'Project not found.',
+                error: "Project not found.",
             });
         }
 
         return reply.send({
             success: true,
-            message: 'Project deleted successfully.',
+            message:
+                "Project deleted successfully.",
             data: {
                 _id: deletedProject._id,
             },

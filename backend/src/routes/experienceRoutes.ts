@@ -9,14 +9,14 @@
  * already adopted by the Projects resource.
  */
 
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance } from "fastify";
 
 import {
     getExperiences,
     createExperience,
     updateExperienceImage,
     deleteExperience,
-} from '../controllers/experienceController';
+} from "../controllers/experienceController";
 
 /**
  * Registers all API endpoints related to experiences.
@@ -33,7 +33,7 @@ export default async function experienceRoutes(
     // ---------------------------------------------------------------------------
 
     fastify.get(
-        '/',
+        "/",
         getExperiences,
     );
 
@@ -47,13 +47,13 @@ export default async function experienceRoutes(
      */
     const createExperienceSchema = {
         body: {
-            type: 'object',
+            type: "object",
 
             required: [
-                'role',
-                'company',
-                'description',
-                'startDate',
+                "role",
+                "company",
+                "description",
+                "startDate",
             ],
 
             properties: {
@@ -61,7 +61,7 @@ export default async function experienceRoutes(
                  * Experience role or position title.
                  */
                 role: {
-                    type: 'string',
+                    type: "string",
                     minLength: 2,
                 },
 
@@ -69,7 +69,7 @@ export default async function experienceRoutes(
                  * Organization or institution name.
                  */
                 company: {
-                    type: 'string',
+                    type: "string",
                     minLength: 2,
                 },
 
@@ -77,7 +77,7 @@ export default async function experienceRoutes(
                  * Experience description.
                  */
                 description: {
-                    type: 'string',
+                    type: "string",
                     minLength: 10,
                 },
 
@@ -85,9 +85,9 @@ export default async function experienceRoutes(
                  * Technologies associated with the experience.
                  */
                 technologies: {
-                    type: 'array',
+                    type: "array",
                     items: {
-                        type: 'string',
+                        type: "string",
                     },
                 },
 
@@ -95,7 +95,7 @@ export default async function experienceRoutes(
                  * ISO-compatible start date.
                  */
                 startDate: {
-                    type: 'string',
+                    type: "string",
                 },
 
                 /**
@@ -104,10 +104,10 @@ export default async function experienceRoutes(
                 endDate: {
                     anyOf: [
                         {
-                            type: 'string',
+                            type: "string",
                         },
                         {
-                            type: 'null',
+                            type: "null",
                         },
                     ],
                 },
@@ -116,7 +116,7 @@ export default async function experienceRoutes(
                  * Indicates whether the experience is ongoing.
                  */
                 current: {
-                    type: 'boolean',
+                    type: "boolean",
                 },
 
                 /**
@@ -125,10 +125,10 @@ export default async function experienceRoutes(
                 image: {
                     anyOf: [
                         {
-                            type: 'string',
+                            type: "string",
                         },
                         {
-                            type: 'null',
+                            type: "null",
                         },
                     ],
                 },
@@ -137,7 +137,7 @@ export default async function experienceRoutes(
     };
 
     fastify.post(
-        '/',
+        "/",
         {
             schema: createExperienceSchema,
 
@@ -150,11 +150,13 @@ export default async function experienceRoutes(
                 reply,
             ) => {
                 const apiKey =
-                    request.headers['x-api-key'];
+                    request.headers[
+                    "x-api-key"
+                    ];
 
                 const adminKey =
                     process.env.ADMIN_API_KEY ||
-                    'super_secret_dev_key';
+                    "super_secret_dev_key";
 
                 if (
                     !apiKey ||
@@ -165,12 +167,146 @@ export default async function experienceRoutes(
                         .send({
                             success: false,
                             error:
-                                'Unauthorized. Invalid or missing x-api-key.',
+                                "Unauthorized. Invalid or missing x-api-key.",
                         });
                 }
             },
         },
         createExperience,
+    );
+
+    // ---------------------------------------------------------------------------
+    // [PATCH] /api/experiences/:id
+    // Protected endpoint used to update an entire experience record.
+    // ---------------------------------------------------------------------------
+
+    /**
+     * JSON schema used to validate partial experience updates.
+     *
+     * No fields are required because PATCH requests only need to contain
+     * the fields that should actually be changed.
+     */
+    const updateExperienceSchema = {
+        body: {
+            type: "object",
+
+            properties: {
+                /**
+                 * Experience role or position title.
+                 */
+                role: {
+                    type: "string",
+                    minLength: 2,
+                },
+
+                /**
+                 * Organization or institution name.
+                 */
+                company: {
+                    type: "string",
+                    minLength: 2,
+                },
+
+                /**
+                 * Experience description.
+                 */
+                description: {
+                    type: "string",
+                    minLength: 10,
+                },
+
+                /**
+                 * Technologies associated with the experience.
+                 */
+                technologies: {
+                    type: "array",
+                    items: {
+                        type: "string",
+                    },
+                },
+
+                /**
+                 * ISO-compatible start date.
+                 */
+                startDate: {
+                    type: "string",
+                },
+
+                /**
+                 * Optional ISO-compatible end date.
+                 */
+                endDate: {
+                    anyOf: [
+                        {
+                            type: "string",
+                        },
+                        {
+                            type: "null",
+                        },
+                    ],
+                },
+
+                /**
+                 * Indicates whether the experience is ongoing.
+                 */
+                current: {
+                    type: "boolean",
+                },
+
+                /**
+                 * Optional image or logo URL/path.
+                 */
+                image: {
+                    anyOf: [
+                        {
+                            type: "string",
+                        },
+                        {
+                            type: "null",
+                        },
+                    ],
+                },
+            },
+        },
+    };
+
+    fastify.patch(
+        "/:id",
+        {
+            schema: updateExperienceSchema,
+
+            /**
+             * Protect full experience updates with the same
+             * administrator API-key authentication mechanism.
+             */
+            preHandler: async (
+                request,
+                reply,
+            ) => {
+                const apiKey =
+                    request.headers[
+                    "x-api-key"
+                    ];
+
+                const adminKey =
+                    process.env.ADMIN_API_KEY ||
+                    "super_secret_dev_key";
+
+                if (
+                    !apiKey ||
+                    apiKey !== adminKey
+                ) {
+                    return reply
+                        .status(401)
+                        .send({
+                            success: false,
+                            error:
+                                "Unauthorized. Invalid or missing x-api-key.",
+                        });
+                }
+            },
+        },
+        updateExperienceImage,
     );
 
     // ---------------------------------------------------------------------------
@@ -184,10 +320,10 @@ export default async function experienceRoutes(
      */
     const updateExperienceImageSchema = {
         body: {
-            type: 'object',
+            type: "object",
 
             required: [
-                'image',
+                "image",
             ],
 
             properties: {
@@ -199,10 +335,10 @@ export default async function experienceRoutes(
                 image: {
                     anyOf: [
                         {
-                            type: 'string',
+                            type: "string",
                         },
                         {
-                            type: 'null',
+                            type: "null",
                         },
                     ],
                 },
@@ -211,7 +347,7 @@ export default async function experienceRoutes(
     };
 
     fastify.patch(
-        '/:id/image',
+        "/:id/image",
         {
             schema: updateExperienceImageSchema,
 
@@ -224,11 +360,13 @@ export default async function experienceRoutes(
                 reply,
             ) => {
                 const apiKey =
-                    request.headers['x-api-key'];
+                    request.headers[
+                    "x-api-key"
+                    ];
 
                 const adminKey =
                     process.env.ADMIN_API_KEY ||
-                    'super_secret_dev_key';
+                    "super_secret_dev_key";
 
                 if (
                     !apiKey ||
@@ -239,7 +377,7 @@ export default async function experienceRoutes(
                         .send({
                             success: false,
                             error:
-                                'Unauthorized. Invalid or missing x-api-key.',
+                                "Unauthorized. Invalid or missing x-api-key.",
                         });
                 }
             },
@@ -256,7 +394,7 @@ export default async function experienceRoutes(
      * Deletes a complete experience record from MongoDB.
      */
     fastify.delete(
-        '/:id',
+        "/:id",
         {
             /**
              * Protect deletion with the project's existing
@@ -267,11 +405,13 @@ export default async function experienceRoutes(
                 reply,
             ) => {
                 const apiKey =
-                    request.headers['x-api-key'];
+                    request.headers[
+                    "x-api-key"
+                    ];
 
                 const adminKey =
                     process.env.ADMIN_API_KEY ||
-                    'super_secret_dev_key';
+                    "super_secret_dev_key";
 
                 if (
                     !apiKey ||
@@ -282,7 +422,7 @@ export default async function experienceRoutes(
                         .send({
                             success: false,
                             error:
-                                'Unauthorized. Invalid or missing x-api-key.',
+                                "Unauthorized. Invalid or missing x-api-key.",
                         });
                 }
             },

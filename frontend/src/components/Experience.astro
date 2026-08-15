@@ -5,7 +5,7 @@
  *
  * Experience records are provided by the page layer through the backend API.
  * The backend is responsible for chronological sorting, while this component
- * handles presentation, date formatting, organization images, technology
+ * handles presentation, English date formatting, organization images, technology
  * badges, spacing, and the animated chronological connector.
  */
 
@@ -34,7 +34,14 @@ const { experiences } = Astro.props;
  * ============================================================
  */
 
-const monthFormatter = new Intl.DateTimeFormat("it-IT", {
+/**
+ * Formats a date using English month names.
+ *
+ * Examples:
+ * - "Sep 2025"
+ * - "Dec 2024"
+ */
+const monthFormatter = new Intl.DateTimeFormat("en-US", {
     month: "short",
     year: "numeric",
 });
@@ -44,8 +51,8 @@ const monthFormatter = new Intl.DateTimeFormat("it-IT", {
  * Builds the human-readable experience period.
  *
  * Examples:
- * - "Gen 2024 - Presente"
- * - "Set 2023 - Dic 2023"
+ * - "Sep 2025 - Present"
+ * - "Sep 2023 - Dec 2023"
  */
 function formatPeriod(
     startDate: string,
@@ -55,36 +62,28 @@ function formatPeriod(
     const start = new Date(startDate);
 
     if (Number.isNaN(start.getTime())) {
-        return "Data non disponibile";
+        return "Date unavailable";
     }
 
-    const startLabel = capitalize(
-        monthFormatter.format(start).replace(".", ""),
-    );
+    const startLabel = monthFormatter
+        .format(start)
+        .replace(".", "");
 
     if (current || !endDate) {
-        return `${startLabel} - Presente`;
+        return `${startLabel} - Present`;
     }
 
     const end = new Date(endDate);
 
     if (Number.isNaN(end.getTime())) {
-        return `${startLabel} - Presente`;
+        return `${startLabel} - Present`;
     }
 
-    const endLabel = capitalize(
-        monthFormatter.format(end).replace(".", ""),
-    );
+    const endLabel = monthFormatter
+        .format(end)
+        .replace(".", "");
 
     return `${startLabel} - ${endLabel}`;
-}
-
-
-/**
- * Capitalizes the first character of a string.
- */
-function capitalize(value: string): string {
-    return value.charAt(0).toUpperCase() + value.slice(1);
 }
 ---
 
@@ -447,13 +446,6 @@ function capitalize(value: string): string {
        ENERGY CONNECTOR
        ============================================================ */
 
-    /**
-     * Slightly larger than before.
-     *
-     * The extra space gives the connector enough visual room
-     * to read as a real connection between the cards rather
-     * than an empty margin.
-     */
     .experience-timeline-connector {
         position: relative;
 
@@ -472,14 +464,6 @@ function capitalize(value: string): string {
        ENERGY RAIL
        ============================================================ */
 
-    /**
-     * The rail is intentionally narrow.
-     *
-     * It acts as the permanent connection between two cards.
-     *
-     * The runner lives inside the rail and is clipped by it,
-     * which guarantees a clean start and end of the animation.
-     */
     .experience-energy-rail {
         position: relative;
 
@@ -511,11 +495,6 @@ function capitalize(value: string): string {
        RAIL CORE
        ============================================================ */
 
-    /**
-     * Soft inner light line.
-     *
-     * This stays static while the runner moves above it.
-     */
     .experience-energy-rail::after {
         content: "";
 
@@ -546,24 +525,6 @@ function capitalize(value: string): string {
        RUNNING LED
        ============================================================ */
 
-    /**
-     * IMPORTANT ARCHITECTURE:
-     *
-     * The runner has the SAME HEIGHT as the entire rail.
-     *
-     * Therefore:
-     *
-     * translateY(100%)
-     *
-     * moves it by exactly the rail's height.
-     *
-     * This gives us a mathematically stable traversal without
-     * hardcoded pixel distances or percentage transforms based
-     * on the runner's own height.
-     *
-     * The visible "LED" is only the bright band inside this
-     * full-height gradient.
-     */
     .experience-energy-runner {
         position: absolute;
 
@@ -583,43 +544,19 @@ function capitalize(value: string): string {
             linear-gradient(
                 to bottom,
 
-                /* ------------------------------------------------
-                   TRAILING SPACE
-                   ------------------------------------------------ */
-
                 transparent 0%,
                 transparent 38%,
 
-                /* ------------------------------------------------
-                   CYAN TRAIL
-                   ------------------------------------------------ */
-
                 rgba(34, 211, 238, 0.08) 43%,
 
-                /* ------------------------------------------------
-                   GLOW BUILD
-                   ------------------------------------------------ */
-
                 rgba(103, 232, 249, 0.32) 47%,
-
-                /* ------------------------------------------------
-                   WHITE-CYAN CORE
-                   ------------------------------------------------ */
 
                 rgba(165, 243, 252, 0.95) 49%,
                 rgba(255, 255, 255, 1) 50%,
                 rgba(165, 243, 252, 0.95) 51%,
 
-                /* ------------------------------------------------
-                   TRAILING GLOW
-                   ------------------------------------------------ */
-
                 rgba(103, 232, 249, 0.32) 53%,
                 rgba(34, 211, 238, 0.08) 57%,
-
-                /* ------------------------------------------------
-                   LEADING SPACE
-                   ------------------------------------------------ */
 
                 transparent 62%,
                 transparent 100%
@@ -655,25 +592,7 @@ function capitalize(value: string): string {
        RUNNING LED ANIMATION
        ============================================================ */
 
-    /**
-     * The runner starts below the rail and moves upward.
-     *
-     * Because the runner itself is the full rail height:
-     *
-     * +100% = exactly one rail height downward
-     * -100% = exactly one rail height upward
-     *
-     * The bright center therefore travels from:
-     *
-     * BOTTOM → TOP
-     *
-     * while the reset happens outside the visible rail.
-     */
     @keyframes experience-energy-slide {
-
-        /* --------------------------------------------------------
-           INVISIBLE BELOW
-           -------------------------------------------------------- */
 
         0% {
             opacity: 0;
@@ -682,22 +601,12 @@ function capitalize(value: string): string {
                 translate3d(-50%, 100%, 0);
         }
 
-
-        /* --------------------------------------------------------
-           ENTER
-           -------------------------------------------------------- */
-
         7% {
             opacity: 0.85;
 
             transform:
                 translate3d(-50%, 76%, 0);
         }
-
-
-        /* --------------------------------------------------------
-           RUNNING
-           -------------------------------------------------------- */
 
         20% {
             opacity: 1;
@@ -706,22 +615,12 @@ function capitalize(value: string): string {
                 translate3d(-50%, 50%, 0);
         }
 
-
-        /* --------------------------------------------------------
-           MID TRAVEL
-           -------------------------------------------------------- */
-
         35% {
             opacity: 1;
 
             transform:
                 translate3d(-50%, 20%, 0);
         }
-
-
-        /* --------------------------------------------------------
-           APPROACH TOP
-           -------------------------------------------------------- */
 
         48% {
             opacity: 1;
@@ -730,11 +629,6 @@ function capitalize(value: string): string {
                 translate3d(-50%, -6%, 0);
         }
 
-
-        /* --------------------------------------------------------
-           PASS OVER TOP
-           -------------------------------------------------------- */
-
         58% {
             opacity: 0.78;
 
@@ -742,22 +636,12 @@ function capitalize(value: string): string {
                 translate3d(-50%, -30%, 0);
         }
 
-
-        /* --------------------------------------------------------
-           EXIT
-           -------------------------------------------------------- */
-
         68% {
             opacity: 0;
 
             transform:
                 translate3d(-50%, -100%, 0);
         }
-
-
-        /* --------------------------------------------------------
-           QUIET RESET
-           -------------------------------------------------------- */
 
         68%,
         100% {
@@ -811,10 +695,6 @@ function capitalize(value: string): string {
 
     @media (max-width: 767px) {
 
-        /* --------------------------------------------------------
-           EXPERIENCE META
-           -------------------------------------------------------- */
-
         .experience-meta {
             align-items: center;
             justify-content: center;
@@ -825,36 +705,20 @@ function capitalize(value: string): string {
         }
 
 
-        /* --------------------------------------------------------
-           ORGANIZATION LOGO
-           -------------------------------------------------------- */
-
         .experience-logo-wrapper {
             align-self: center;
         }
 
-
-        /* --------------------------------------------------------
-           EXPERIENCE PERIOD
-           -------------------------------------------------------- */
 
         .experience-period {
             white-space: normal;
         }
 
 
-        /* --------------------------------------------------------
-           CONNECTOR
-           -------------------------------------------------------- */
-
         .experience-timeline-connector {
             height: 68px;
         }
 
-
-        /* --------------------------------------------------------
-           RAIL
-           -------------------------------------------------------- */
 
         .experience-energy-rail {
             height: calc(100% - 8px);
@@ -862,10 +726,6 @@ function capitalize(value: string): string {
             margin: 4px 0;
         }
 
-
-        /* --------------------------------------------------------
-           RUNNER
-           -------------------------------------------------------- */
 
         .experience-energy-runner {
             width: 8px;
@@ -888,9 +748,6 @@ function capitalize(value: string): string {
         }
 
 
-        /**
-         * Keep the static rail visible while disabling the runner.
-         */
         .experience-energy-runner {
             opacity: 0;
         }
@@ -903,4 +760,3 @@ function capitalize(value: string): string {
         }
     }
 </style>
-

@@ -2,18 +2,18 @@
  * @file backend/src/controllers/experienceController.ts
  * @description Controller layer for the Experiences resource.
  *
- * Handles retrieval, creation, image updates, and deletion of
- * experience records while keeping database access isolated from
- * the route definitions.
+ * Handles retrieval, creation, full updates, image updates, and
+ * deletion of experience records while keeping database access
+ * isolated from the route definitions.
  */
 
 import {
     FastifyRequest,
     FastifyReply,
-} from 'fastify';
+} from "fastify";
 
-import mongoose from 'mongoose';
-import Experience from '../models/Experiences';
+import mongoose from "mongoose";
+import Experience from "../models/Experiences";
 
 /**
  * Shape of the payload accepted when creating an experience.
@@ -24,6 +24,24 @@ interface CreateExperiencePayload {
     description: string;
     technologies?: string[];
     startDate: string | Date;
+    endDate?: string | Date | null;
+    current?: boolean;
+    image?: string | null;
+}
+
+/**
+ * Shape of the payload accepted when partially updating
+ * an existing experience.
+ *
+ * All fields are optional because PATCH only changes the
+ * properties supplied by the client.
+ */
+interface UpdateExperiencePayload {
+    role?: string;
+    company?: string;
+    description?: string;
+    technologies?: string[];
+    startDate?: string | Date;
     endDate?: string | Date | null;
     current?: boolean;
     image?: string | null;
@@ -83,13 +101,84 @@ export const createExperience = async (
             request.body as CreateExperiencePayload;
 
         const newExperience =
-            await Experience.create(experienceData);
+            await Experience.create(
+                experienceData,
+            );
 
         return reply.status(201).send({
             success: true,
             message:
-                'Experience created successfully.',
+                "Experience created successfully.",
             data: newExperience,
+        });
+    } catch (error) {
+        /**
+         * Delegate unexpected errors to Fastify's global error handler.
+         */
+        throw error;
+    }
+};
+
+/**
+ * Updates an existing experience using only the fields
+ * provided in the PATCH request body.
+ *
+ * This endpoint supports partial updates, so omitted fields
+ * remain unchanged in MongoDB.
+ */
+export const updateExperience = async (
+    request: FastifyRequest<{
+        Params: ExperienceIdParams;
+        Body: UpdateExperiencePayload;
+    }>,
+    reply: FastifyReply,
+) => {
+    try {
+        const { id } = request.params;
+        const updates = request.body;
+
+        /**
+         * Validate the MongoDB ObjectId before querying the database.
+         */
+        if (
+            !mongoose.Types.ObjectId.isValid(
+                id,
+            )
+        ) {
+            return reply.status(400).send({
+                success: false,
+                error: "Invalid experience ID.",
+            });
+        }
+
+        /**
+         * Update only the fields supplied by the PATCH request.
+         *
+         * runValidators ensures the Mongoose schema rules are
+         * still applied to the modified values.
+         */
+        const experience =
+            await Experience.findByIdAndUpdate(
+                id,
+                updates,
+                {
+                    new: true,
+                    runValidators: true,
+                },
+            );
+
+        if (!experience) {
+            return reply.status(404).send({
+                success: false,
+                error: "Experience not found.",
+            });
+        }
+
+        return reply.send({
+            success: true,
+            message:
+                "Experience updated successfully.",
+            data: experience,
         });
     } catch (error) {
         /**
@@ -119,10 +208,14 @@ export const updateExperienceImage = async (
         /**
          * Validate the MongoDB ObjectId before querying the database.
          */
-        if (!mongoose.Types.ObjectId.isValid(id)) {
+        if (
+            !mongoose.Types.ObjectId.isValid(
+                id,
+            )
+        ) {
             return reply.status(400).send({
                 success: false,
-                error: 'Invalid experience ID.',
+                error: "Invalid experience ID.",
             });
         }
 
@@ -144,14 +237,14 @@ export const updateExperienceImage = async (
         if (!experience) {
             return reply.status(404).send({
                 success: false,
-                error: 'Experience not found.',
+                error: "Experience not found.",
             });
         }
 
         return reply.send({
             success: true,
             message:
-                'Experience image updated successfully.',
+                "Experience image updated successfully.",
             data: experience,
         });
     } catch (error) {
@@ -179,10 +272,14 @@ export const deleteExperience = async (
         /**
          * Validate the MongoDB ObjectId before attempting deletion.
          */
-        if (!mongoose.Types.ObjectId.isValid(id)) {
+        if (
+            !mongoose.Types.ObjectId.isValid(
+                id,
+            )
+        ) {
             return reply.status(400).send({
                 success: false,
-                error: 'Invalid experience ID.',
+                error: "Invalid experience ID.",
             });
         }
 
@@ -190,19 +287,21 @@ export const deleteExperience = async (
          * Remove the experience document from MongoDB.
          */
         const deletedExperience =
-            await Experience.findByIdAndDelete(id);
+            await Experience.findByIdAndDelete(
+                id,
+            );
 
         if (!deletedExperience) {
             return reply.status(404).send({
                 success: false,
-                error: 'Experience not found.',
+                error: "Experience not found.",
             });
         }
 
         return reply.send({
             success: true,
             message:
-                'Experience deleted successfully.',
+                "Experience deleted successfully.",
             data: {
                 _id: deletedExperience._id,
             },
