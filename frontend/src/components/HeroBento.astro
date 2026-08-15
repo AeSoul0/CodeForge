@@ -1,9 +1,9 @@
 ---
-/**
- * @file src/components/HeroBento.astro
- * @description Minimal editorial hero with simultaneous generated reveal.
- * Optimized for smooth animation and synchronized entrance with the loader.
- */
+
+/** @file src/components/HeroBento.astro * @description Minimal editorial hero with
+simultaneous generated reveal. * Optimized for smooth animation and synchronized entrance
+with the loader. **/
+
 ---
 
 <section
@@ -25,16 +25,18 @@
 
     <div class="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
         <div
-            class="max-w-5xl -translate-y-16 sm:-translate-y-[4.5rem] lg:-translate-y-[5.5rem]"
+            class="max-w-5xl -translate-y-8 sm:-translate-y-[4.5rem] lg:-translate-y-[5.5rem]"
         >
             <!-- Identity / Name -->
-            <div class="hero-element mb-8 flex items-center gap-3">
+            <div
+                class="hero-element mb-8 flex items-start sm:items-center gap-3"
+            >
                 <span
-                    class="inline-block w-1.5 h-1.5 rounded-full bg-cyan-400/90"
+                    class="inline-block w-1.5 h-1.5 rounded-full bg-cyan-400/90 mt-1.5 sm:mt-0 flex-shrink-0"
                     aria-hidden="true"></span>
 
                 <span
-                    class="text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.28em] text-slate-400/90"
+                    class="text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.28em] text-slate-400/90 leading-relaxed"
                 >
                     Samuele Arabia / Under Grad. Computer Engineering
                 </span>
@@ -55,24 +57,24 @@
 
             <!-- Subtitle + actions -->
             <div
-                class="hero-element mt-10 flex flex-wrap items-center gap-6 sm:gap-8"
+                class="hero-element mt-10 flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-5 sm:gap-8"
             >
                 <!-- Role -->
                 <p class="text-sm sm:text-base text-slate-400/95 tracking-wide">
                     Student Software Engineer
                 </p>
 
-                <!-- Divider -->
+                <!-- Divider (Desktop Only) -->
                 <div
-                    class="h-px w-10 sm:w-12 bg-white/[0.12]"
+                    class="hidden sm:block h-px w-10 sm:w-12 bg-white/[0.12]"
                     aria-hidden="true"
                 >
                 </div>
 
                 <!-- Explore Works -->
                 <a
-                    href="#progetti"
-                    class="hero-action group inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.03] px-5 py-3 text-sm font-semibold"
+                    href="#projects"
+                    class="hero-action group inline-flex items-center justify-center w-full sm:w-auto gap-3 rounded-full border border-white/10 bg-white/[0.03] px-6 py-3 text-sm font-semibold"
                 >
                     <span>Explore Works</span>
 
@@ -92,9 +94,9 @@
                     </svg>
                 </a>
 
-                <!-- Divider -->
+                <!-- Divider (Desktop Only) -->
                 <div
-                    class="h-px w-10 sm:w-12 bg-white/[0.12]"
+                    class="hidden sm:block h-px w-10 sm:w-12 bg-white/[0.12]"
                     aria-hidden="true"
                 >
                 </div>
@@ -103,7 +105,7 @@
                 <a
                     href="/CV.pdf"
                     download="Samuele_Arabia_CV.pdf"
-                    class="hero-action group inline-flex items-center gap-3 text-sm font-semibold"
+                    class="hero-action group inline-flex items-center justify-center w-full sm:w-auto gap-3 py-3 sm:py-0 text-sm font-semibold"
                     aria-label="Download Curriculum Vitae"
                 >
                     <span>Download CV</span>
@@ -126,7 +128,7 @@
                     </svg>
                 </a>
 
-                <!-- ÆSoul signature -->
+                <!-- ÆSoul signature (Desktop) -->
                 <div
                     class="hero-element ml-auto hidden md:flex items-center gap-3 text-right"
                     aria-label="ÆSoul Digital Systems"
@@ -160,9 +162,9 @@
                 </div>
             </div>
 
-            <!-- ÆSoul signature on smaller screens -->
+            <!-- ÆSoul signature (Mobile Optimized) -->
             <div
-                class="hero-element mt-8 flex md:hidden items-center gap-3 justify-end"
+                class="hero-element mt-12 flex md:hidden items-center justify-center gap-4 border-t border-white/[0.05] pt-8 w-full"
                 aria-label="ÆSoul Digital Systems"
             >
                 <div class="flex flex-col items-end leading-none">
@@ -180,13 +182,13 @@
                 </div>
 
                 <div
-                    class="h-10 w-px bg-gradient-to-b from-transparent via-cyan-400/40 to-transparent"
+                    class="h-8 w-px bg-gradient-to-b from-transparent via-cyan-400/40 to-transparent"
                     aria-hidden="true"
                 >
                 </div>
 
                 <span
-                    class="text-cyan-400/70 text-lg font-light"
+                    class="text-cyan-400/70 text-xl font-light"
                     aria-hidden="true"
                 >
                     Æ
@@ -201,10 +203,6 @@
      * ======================================================
      * HERO SPACING
      * ======================================================
-     *
-     * The hero keeps its original height and position.
-     * overflow-visible prevents the translated content from
-     * being clipped at the top of the section.
      */
 
     .hero-section {
@@ -328,11 +326,6 @@
 
             hero.classList.add("is-loaded");
         };
-
-        /*
-         * Start the hero reveal during the final part
-         * of the loader fade.
-         */
 
         const loader = document.getElementById("initial-loader");
 

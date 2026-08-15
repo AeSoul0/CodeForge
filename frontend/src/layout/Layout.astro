@@ -114,6 +114,10 @@ const ogImageUrl = new URL("/og-image.png", Astro.url).href;
             #initial-loader {
                 position: fixed;
                 inset: 0;
+                width: 100vw;
+                width: 100dvw;
+                height: 100vh;
+                height: 100dvh;
                 z-index: 99999;
 
                 display: flex;
@@ -359,21 +363,15 @@ const ogImageUrl = new URL("/og-image.png", Astro.url).href;
 
             .social-link {
                 position: relative;
-
                 display: flex;
                 align-items: center;
                 justify-content: center;
-
                 width: 36px;
                 height: 36px;
-
                 color: #94a3b8;
                 text-decoration: none;
-
                 border-radius: 50%;
-
                 transition:
-                    transform 0.3s cubic-bezier(0.22, 1.2, 0.36, 1),
                     background-color 0.3s ease,
                     color 0.3s ease,
                     box-shadow 0.3s ease;
@@ -382,35 +380,35 @@ const ogImageUrl = new URL("/og-image.png", Astro.url).href;
             .social-link svg {
                 width: 18px;
                 height: 18px;
-
                 transition: transform 0.3s cubic-bezier(0.22, 1.2, 0.36, 1);
+            }
+
+            .social-link:hover {
+                color: #fff;
+            }
+
+            .social-link:hover svg {
+                transform: scale(1.15);
             }
 
             .social-link.linkedin:hover {
                 background-color: #0a66c2;
-                color: #fff;
-
-                transform: translate3d(0, -3px, 0) scale(1.15);
-
-                box-shadow: 0 8px 20px rgba(10, 102, 194, 0.4);
+                box-shadow: 0 0 20px rgba(10, 102, 194, 0.4);
             }
 
             .social-link.github:hover {
-                background-color: #1a1e22;
-                color: #fff;
-
-                transform: translate3d(0, -3px, 0) scale(1.15);
-
-                box-shadow: 0 8px 20px rgba(255, 255, 255, 0.15);
+                background-color: #475569; /* Slate 600 for sleek dark grey */
+                box-shadow: 0 0 20px rgba(71, 85, 105, 0.4);
             }
 
             .social-link.whatsapp:hover {
                 background-color: #25d366;
-                color: #fff;
+                box-shadow: 0 0 20px rgba(37, 211, 102, 0.4);
+            }
 
-                transform: translate3d(0, -3px, 0) scale(1.15);
-
-                box-shadow: 0 8px 20px rgba(37, 211, 102, 0.4);
+            .social-link.mail:hover {
+                background-color: #ef4444;
+                box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
             }
 
             /* ======================================================
@@ -610,6 +608,71 @@ const ogImageUrl = new URL("/og-image.png", Astro.url).href;
                  * Safety fallback.
                  */
                 window.setTimeout(dismissLoader, 3000);
+            })();
+        </script>
+
+        <!-- ======================================================
+             SECTION URL HASH OBSERVER (#home, #projects)
+             ====================================================== -->
+
+        <script is:inline>
+            (() => {
+                const initSectionHashObserver = () => {
+                    const monitoredSectionIds = ["home", "projects"];
+                    const sectionElements = monitoredSectionIds
+                        .map((id) => document.getElementById(id))
+                        .filter(Boolean);
+
+                    if (!sectionElements.length) return;
+
+                    let currentHash = window.location.hash.replace("#", "");
+
+                    const observerOptions = {
+                        root: null,
+                        rootMargin: "-20% 0px -40% 0px",
+                        threshold: [0, 0.15, 0.3],
+                    };
+
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach((entry) => {
+                            if (entry.isIntersecting) {
+                                const targetId = entry.target.id;
+                                if (targetId && currentHash !== targetId) {
+                                    currentHash = targetId;
+                                    history.replaceState(
+                                        null,
+                                        "",
+                                        `#${targetId}`,
+                                    );
+                                }
+                            }
+                        });
+                    }, observerOptions);
+
+                    sectionElements.forEach((section) =>
+                        observer.observe(section),
+                    );
+
+                    window.addEventListener(
+                        "scroll",
+                        () => {
+                            if (window.scrollY < 80 && currentHash !== "home") {
+                                currentHash = "home";
+                                history.replaceState(null, "", "#home");
+                            }
+                        },
+                        { passive: true },
+                    );
+                };
+
+                if (document.readyState === "loading") {
+                    document.addEventListener(
+                        "DOMContentLoaded",
+                        initSectionHashObserver,
+                    );
+                } else {
+                    initSectionHashObserver();
+                }
             })();
         </script>
     </body>

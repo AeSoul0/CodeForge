@@ -1,0 +1,906 @@
+---
+/**
+ * @file frontend/src/components/Experience.astro
+ * @description Chronological timeline component for professional and academic experiences.
+ *
+ * Experience records are provided by the page layer through the backend API.
+ * The backend is responsible for chronological sorting, while this component
+ * handles presentation, date formatting, organization images, technology
+ * badges, spacing, and the animated chronological connector.
+ */
+
+export interface ExperienceItem {
+    _id: string;
+    role: string;
+    company: string;
+    description: string;
+    technologies: string[];
+    startDate: string;
+    endDate?: string | null;
+    current: boolean;
+    image?: string | null;
+}
+
+interface Props {
+    experiences: ExperienceItem[];
+}
+
+const { experiences } = Astro.props;
+
+
+/**
+ * ============================================================
+ * DATE FORMATTING
+ * ============================================================
+ */
+
+const monthFormatter = new Intl.DateTimeFormat("it-IT", {
+    month: "short",
+    year: "numeric",
+});
+
+
+/**
+ * Builds the human-readable experience period.
+ *
+ * Examples:
+ * - "Gen 2024 - Presente"
+ * - "Set 2023 - Dic 2023"
+ */
+function formatPeriod(
+    startDate: string,
+    endDate?: string | null,
+    current = false,
+): string {
+    const start = new Date(startDate);
+
+    if (Number.isNaN(start.getTime())) {
+        return "Data non disponibile";
+    }
+
+    const startLabel = capitalize(
+        monthFormatter.format(start).replace(".", ""),
+    );
+
+    if (current || !endDate) {
+        return `${startLabel} - Presente`;
+    }
+
+    const end = new Date(endDate);
+
+    if (Number.isNaN(end.getTime())) {
+        return `${startLabel} - Presente`;
+    }
+
+    const endLabel = capitalize(
+        monthFormatter.format(end).replace(".", ""),
+    );
+
+    return `${startLabel} - ${endLabel}`;
+}
+
+
+/**
+ * Capitalizes the first character of a string.
+ */
+function capitalize(value: string): string {
+    return value.charAt(0).toUpperCase() + value.slice(1);
+}
+---
+
+<section
+    id="experience"
+    class="relative z-10 w-full mb-20"
+>
+    <!-- ======================================================
+         SECTION HEADER
+         ====================================================== -->
+
+    <div
+        class="flex items-center justify-between mb-10 relative z-10"
+    >
+        <h2 class="text-3xl font-bold text-white">
+            Experience
+        </h2>
+    </div>
+
+
+    <!-- ======================================================
+         CHRONOLOGICAL EXPERIENCE TIMELINE
+
+         Experiences are displayed from newest to oldest.
+
+         Each experience is followed by one integrated
+         energy connector:
+
+         CARD
+           │
+           │
+          ███   ← running LED
+           │
+           │
+         CARD
+
+         Animation:
+
+             BOTTOM → TOP
+         ====================================================== -->
+
+    <div class="experience-timeline">
+
+        <!-- ==================================================
+             EMPTY STATE
+             ================================================== -->
+
+        {experiences.length === 0 && (
+            <div class="experience-card p-7 sm:p-9 text-slate-400">
+                No experience available.
+            </div>
+        )}
+
+
+        <!-- ==================================================
+             EXPERIENCE ITEMS
+             ================================================== -->
+
+        {experiences.map((exp, index) => (
+            <div class="experience-timeline-item">
+
+                <!-- ==================================================
+                     EXPERIENCE CARD
+                     ================================================== -->
+
+                <article
+                    class="experience-card glass-card hover-glow p-7 sm:p-9 relative overflow-hidden flex flex-col md:flex-row md:items-stretch gap-6 md:gap-10"
+                >
+
+                    <!-- ==================================================
+                         LEFT COLUMN
+                         PERIOD + ORGANIZATION IMAGE
+                         ================================================== -->
+
+                    <div class="md:w-1/4 flex-shrink-0">
+                        <div class="experience-meta">
+
+                            <span class="experience-period">
+                                {formatPeriod(
+                                    exp.startDate,
+                                    exp.endDate,
+                                    exp.current,
+                                )}
+                            </span>
+
+
+                            {exp.image && (
+                                <div class="experience-logo-wrapper">
+                                    <img
+                                        src={exp.image}
+                                        alt={`${exp.company} logo`}
+                                        class="experience-logo"
+                                        loading="lazy"
+                                    />
+                                </div>
+                            )}
+
+                        </div>
+                    </div>
+
+
+                    <!-- ==================================================
+                         EXPERIENCE CONTENT
+                         ================================================== -->
+
+                    <div class="md:w-3/4 flex flex-col">
+
+                        <h3 class="text-xl font-bold text-white mb-1">
+                            {exp.role}
+                        </h3>
+
+
+                        <span class="text-sm font-semibold text-slate-300 mb-4 block">
+                            {exp.company}
+                        </span>
+
+
+                        <p class="text-slate-400 text-sm leading-relaxed mb-6">
+                            {exp.description}
+                        </p>
+
+
+                        <div class="flex flex-wrap gap-2 mt-auto">
+                            {exp.technologies.map((tech) => (
+                                <span
+                                    class="tech-badge px-2.5 py-1 text-[9px] font-bold rounded-full border uppercase"
+                                >
+                                    {tech}
+                                </span>
+                            ))}
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+                <!-- ==================================================
+                     MINIMAL ENERGY CONNECTOR
+
+                     The connector is deliberately reduced to two
+                     elements:
+
+                     1. static rail
+                     2. one travelling light
+
+                     No nodes.
+                     No arrowheads.
+                     No separate animations.
+
+                     The moving light travels:
+
+                         BOTTOM → TOP
+                     ================================================== -->
+
+                {index < experiences.length - 1 && (
+                    <div
+                        class="experience-timeline-connector"
+                        aria-hidden="true"
+                    >
+
+                        <div class="experience-energy-rail">
+                            <span class="experience-energy-runner"></span>
+                        </div>
+
+                    </div>
+                )}
+
+            </div>
+        ))}
+    </div>
+</section>
+
+
+<style>
+    /* ============================================================
+       TEXT RENDERING
+       ============================================================ */
+
+    .experience-card,
+    .tech-badge {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+
+    /* ============================================================
+       EXPERIENCE TIMELINE
+       ============================================================ */
+
+    .experience-timeline {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+
+    .experience-timeline-item {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+
+    /* ============================================================
+       EXPERIENCE CARD
+       ============================================================ */
+
+    .experience-card {
+        background:
+            linear-gradient(
+                135deg,
+                rgba(30, 64, 175, 0.12),
+                rgba(6, 182, 212, 0.05)
+            ),
+            rgba(255, 255, 255, 0.02) !important;
+
+        backdrop-filter: blur(20px) saturate(160%);
+        -webkit-backdrop-filter: blur(20px) saturate(160%);
+
+        border-top: 1px solid rgba(255, 255, 255, 0.10);
+        border-left: 1px solid rgba(255, 255, 255, 0.10);
+        border-right: 1px solid rgba(255, 255, 255, 0.025);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.025);
+
+        border-radius: 2rem;
+
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.4);
+
+        transform: translate3d(0, 0, 0);
+
+        transition:
+            transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+            box-shadow 420ms cubic-bezier(0.22, 1, 0.36, 1),
+            border-color 300ms ease;
+    }
+
+
+    /* ============================================================
+       EXPERIENCE CARD HOVER
+       ============================================================ */
+
+    .experience-card.hover-glow:hover {
+        transform: translate3d(0, -4px, 0);
+
+        border-color:
+            rgba(59, 130, 246, 0.45) !important;
+
+        box-shadow:
+            0 12px 30px rgba(0, 0, 0, 0.5),
+            0 0 20px rgba(59, 130, 246, 0.15),
+            inset 0 0 10px rgba(59, 130, 246, 0.03);
+    }
+
+
+    /* ============================================================
+       LEFT COLUMN / META
+       ============================================================ */
+
+    .experience-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        width: 100%;
+        height: 100%;
+
+        text-align: center;
+    }
+
+
+    /* ============================================================
+       EXPERIENCE PERIOD
+       ============================================================ */
+
+    .experience-period {
+        display: block;
+
+        color: rgb(34, 211, 238);
+
+        font-size: 15px;
+        font-weight: 900;
+        line-height: 1.5;
+
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+
+        text-align: center;
+        white-space: nowrap;
+    }
+
+
+    /* ============================================================
+       EXPERIENCE IMAGE / ORGANIZATION LOGO
+       ============================================================ */
+
+    .experience-logo-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 116px;
+        height: 116px;
+
+        margin-top: 22px;
+
+        flex-shrink: 0;
+
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+
+        border-radius: 9999px;
+        overflow: hidden;
+
+        background: transparent !important;
+    }
+
+
+    .experience-logo {
+        display: block;
+
+        width: 100%;
+        height: 100%;
+
+        object-fit: cover;
+
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+
+        border-radius: 9999px;
+
+        padding: 10px;
+
+        background: transparent !important;
+
+        transition:
+            transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+
+    .experience-card:hover .experience-logo-wrapper,
+    .experience-card:hover .experience-logo {
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+    }
+
+
+    .experience-card:hover .experience-logo {
+        transform: scale(1.06);
+    }
+
+
+    /* ============================================================
+       ENERGY CONNECTOR
+       ============================================================ */
+
+    /**
+     * Slightly larger than before.
+     *
+     * The extra space gives the connector enough visual room
+     * to read as a real connection between the cards rather
+     * than an empty margin.
+     */
+    .experience-timeline-connector {
+        position: relative;
+
+        width: 100%;
+        height: 88px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        pointer-events: none;
+    }
+
+
+    /* ============================================================
+       ENERGY RAIL
+       ============================================================ */
+
+    /**
+     * The rail is intentionally narrow.
+     *
+     * It acts as the permanent connection between two cards.
+     *
+     * The runner lives inside the rail and is clipped by it,
+     * which guarantees a clean start and end of the animation.
+     */
+    .experience-energy-rail {
+        position: relative;
+
+        width: 2px;
+        height: calc(100% - 10px);
+
+        margin: 5px 0;
+
+        overflow: hidden;
+
+        border-radius: 9999px;
+
+        background:
+            linear-gradient(
+                to bottom,
+                rgba(34, 211, 238, 0.035),
+                rgba(34, 211, 238, 0.12) 18%,
+                rgba(103, 232, 249, 0.18) 50%,
+                rgba(34, 211, 238, 0.10) 82%,
+                rgba(59, 130, 246, 0.025)
+            );
+
+        box-shadow:
+            0 0 5px rgba(34, 211, 238, 0.045);
+    }
+
+
+    /* ============================================================
+       RAIL CORE
+       ============================================================ */
+
+    /**
+     * Soft inner light line.
+     *
+     * This stays static while the runner moves above it.
+     */
+    .experience-energy-rail::after {
+        content: "";
+
+        position: absolute;
+
+        inset: 0;
+
+        width: 1px;
+
+        margin-left: auto;
+        margin-right: auto;
+
+        background:
+            linear-gradient(
+                to bottom,
+                rgba(165, 243, 252, 0.01),
+                rgba(165, 243, 252, 0.16),
+                rgba(165, 243, 252, 0.015)
+            );
+
+        border-radius: inherit;
+
+        pointer-events: none;
+    }
+
+
+    /* ============================================================
+       RUNNING LED
+       ============================================================ */
+
+    /**
+     * IMPORTANT ARCHITECTURE:
+     *
+     * The runner has the SAME HEIGHT as the entire rail.
+     *
+     * Therefore:
+     *
+     * translateY(100%)
+     *
+     * moves it by exactly the rail's height.
+     *
+     * This gives us a mathematically stable traversal without
+     * hardcoded pixel distances or percentage transforms based
+     * on the runner's own height.
+     *
+     * The visible "LED" is only the bright band inside this
+     * full-height gradient.
+     */
+    .experience-energy-runner {
+        position: absolute;
+
+        inset: 0;
+
+        width: 9px;
+        height: 100%;
+
+        left: 50%;
+
+        transform:
+            translate3d(-50%, 100%, 0);
+
+        transform-origin: center;
+
+        background:
+            linear-gradient(
+                to bottom,
+
+                /* ------------------------------------------------
+                   TRAILING SPACE
+                   ------------------------------------------------ */
+
+                transparent 0%,
+                transparent 38%,
+
+                /* ------------------------------------------------
+                   CYAN TRAIL
+                   ------------------------------------------------ */
+
+                rgba(34, 211, 238, 0.08) 43%,
+
+                /* ------------------------------------------------
+                   GLOW BUILD
+                   ------------------------------------------------ */
+
+                rgba(103, 232, 249, 0.32) 47%,
+
+                /* ------------------------------------------------
+                   WHITE-CYAN CORE
+                   ------------------------------------------------ */
+
+                rgba(165, 243, 252, 0.95) 49%,
+                rgba(255, 255, 255, 1) 50%,
+                rgba(165, 243, 252, 0.95) 51%,
+
+                /* ------------------------------------------------
+                   TRAILING GLOW
+                   ------------------------------------------------ */
+
+                rgba(103, 232, 249, 0.32) 53%,
+                rgba(34, 211, 238, 0.08) 57%,
+
+                /* ------------------------------------------------
+                   LEADING SPACE
+                   ------------------------------------------------ */
+
+                transparent 62%,
+                transparent 100%
+            );
+
+        filter:
+            blur(0.15px)
+            drop-shadow(
+                0 0 4px rgba(103, 232, 249, 0.68)
+            )
+            drop-shadow(
+                0 0 9px rgba(34, 211, 238, 0.34)
+            )
+            drop-shadow(
+                0 0 16px rgba(34, 211, 238, 0.12)
+            );
+
+        opacity: 0;
+
+        will-change:
+            transform,
+            opacity;
+
+        animation:
+            experience-energy-slide
+            1.05s
+            cubic-bezier(0.62, 0, 0.24, 1)
+            infinite;
+    }
+
+
+    /* ============================================================
+       RUNNING LED ANIMATION
+       ============================================================ */
+
+    /**
+     * The runner starts below the rail and moves upward.
+     *
+     * Because the runner itself is the full rail height:
+     *
+     * +100% = exactly one rail height downward
+     * -100% = exactly one rail height upward
+     *
+     * The bright center therefore travels from:
+     *
+     * BOTTOM → TOP
+     *
+     * while the reset happens outside the visible rail.
+     */
+    @keyframes experience-energy-slide {
+
+        /* --------------------------------------------------------
+           INVISIBLE BELOW
+           -------------------------------------------------------- */
+
+        0% {
+            opacity: 0;
+
+            transform:
+                translate3d(-50%, 100%, 0);
+        }
+
+
+        /* --------------------------------------------------------
+           ENTER
+           -------------------------------------------------------- */
+
+        7% {
+            opacity: 0.85;
+
+            transform:
+                translate3d(-50%, 76%, 0);
+        }
+
+
+        /* --------------------------------------------------------
+           RUNNING
+           -------------------------------------------------------- */
+
+        20% {
+            opacity: 1;
+
+            transform:
+                translate3d(-50%, 50%, 0);
+        }
+
+
+        /* --------------------------------------------------------
+           MID TRAVEL
+           -------------------------------------------------------- */
+
+        35% {
+            opacity: 1;
+
+            transform:
+                translate3d(-50%, 20%, 0);
+        }
+
+
+        /* --------------------------------------------------------
+           APPROACH TOP
+           -------------------------------------------------------- */
+
+        48% {
+            opacity: 1;
+
+            transform:
+                translate3d(-50%, -6%, 0);
+        }
+
+
+        /* --------------------------------------------------------
+           PASS OVER TOP
+           -------------------------------------------------------- */
+
+        58% {
+            opacity: 0.78;
+
+            transform:
+                translate3d(-50%, -30%, 0);
+        }
+
+
+        /* --------------------------------------------------------
+           EXIT
+           -------------------------------------------------------- */
+
+        68% {
+            opacity: 0;
+
+            transform:
+                translate3d(-50%, -100%, 0);
+        }
+
+
+        /* --------------------------------------------------------
+           QUIET RESET
+           -------------------------------------------------------- */
+
+        68%,
+        100% {
+            opacity: 0;
+
+            transform:
+                translate3d(-50%, -100%, 0);
+        }
+    }
+
+
+    /* ============================================================
+       TECHNOLOGY BADGES
+       ============================================================ */
+
+    .tech-badge {
+        color: #a5f3fc;
+
+        background-color:
+            rgba(34, 211, 238, 0.045);
+
+        border-color:
+            rgba(34, 211, 238, 0.12);
+
+        transition:
+            transform 280ms cubic-bezier(0.22, 1.25, 0.36, 1),
+            background-color 200ms ease,
+            border-color 200ms ease,
+            color 200ms ease;
+    }
+
+
+    .tech-badge:hover {
+        transform:
+            translateY(-2px)
+            scale(1.03);
+
+        color: #cffafe;
+
+        background-color:
+            rgba(34, 211, 238, 0.08);
+
+        border-color:
+            rgba(34, 211, 238, 0.22);
+    }
+
+
+    /* ============================================================
+       RESPONSIVE LAYOUT
+       ============================================================ */
+
+    @media (max-width: 767px) {
+
+        /* --------------------------------------------------------
+           EXPERIENCE META
+           -------------------------------------------------------- */
+
+        .experience-meta {
+            align-items: center;
+            justify-content: center;
+
+            height: auto;
+
+            text-align: center;
+        }
+
+
+        /* --------------------------------------------------------
+           ORGANIZATION LOGO
+           -------------------------------------------------------- */
+
+        .experience-logo-wrapper {
+            align-self: center;
+        }
+
+
+        /* --------------------------------------------------------
+           EXPERIENCE PERIOD
+           -------------------------------------------------------- */
+
+        .experience-period {
+            white-space: normal;
+        }
+
+
+        /* --------------------------------------------------------
+           CONNECTOR
+           -------------------------------------------------------- */
+
+        .experience-timeline-connector {
+            height: 68px;
+        }
+
+
+        /* --------------------------------------------------------
+           RAIL
+           -------------------------------------------------------- */
+
+        .experience-energy-rail {
+            height: calc(100% - 8px);
+
+            margin: 4px 0;
+        }
+
+
+        /* --------------------------------------------------------
+           RUNNER
+           -------------------------------------------------------- */
+
+        .experience-energy-runner {
+            width: 8px;
+        }
+    }
+
+
+    /* ============================================================
+       ACCESSIBILITY
+       ============================================================ */
+
+    @media (prefers-reduced-motion: reduce) {
+
+        .experience-card,
+        .tech-badge,
+        .experience-logo,
+        .experience-energy-runner {
+            transition: none !important;
+            animation: none !important;
+        }
+
+
+        /**
+         * Keep the static rail visible while disabling the runner.
+         */
+        .experience-energy-runner {
+            opacity: 0;
+        }
+
+
+        .experience-card.hover-glow:hover,
+        .experience-card:hover .experience-logo,
+        .tech-badge:hover {
+            transform: none !important;
+        }
+    }
+</style>
+

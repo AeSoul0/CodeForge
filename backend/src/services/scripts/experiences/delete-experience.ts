@@ -1,0 +1,233 @@
+/**
+ * @file backend/src/services/scripts/delete-experience.ts
+ * @description Interactive CLI for deleting an existing experience
+ * through the backend API.
+ *
+ * The experience can be identified by:
+ * - MongoDB ID
+ * - exact role
+ * - exact company
+ */
+
+import "dotenv/config";
+import * as readline from "readline/promises";
+import {
+    stdin as input,
+    stdout as output,
+} from "process";
+
+const rl = readline.createInterface({
+    input,
+    output,
+});
+
+const API_KEY =
+    process.env.ADMIN_API_KEY;
+
+const API_URL =
+    process.env.PUBLIC_API_URL ||
+    "http://localhost:3002";
+
+if (!API_KEY) {
+    console.error(
+        "❌ ERROR: ADMIN_API_KEY not found in environment variables.",
+    );
+
+    process.exit(1);
+}
+
+/**
+ * Prompt the user for a value.
+ */
+async function ask(
+    question: string,
+): Promise<string> {
+    return rl.question(
+        `\x1b[36m?\x1b[0m ${question} `,
+    );
+}
+
+/**
+ * Resolve an experience ID from either a MongoDB ID,
+ * an exact role, or an exact company name.
+ */
+async function resolveExperienceId(
+    value: string,
+): Promise<string | null> {
+    const trimmed = value.trim();
+
+    if (/^[a-f\d]{24}$/i.test(trimmed)) {
+        return trimmed;
+    }
+
+    const response = await fetch(
+        `${API_URL}/api/experiences`,
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            `Failed to fetch experiences. Status ${response.status}`,
+        );
+    }
+
+    const data: unknown =
+        await response.json();
+
+    if (!Array.isArray(data)) {
+        throw new Error(
+            "Experiences API returned an invalid response.",
+        );
+    }
+
+    const normalized =
+        trimmed.toLowerCase();
+
+    const matches = data.filter(
+        (experience) => {
+            const role =
+                typeof experience?.role ===
+                    "string"
+                    ? experience.role
+                        .trim()
+                        .toLowerCase()
+                    : "";
+
+            const company =
+                typeof experience?.company ===
+                    "string"
+                    ? experience.company
+                        .trim()
+                        .toLowerCase()
+                    : "";
+
+            return (
+                role === normalized ||
+                company === normalized
+            );
+        },
+    );
+
+    if (matches.length === 0) {
+        console.error(
+            `❌ Experience "${trimmed}" not found.`,
+        );
+
+        return null;
+    }
+
+    if (matches.length > 1) {
+        console.error(
+            `❌ Multiple experiences match "${trimmed}". Use the MongoDB ID instead.`,
+        );
+
+        return null;
+    }
+
+    return String(matches[0]._id);
+}
+
+async function main(): Promise<void> {
+    console.log(
+        "\n=============================================",
+    );
+
+    console.log(
+        "🗑️ CodeForge Admin CLI - Delete Experience",
+    );
+
+    console.log(
+        "=============================================\n",
+    );
+
+    try {
+        const identifier =
+            await ask(
+                "Experience ID, role, or company:",
+            );
+
+        const experienceId =
+            await resolveExperienceId(
+                identifier,
+            );
+
+        if (!experienceId) {
+            return;
+        }
+
+        const confirmation =
+            await ask(
+                'Type "DELETE" to confirm:',
+            );
+
+        /*
+         * Require explicit confirmation before deleting
+         * the database record.
+         */
+        if (
+            confirmation.trim() !==
+            "DELETE"
+        ) {
+            console.log(
+                "❌ Deletion cancelled.",
+            );
+
+            return;
+        }
+
+        console.log(
+            "\n⏳ Deleting experience...",
+        );
+
+        const response =
+            await fetch(
+                `${API_URL}/api/experiences/${experienceId}`,
+                {
+                    method: "DELETE",
+
+                    headers: {
+                        "x-api-key":
+                            API_KEY,
+                    },
+                },
+            );
+
+        if (response.ok) {
+            console.log(
+                "\n✅ Experience deleted successfully.",
+            );
+        } else {
+            let errorData: unknown;
+
+            try {
+                errorData =
+                    await response.json();
+            } catch {
+                errorData =
+                    await response.text();
+            }
+
+            console.error(
+                "\n❌ SERVER ERROR:",
+                response.status,
+            );
+
+            console.error(
+                errorData,
+            );
+        }
+    } catch (error: unknown) {
+        const message =
+            error instanceof Error
+                ? error.message
+                : String(error);
+
+        console.error(
+            "\n❌ CONNECTION ERROR:",
+            message,
+        );
+    } finally {
+        rl.close();
+    }
+}
+
+main();

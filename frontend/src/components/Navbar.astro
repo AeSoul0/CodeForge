@@ -116,11 +116,46 @@
 </nav>
 
 <style>
-    /* Simulates the global interaction behavior specifically mapped to a red color profile */
-    .social-link.mail:hover {
-        background-color: #ef4444; /* Deep red core */
+    /* ======================================================
+       FLUID TRANSITION OVERRIDES
+       Sovrascrive il bounce globale con un ease-out super fluido
+       ====================================================== */
+    .social-link {
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    .social-link svg {
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    /* ======================================================
+       HOVER STATES
+       ====================================================== */
+    .social-link.linkedin:hover {
+        background-color: #0a66c2;
         color: #ffffff;
-        transform: scale(1.15) translateY(-3px);
-        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4); /* Glowing red shadow */
+        transform: scale(1.08) translateY(-2px);
+        box-shadow: 0 8px 20px rgba(10, 102, 194, 0.25);
+    }
+
+    .social-link.github:hover {
+        background-color: #475569;
+        color: #ffffff;
+        transform: scale(1.08) translateY(-2px);
+        box-shadow: 0 8px 20px rgba(71, 85, 105, 0.25);
+    }
+
+    .social-link.whatsapp:hover {
+        background-color: #25d366;
+        color: #ffffff;
+        transform: scale(1.08) translateY(-2px);
+        box-shadow: 0 8px 20px rgba(37, 211, 102, 0.25);
+    }
+
+    .social-link.mail:hover {
+        background-color: #ef4444;
+        color: #ffffff;
+        transform: scale(1.08) translateY(-2px);
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25);
     }
 </style>

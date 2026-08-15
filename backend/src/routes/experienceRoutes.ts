@@ -1,79 +1,90 @@
 /**
- * @file backend/src/routes/projectRoutes.ts
- * @description Fastify route definitions for the Projects resource.
+ * @file backend/src/routes/experienceRoutes.ts
+ * @description Fastify route definitions for the Experiences resource.
  *
- * The GET endpoint is public because projects are part of the public
- * portfolio. Creation, updates, and deletion are protected using
- * the administrator API key.
+ * The GET endpoint is public because experience information is part
+ * of the public portfolio.
+ *
+ * Write operations are protected using the same API-key mechanism
+ * already adopted by the Projects resource.
  */
 
 import { FastifyInstance } from 'fastify';
 
 import {
-    getProjects,
-    createProject,
-    updateProject,
-    deleteProject,
-} from '../controllers/projectController';
+    getExperiences,
+    createExperience,
+    updateExperienceImage,
+    deleteExperience,
+} from '../controllers/experienceController';
 
 /**
- * Registers all API endpoints related to projects.
+ * Registers all API endpoints related to experiences.
  *
  * Expected route prefix:
- * /api/projects
+ * /api/experiences
  */
-export default async function projectRoutes(
+export default async function experienceRoutes(
     fastify: FastifyInstance,
 ) {
     // ---------------------------------------------------------------------------
-    // [GET] /api/projects
+    // [GET] /api/experiences
     // Public endpoint used by the portfolio frontend.
     // ---------------------------------------------------------------------------
 
     fastify.get(
         '/',
-        getProjects,
+        getExperiences,
     );
 
     // ---------------------------------------------------------------------------
-    // [POST] /api/projects
-    // Protected endpoint used to create new projects.
+    // [POST] /api/experiences
+    // Protected endpoint used to create experience records.
     // ---------------------------------------------------------------------------
 
     /**
-     * JSON schema used to validate project creation payloads.
+     * JSON schema used to validate incoming experience payloads.
      */
-    const createProjectSchema = {
+    const createExperienceSchema = {
         body: {
             type: 'object',
 
             required: [
-                'titolo',
-                'descrizione',
-                'tecnologie',
+                'role',
+                'company',
+                'description',
+                'startDate',
             ],
 
             properties: {
                 /**
-                 * Project title.
+                 * Experience role or position title.
                  */
-                titolo: {
+                role: {
                     type: 'string',
-                    minLength: 3,
+                    minLength: 2,
                 },
 
                 /**
-                 * Project description.
+                 * Organization or institution name.
                  */
-                descrizione: {
+                company: {
+                    type: 'string',
+                    minLength: 2,
+                },
+
+                /**
+                 * Experience description.
+                 */
+                description: {
                     type: 'string',
                     minLength: 10,
                 },
 
                 /**
-                 * Technologies used by the project.
+                 * Technologies associated with the experience.
                  */
-                tecnologie: {
+                technologies: {
                     type: 'array',
                     items: {
                         type: 'string',
@@ -81,24 +92,45 @@ export default async function projectRoutes(
                 },
 
                 /**
-                 * Project category.
+                 * ISO-compatible start date.
                  */
-                categoria: {
+                startDate: {
                     type: 'string',
                 },
 
                 /**
-                 * Optional GitHub or live project link.
+                 * Optional ISO-compatible end date.
                  */
-                linkGithub: {
-                    type: 'string',
+                endDate: {
+                    anyOf: [
+                        {
+                            type: 'string',
+                        },
+                        {
+                            type: 'null',
+                        },
+                    ],
                 },
 
                 /**
-                 * Optional project image.
+                 * Indicates whether the experience is ongoing.
+                 */
+                current: {
+                    type: 'boolean',
+                },
+
+                /**
+                 * Optional image or logo URL/path.
                  */
                 image: {
-                    type: 'string',
+                    anyOf: [
+                        {
+                            type: 'string',
+                        },
+                        {
+                            type: 'null',
+                        },
+                    ],
                 },
             },
         },
@@ -107,10 +139,11 @@ export default async function projectRoutes(
     fastify.post(
         '/',
         {
-            schema: createProjectSchema,
+            schema: createExperienceSchema,
 
             /**
-             * Protect project creation from unauthorized write operations.
+             * Protect experience creation with the project's
+             * existing x-api-key authentication mechanism.
              */
             preHandler: async (
                 request,
@@ -137,76 +170,31 @@ export default async function projectRoutes(
                 }
             },
         },
-        createProject,
+        createExperience,
     );
 
     // ---------------------------------------------------------------------------
-    // [PATCH] /api/projects/:id
-    // Protected endpoint used to partially update an existing project.
+    // [PATCH] /api/experiences/:id/image
+    // Protected endpoint used to update only the image of an experience.
     // ---------------------------------------------------------------------------
 
     /**
-     * PATCH allows individual project fields to be changed without
-     * replacing the entire database document.
+     * Allows the administrator to change or remove an experience image
+     * without modifying any other field in the database.
      */
-    const updateProjectSchema = {
+    const updateExperienceImageSchema = {
         body: {
             type: 'object',
 
+            required: [
+                'image',
+            ],
+
             properties: {
                 /**
-                 * Updated project title.
-                 */
-                titolo: {
-                    type: 'string',
-                    minLength: 3,
-                },
-
-                /**
-                 * Updated project description.
-                 */
-                descrizione: {
-                    type: 'string',
-                    minLength: 10,
-                },
-
-                /**
-                 * Updated technology list.
-                 */
-                tecnologie: {
-                    type: 'array',
-                    items: {
-                        type: 'string',
-                    },
-                },
-
-                /**
-                 * Updated project category.
-                 */
-                categoria: {
-                    type: 'string',
-                },
-
-                /**
-                 * Updated GitHub or live project link.
+                 * Image URL or public frontend path.
                  *
-                 * Null can be used to remove the existing link.
-                 */
-                linkGithub: {
-                    anyOf: [
-                        {
-                            type: 'string',
-                        },
-                        {
-                            type: 'null',
-                        },
-                    ],
-                },
-
-                /**
-                 * Updated project image.
-                 *
-                 * Null can be used to remove the existing image.
+                 * Null removes the image from the experience.
                  */
                 image: {
                     anyOf: [
@@ -223,12 +211,13 @@ export default async function projectRoutes(
     };
 
     fastify.patch(
-        '/:id',
+        '/:id/image',
         {
-            schema: updateProjectSchema,
+            schema: updateExperienceImageSchema,
 
             /**
-             * Protect project updates with the administrator API key.
+             * Protect image updates with the same API key
+             * authentication mechanism used by creation.
              */
             preHandler: async (
                 request,
@@ -255,19 +244,23 @@ export default async function projectRoutes(
                 }
             },
         },
-        updateProject,
+        updateExperienceImage,
     );
 
     // ---------------------------------------------------------------------------
-    // [DELETE] /api/projects/:id
-    // Protected endpoint used to permanently delete a project.
+    // [DELETE] /api/experiences/:id
+    // Protected endpoint used to permanently remove an experience.
     // ---------------------------------------------------------------------------
 
+    /**
+     * Deletes a complete experience record from MongoDB.
+     */
     fastify.delete(
         '/:id',
         {
             /**
-             * Protect destructive operations with the administrator API key.
+             * Protect deletion with the project's existing
+             * administrator API-key authentication.
              */
             preHandler: async (
                 request,
@@ -294,6 +287,6 @@ export default async function projectRoutes(
                 }
             },
         },
-        deleteProject,
+        deleteExperience,
     );
 }

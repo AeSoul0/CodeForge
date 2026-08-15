@@ -1,8 +1,8 @@
 ---
 /**
  * @file src/components/ProjectsGrid.astro
- * @description Renders database projects with category filtering
- * and Recruiter/Dev view toggle.
+ * @description Renders projects fetched from the backend with
+ * multi-category filtering.
  */
 
 export interface Project {
@@ -10,44 +10,124 @@ export interface Project {
 	titolo: string;
 	descrizione: string;
 	tecnologie: string[];
-	categoria: string;
+	categorie: string[];
 	linkGithub?: string;
 }
 
-export interface Props {
-	projects: Project[];
+const apiUrl =
+	import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") ||
+	"http://localhost:3002";
+
+let projects: Project[] = [];
+
+/* ======================================================
+   FETCH PROJECTS
+   ====================================================== */
+
+try {
+	const response = await fetch(`${apiUrl}/api/projects`);
+
+	if (!response.ok) {
+		throw new Error(
+			`Projects API request failed with status ${response.status}`,
+		);
+	}
+
+	const data: unknown = await response.json();
+
+	if (Array.isArray(data)) {
+		projects = data as Project[];
+	} else {
+		console.warn("[API Warning] Expected an array of projects.");
+	}
+} catch (error) {
+	console.error(
+		"[Backend Connection Error] Failed to fetch projects:",
+		error,
+	);
 }
 
-const { projects } = Astro.props;
+/* ======================================================
+   HELPERS
+   ====================================================== */
+
+const normalizeCategory = (category?: string) => {
+	const value = (category || "").trim().toLowerCase();
+
+	if (
+		value === "full-stack" ||
+		value === "full stack" ||
+		value === "fullstack"
+	) {
+		return "full-stack";
+	}
+
+	if (value === "embedded") return "embedded";
+	if (value === "ai") return "ai";
+	if (value === "iot") return "iot";
+	if (value === "data") return "data";
+
+	return value;
+};
+
+const getCategoryLabel = (category: string) => {
+	const normalized = normalizeCategory(category);
+
+	switch (normalized) {
+		case "full-stack":
+			return "Full Stack";
+
+		case "embedded":
+			return "Embedded";
+
+		case "ai":
+			return "AI";
+
+		case "iot":
+			return "IoT";
+
+		case "data":
+			return "Data";
+
+		default:
+			return category;
+	}
+};
+
+const projectCategories = projects.flatMap(
+	(project) => project.categorie ?? [],
+);
+
+const normalizedProjectCategories = [
+	...new Set(projectCategories.map(normalizeCategory).filter(Boolean)),
+];
+
+const baseCategories = ["full-stack", "embedded", "ai", "iot", "data"];
 
 const allCategories = [
-	...new Set(
-		projects
-			.map((project) => project.categoria)
-			.filter(Boolean),
+	...baseCategories.filter((category) =>
+		normalizedProjectCategories.includes(category),
+	),
+	...normalizedProjectCategories.filter(
+		(category) => !baseCategories.includes(category),
 	),
 ];
 ---
 
-<section id="progetti">
+<section id="projects">
 	<!-- ======================================================
 	     HEADER
 	     ====================================================== -->
 
 	<div class="flex items-center justify-between mb-8 relative z-10">
-		<h2 class="text-3xl font-bold text-white">
-			Recent Projects
-		</h2>
+		<h2 class="text-3xl font-bold text-white">Recent Projects</h2>
 	</div>
 
 	<!-- ======================================================
 	     CATEGORY FILTERS
 	     ====================================================== -->
 
-	<div
-		id="tech-filters"
-		class="flex flex-wrap gap-2 mb-10 relative z-10"
-	>
+	<div id="tech-filters" class="flex flex-wrap gap-2 mb-10 relative z-10">
 		<button
 			class="cat-btn active"
 			data-filter="all"
@@ -61,11 +141,11 @@ const allCategories = [
 			allCategories.map((category) => (
 				<button
 					class="cat-btn"
-					data-filter={category.toLowerCase()}
+					data-filter={category}
 					type="button"
 					aria-pressed="false"
 				>
-					{category}
+					{getCategoryLabel(category)}
 				</button>
 			))
 		}
@@ -81,96 +161,110 @@ const allCategories = [
 	>
 		{
 			projects.length === 0 ? (
-				<p class="text-slate-500 italic">
-					Waiting for projects from database...
-				</p>
+				<>
+					<!-- Skeleton shown when no project data is available yet. -->
+					<div class="project-skeleton" aria-hidden="true">
+						<div class="skeleton-category"></div>
+						<div class="skeleton-title"></div>
+						<div class="skeleton-description"></div>
+						<div class="skeleton-description short"></div>
+
+						<div class="skeleton-badges">
+							<span></span>
+							<span></span>
+							<span></span>
+						</div>
+					</div>
+
+					<div class="project-skeleton" aria-hidden="true">
+						<div class="skeleton-category"></div>
+						<div class="skeleton-title"></div>
+						<div class="skeleton-description"></div>
+						<div class="skeleton-description short"></div>
+
+						<div class="skeleton-badges">
+							<span></span>
+							<span></span>
+							<span></span>
+						</div>
+					</div>
+				</>
 			) : (
-				projects.map((project) => (
-					<article
-						class="project-card glass-card hover-glow p-8 group relative overflow-hidden flex flex-col justify-between"
-						data-category={(
-							project.categoria ||
-							"full-stack"
-						).toLowerCase()}
-					>
-						<!-- ==================================================
-						     GITHUB LINK
-						     ================================================== -->
+				projects.map((project) => {
+					const categories = [
+						...new Set(
+							(project.categorie ?? []).map(normalizeCategory),
+						),
+					].filter(Boolean);
 
-						{project.linkGithub && (
-							<a
-								href={project.linkGithub}
-								target="_blank"
-								rel="noopener noreferrer"
-								class="github-link absolute top-6 right-6 z-20"
-								title="View Code on GitHub"
-								aria-label={`View ${project.titolo} on GitHub`}
-							>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="20"
-									height="20"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									aria-hidden="true"
-									class="github-icon"
+					return (
+						<article
+							class="project-card glass-card hover-glow p-8 group relative overflow-hidden flex flex-col justify-between"
+							data-categories={categories.join(",")}
+						>
+							{project.linkGithub && (
+								<a
+									href={project.linkGithub}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="github-link absolute top-6 right-6 z-20"
+									title="View Code on GitHub"
+									aria-label={`View ${project.titolo} on GitHub`}
 								>
-									<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
-								</svg>
-							</a>
-						)}
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										width="20"
+										height="20"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										aria-hidden="true"
+										class="github-icon"
+									>
+										<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+									</svg>
+								</a>
+							)}
 
-						<!-- ==================================================
-						     PROJECT CONTENT
-						     ================================================== -->
+							<div class="relative z-10">
+								<div class="mb-2 flex flex-wrap gap-2">
+									{categories.map((category) => (
+										<span class="project-category text-[10px] font-black tracking-widest uppercase">
+											{getCategoryLabel(category)}
+										</span>
+									))}
+								</div>
 
-						<div class="relative z-10">
-							<div class="mb-2">
-								<span
-									class="project-category text-[10px] font-black tracking-widest uppercase"
-								>
-									{project.categoria}
-								</span>
+								<h3 class="project-title text-xl font-bold text-white mb-3 w-[90%]">
+									{project.titolo}
+								</h3>
+
+								<p class="text-slate-400 text-sm leading-relaxed mb-6">
+									{project.descrizione}
+								</p>
 							</div>
 
-							<h3 class="project-title text-xl font-bold text-white mb-3 w-[90%]">
-								{project.titolo}
-							</h3>
-
-							<p class="text-slate-400 text-sm leading-relaxed mb-6">
-								{project.descrizione}
-							</p>
-						</div>
-
-						<!-- ==================================================
-						     TECHNOLOGY BADGES
-						     ================================================== -->
-
-						<div class="flex flex-wrap gap-2 relative z-10 mt-auto">
-							{(project.tecnologie ?? []).map(
-								(technology) => (
-									<span class="tech-badge px-2 py-1 text-[9px] font-bold rounded-full border uppercase">
-										{technology}
-									</span>
-								),
-							)}
-						</div>
-					</article>
-				))
+							<div class="flex flex-wrap gap-2 relative z-10 mt-auto">
+								{(project.tecnologie ?? []).map(
+									(technology) => (
+										<span class="tech-badge px-2 py-1 text-[9px] font-bold rounded-full border uppercase">
+											{technology}
+										</span>
+									),
+								)}
+							</div>
+						</article>
+					);
+				})
 			)
 		}
 	</div>
 </section>
 
 <style>
-	/* ======================================================
-	   TEXT RENDERING
-	   ====================================================== */
-
 	.project-title,
 	.project-category,
 	.github-link,
@@ -190,13 +284,12 @@ const allCategories = [
 
 	.project-category {
 		display: inline-block;
+		padding: 0.25rem 0.55rem;
+		border: 1px solid rgba(34, 211, 238, 0.12);
+		border-radius: 9999px;
 		color: #22d3ee;
+		background: rgba(34, 211, 238, 0.045);
 	}
-
-	/* ======================================================
-	   PROJECT CARD
-	   Original glass treatment + subtle blue tint.
-	   ====================================================== */
 
 	.project-card {
 		position: relative;
@@ -212,18 +305,16 @@ const allCategories = [
 		backdrop-filter: blur(20px) saturate(160%);
 		-webkit-backdrop-filter: blur(20px) saturate(160%);
 
-		border-top: 1px solid rgba(255, 255, 255, 0.10);
-		border-left: 1px solid rgba(255, 255, 255, 0.10);
+		border-top: 1px solid rgba(255, 255, 255, 0.1);
+		border-left: 1px solid rgba(255, 255, 255, 0.1);
 		border-right: 1px solid rgba(255, 255, 255, 0.025);
 		border-bottom: 1px solid rgba(255, 255, 255, 0.025);
 
 		border-radius: 2rem;
 
-		box-shadow:
-			0 8px 32px rgba(0, 0, 0, 0.4);
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 
 		transform: translate3d(0, 0, 0);
-		transform-origin: center center;
 
 		transition:
 			transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -231,7 +322,7 @@ const allCategories = [
 			border-color 300ms ease;
 	}
 
-	.project-card.hover-glow:hover {
+	.project-card:hover {
 		transform: translate3d(0, -6px, 0);
 
 		border-color: rgba(59, 130, 246, 0.55) !important;
@@ -241,12 +332,6 @@ const allCategories = [
 			0 0 22px rgba(59, 130, 246, 0.18),
 			inset 0 0 10px rgba(59, 130, 246, 0.04);
 	}
-
-	/* ======================================================
-	   GITHUB
-	   Borderless. Leggermente più grande, si solleva e
-	   si illumina con un glow bianco molto discreto.
-	   ====================================================== */
 
 	.github-link {
 		display: grid;
@@ -262,6 +347,7 @@ const allCategories = [
 
 	.github-icon {
 		display: block;
+
 		width: 22px;
 		height: 22px;
 
@@ -278,10 +364,9 @@ const allCategories = [
 	}
 
 	.github-link:hover .github-icon {
-		transform: translateY(-3px) scale(1.10);
+		transform: translateY(-3px) scale(1.1);
 
-		filter:
-			drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12))
+		filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12))
 			drop-shadow(0 0 2px rgba(255, 255, 255, 0.06))
 			drop-shadow(0 0 4px rgba(255, 255, 255, 0.02));
 	}
@@ -289,10 +374,6 @@ const allCategories = [
 	.github-link:active .github-icon {
 		transform: translateY(-1px) scale(1.04);
 	}
-
-	/* ======================================================
-	   TECHNOLOGY BADGES
-	   ====================================================== */
 
 	.tech-badge {
 		color: #a5f3fc;
@@ -307,21 +388,12 @@ const allCategories = [
 	}
 
 	.tech-badge:hover {
-		transform:
-			translateY(-2px)
-			scale(1.03);
+		transform: translateY(-2px) scale(1.03);
 
 		color: #cffafe;
 		background-color: rgba(34, 211, 238, 0.08);
 		border-color: rgba(34, 211, 238, 0.22);
 	}
-
-	/* ======================================================
-	   CATEGORY FILTER BUTTONS
-	   Palette aligned with Explore Works.
-	   All Domains, Full Stack and Embedded share the
-	   same visual properties.
-	   ====================================================== */
 
 	.cat-btn {
 		position: relative;
@@ -333,7 +405,7 @@ const allCategories = [
 		min-height: 30px;
 		padding: 0.42rem 0.8rem;
 
-		border: 1px solid rgba(255, 255, 255, 0.10);
+		border: 1px solid rgba(255, 255, 255, 0.1);
 		border-radius: 9999px;
 
 		background: rgba(255, 255, 255, 0.03);
@@ -343,222 +415,195 @@ const allCategories = [
 		font-weight: 700;
 		line-height: 1;
 
-		transform: translateY(0);
-		transform-origin: center;
-
 		transition:
 			transform 280ms cubic-bezier(0.22, 1.25, 0.36, 1),
 			background-color 220ms ease,
 			color 220ms ease,
-			border-color 220ms ease,
-			box-shadow 280ms ease;
+			border-color 220ms ease;
 	}
 
 	.cat-btn:hover {
-		transform:
-			translateY(-1px)
-			scale(1.015);
+		transform: translateY(-1px) scale(1.015);
 
 		background: rgba(34, 211, 238, 0.045);
 		border-color: rgba(34, 211, 238, 0.26);
 		color: #67e8f9;
-
-		box-shadow:
-			0 5px 14px rgba(0, 0, 0, 0.14),
-			0 0 14px rgba(34, 211, 238, 0.05);
 	}
 
-	.cat-btn:active {
-		transform: translateY(0) scale(0.98);
-	}
-
-	/*
-	 * All Domains + Full Stack + Embedded
-	 * share the same base styling.
-	 */
-
-	.cat-btn[data-filter="all"],
-	.cat-btn[data-filter="full-stack"],
-	.cat-btn[data-filter="embedded"] {
-		background: rgba(255, 255, 255, 0.03);
-		border-color: rgba(255, 255, 255, 0.10);
-		color: #e2e8f0;
-	}
-
-	/*
-	 * Active state shared by All Domains, Full Stack and Embedded.
-	 */
-
-	.cat-btn[data-filter="all"].active,
-	.cat-btn[data-filter="full-stack"].active,
-	.cat-btn[data-filter="embedded"].active {
+	.cat-btn.active {
 		background: rgba(34, 211, 238, 0.045);
 		border-color: rgba(34, 211, 238, 0.28);
 		color: #67e8f9;
-
-		box-shadow:
-			0 5px 16px rgba(8, 145, 178, 0.08),
-			0 0 14px rgba(34, 211, 238, 0.04),
-			inset 0 1px 0 rgba(255, 255, 255, 0.07);
-	}
-
-	/*
-	 * Active hover state shared by All Domains,
-	 * Full Stack and Embedded.
-	 */
-
-	.cat-btn[data-filter="all"].active:hover,
-	.cat-btn[data-filter="full-stack"].active:hover,
-	.cat-btn[data-filter="embedded"].active:hover {
-		background: rgba(34, 211, 238, 0.065);
-		border-color: rgba(34, 211, 238, 0.36);
-		color: #a5f3fc;
-
-		box-shadow:
-			0 7px 18px rgba(8, 145, 178, 0.11),
-			0 0 18px rgba(34, 211, 238, 0.07),
-			inset 0 1px 0 rgba(255, 255, 255, 0.09);
 	}
 
 	/* ======================================================
-	   ACCESSIBILITY
+	   SKELETON LOADER
 	   ====================================================== */
 
+	.project-skeleton {
+		position: relative;
+		min-height: 280px;
+		padding: 2rem;
+		overflow: hidden;
+
+		border-radius: 2rem;
+
+		background:
+			linear-gradient(
+				135deg,
+				rgba(30, 64, 175, 0.11),
+				rgba(6, 182, 212, 0.05)
+			),
+			rgba(255, 255, 255, 0.025);
+
+		border-top: 1px solid rgba(255, 255, 255, 0.08);
+		border-left: 1px solid rgba(255, 255, 255, 0.08);
+		border-right: 1px solid rgba(255, 255, 255, 0.025);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.025);
+
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+
+		backdrop-filter: blur(20px) saturate(150%);
+		-webkit-backdrop-filter: blur(20px) saturate(150%);
+	}
+
+	/* Animated highlight used by the loading placeholder. */
+	.project-skeleton::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+
+		background: linear-gradient(
+			90deg,
+			transparent,
+			rgba(255, 255, 255, 0.035),
+			transparent
+		);
+
+		transform: translateX(-100%);
+		animation: skeleton-shimmer 1.8s ease-in-out infinite;
+
+		pointer-events: none;
+	}
+
+	.skeleton-category,
+	.skeleton-title,
+	.skeleton-description,
+	.skeleton-badges span {
+		position: relative;
+		z-index: 1;
+
+		background: rgba(255, 255, 255, 0.07);
+
+		animation: skeleton-pulse 1.6s ease-in-out infinite;
+	}
+
+	.skeleton-category {
+		width: 72px;
+		height: 22px;
+		margin-bottom: 1rem;
+		border-radius: 9999px;
+	}
+
+	.skeleton-title {
+		width: 62%;
+		height: 22px;
+		margin-bottom: 1.25rem;
+		border-radius: 9999px;
+	}
+
+	.skeleton-description {
+		width: 90%;
+		height: 11px;
+		margin-bottom: 0.7rem;
+		border-radius: 9999px;
+	}
+
+	.skeleton-description.short {
+		width: 68%;
+	}
+
+	.skeleton-badges {
+		position: absolute;
+		left: 2rem;
+		bottom: 2rem;
+
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.skeleton-badges span {
+		width: 52px;
+		height: 22px;
+		border-radius: 9999px;
+	}
+
+	@keyframes skeleton-pulse {
+		0%,
+		100% {
+			opacity: 0.3;
+		}
+
+		50% {
+			opacity: 0.75;
+		}
+	}
+
+	@keyframes skeleton-shimmer {
+		0% {
+			transform: translateX(-100%);
+		}
+
+		100% {
+			transform: translateX(100%);
+		}
+	}
+
 	@media (prefers-reduced-motion: reduce) {
+		.project-skeleton::after,
+		.skeleton-category,
+		.skeleton-title,
+		.skeleton-description,
+		.skeleton-badges span,
 		.project-card,
 		.github-link,
 		.github-icon,
 		.tech-badge,
 		.cat-btn {
+			animation: none;
 			transition: none !important;
-		}
-
-		.project-card.hover-glow:hover,
-		.github-link:hover,
-		.tech-badge:hover,
-		.cat-btn:hover {
-			transform: none !important;
-		}
-
-		.github-link:hover .github-icon {
-			transform: none !important;
-			filter: none !important;
 		}
 	}
 </style>
 
-<script is:inline>
-	document.addEventListener("DOMContentLoaded", () => {
-		const section =
-			document.getElementById("progetti");
+<script>
+	const buttons = document.querySelectorAll(".cat-btn");
 
-		const filterButtons =
-			document.querySelectorAll(".cat-btn");
+	const cards = document.querySelectorAll(".project-card");
 
-		const projectCards =
-			document.querySelectorAll(".project-card");
+	buttons.forEach((button) => {
+		button.addEventListener("click", () => {
+			buttons.forEach((btn) => {
+				const active = btn === button;
 
-		/*
-		 * ======================================================
-		 * CATEGORY FILTERS
-		 * ======================================================
-		 */
+				btn.classList.toggle("active", active);
 
-		filterButtons.forEach((button) => {
-			button.addEventListener("click", () => {
-				filterButtons.forEach((btn) => {
-					const isActive = btn === button;
+				btn.setAttribute("aria-pressed", String(active));
+			});
 
-					btn.classList.toggle(
-						"active",
-						isActive,
-					);
+			const filter = button.getAttribute("data-filter") || "all";
 
-					btn.setAttribute(
-						"aria-pressed",
-						String(isActive),
-					);
-				});
+			cards.forEach((card) => {
+				const categories = (
+					card.getAttribute("data-categories") || ""
+				).split(",");
 
-				const filterValue =
-					button.getAttribute(
-						"data-filter",
-					) || "all";
+				const visible =
+					filter === "all" ||
+					categories.includes(filter);
 
-				projectCards.forEach((card) => {
-					const cardCategory =
-						card.getAttribute(
-							"data-category",
-						) || "";
-
-					const visible =
-						filterValue === "all" ||
-						cardCategory === filterValue;
-
-					card.classList.toggle(
-						"hidden",
-						!visible,
-					);
-				});
+				card.classList.toggle("hidden", !visible);
 			});
 		});
-
-		/*
-		 * ======================================================
-		 * URL / RECENT PROJECTS OBSERVER
-		 * ======================================================
-		 */
-
-		if (!section) return;
-
-		const observer =
-			new IntersectionObserver(
-				([entry]) => {
-					if (!entry) return;
-
-					const isInProjects =
-						entry.isIntersecting;
-
-					const currentHash =
-						window.location.hash;
-
-					if (isInProjects) {
-						if (
-							currentHash !==
-							"#progetti"
-						) {
-							history.replaceState(
-								null,
-								"",
-								"#progetti",
-							);
-						}
-					} else if (
-						currentHash ===
-						"#progetti"
-					) {
-						history.replaceState(
-							null,
-							"",
-							window.location.pathname +
-								window.location.search,
-						);
-					}
-				},
-				{
-					threshold: 0.25,
-					rootMargin: "0px 0px -10% 0px",
-				},
-			);
-
-		observer.observe(section);
-
-		window.addEventListener(
-			"beforeunload",
-			() => {
-				observer.disconnect();
-			},
-			{ once: true },
-		);
 	});
 </script>
