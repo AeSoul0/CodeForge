@@ -25,7 +25,7 @@ export const metricsHook = async (request: FastifyRequest, reply: FastifyReply) 
         metrics.errorsCount++;
     }
 
-    const responseTime = reply.getResponseTime();
+    const responseTime = reply.elapsedTime;
     metrics.latencyTotal += responseTime;
 };
 

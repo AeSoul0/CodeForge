@@ -314,7 +314,7 @@ const closeGracefully = async (signal: string) => {
         app.log.info('MongoDB disconnected.');
         process.exit(0);
     } catch (err) {
-        app.log.error('Error during graceful shutdown:', err);
+        app.log.error(err, 'Error during graceful shutdown:');
         process.exit(1);
     }
 };
