@@ -3,7 +3,7 @@
  * @description Database repository for interacting with MongoDB.
  */
 
-import Project from '../models/Projects';
+import Project, { IProject } from '../models/Projects';
 import { CreateProjectDTO, UpdateProjectDTO } from '../dtos/ProjectDTO';
 import { DatabaseError } from '../errors/AppError';
 
@@ -12,7 +12,12 @@ export class ProjectRepository {
         const maxLimit = Math.min(limit, 50);
         const skip = (Math.max(page, 1) - 1) * maxLimit;
         try {
-            return await Project.find().select('-__v').sort({ createdAt: -1 }).skip(skip).limit(maxLimit).lean();
+            return await Project.find()
+                .populate('experienceId')
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(maxLimit)
+                .lean();
         } catch (error) {
             throw new DatabaseError('Failed to fetch projects from database');
         }
@@ -20,7 +25,7 @@ export class ProjectRepository {
 
     async findById(id: string) {
         try {
-            return await Project.findById(id).select('-__v').lean();
+            return await Project.findById(id).populate('experienceId').lean();
         } catch (error) {
             throw new DatabaseError('Failed to fetch project from database');
         }
@@ -29,7 +34,8 @@ export class ProjectRepository {
     async create(data: CreateProjectDTO) {
         try {
             const project = new Project(data);
-            return await project.save();
+            await project.save();
+            return await Project.findById(project._id).populate('experienceId').lean();
         } catch (error) {
             throw new DatabaseError('Failed to create project in database');
         }
@@ -37,7 +43,7 @@ export class ProjectRepository {
 
     async update(id: string, data: UpdateProjectDTO) {
         try {
-            return await Project.findByIdAndUpdate(id, data, { new: true, runValidators: true }).lean();
+            return await Project.findByIdAndUpdate(id, data, { new: true, runValidators: true }).populate('experienceId').lean();
         } catch (error) {
             throw new DatabaseError('Failed to update project in database');
         }

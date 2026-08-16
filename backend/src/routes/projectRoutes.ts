@@ -58,7 +58,8 @@ export default async function projectRoutes(
                 categoria: { type: 'string', maxLength: 50 },
                 categorie: { type: 'array', maxItems: 10, items: { type: 'string', maxLength: 50 } },
                 linkGithub: { type: 'string', maxLength: 500, pattern: '^https?:\\/\\/.+' },
-                image: { type: 'string', maxLength: 500 }
+                image: { type: 'string', maxLength: 500 },
+                experienceId: { type: 'string', pattern: '^[0-9a-fA-F]{24}$' }
             }
         }
     };
@@ -97,7 +98,8 @@ export default async function projectRoutes(
                 categoria: { type: 'string', maxLength: 50 },
                 categorie: { type: 'array', maxItems: 10, items: { type: 'string', maxLength: 50 } },
                 linkGithub: { anyOf: [{ type: 'string', maxLength: 500, pattern: '^https?:\\/\\/.+' }, { type: 'null' }] },
-                image: { anyOf: [{ type: 'string', maxLength: 500 }, { type: 'null' }] }
+                image: { anyOf: [{ type: 'string', maxLength: 500 }, { type: 'null' }] },
+                experienceId: { anyOf: [{ type: 'string', pattern: '^[0-9a-fA-F]{24}$' }, { type: 'null' }] }
             }
         }
     };

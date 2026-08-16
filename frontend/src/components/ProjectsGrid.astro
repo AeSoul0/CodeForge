@@ -11,7 +11,10 @@ export interface Project {
 	descrizione: string;
 	tecnologie: string[];
 	categorie: string[];
-	linkGithub?: string;
+	image?: string | null;
+	experienceId?: string | null;
+	experienceImage?: string | null;
+	linkGithub?: string | null;
 }
 
 interface Props {

@@ -12,6 +12,7 @@ export interface CreateProjectDTO {
     categorie?: string[];
     linkGithub?: string;
     image?: string;
+    experienceId?: string;
 }
 
 export interface UpdateProjectDTO {
@@ -23,6 +24,7 @@ export interface UpdateProjectDTO {
     categorie?: string[];
     linkGithub?: string | null;
     image?: string | null;
+    experienceId?: string | null;
 }
 
 export interface ProjectResponse {
@@ -35,6 +37,8 @@ export interface ProjectResponse {
     categorie?: string[];
     linkGithub?: string | null;
     image?: string | null;
+    experienceId?: string | null;
+    experienceImage?: string | null;
     createdAt: Date;
     updatedAt: Date;
 }

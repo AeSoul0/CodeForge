@@ -81,9 +81,8 @@ export async function processProjectAI(projectId: string) {
         
         // Update project with the new description
         await service.updateProject(projectId, { 
-             ...project,
              descrizioneLunga: generatedMarkdown 
-        } as any);
+        });
 
         console.log(`[AI] Successfully generated and saved description for ${projectId}`);
         

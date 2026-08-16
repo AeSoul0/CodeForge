@@ -77,12 +77,16 @@ const categories = Array.isArray(project.categorie) && project.categorie.length 
 			)}
 		</div>
 
-		{project.image && (
-			<div class="w-full aspect-[21/9] md:aspect-[21/9] rounded-[2rem] overflow-hidden mb-20 border border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.8)] relative group animate-fade-in-up" style="animation-delay: 100ms;">
-				<img src={project.image} alt={project.titolo} class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out" />
-				<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-			</div>
-		)}
+		{(() => {
+			const displayImage = project.image || project.experienceImage;
+			if (!displayImage) return null;
+			return (
+				<div class="w-full aspect-[21/9] md:aspect-[21/9] rounded-[2rem] overflow-hidden mb-20 border border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.8)] relative group animate-fade-in-up" style="animation-delay: 100ms;">
+					<img src={displayImage} alt={project.titolo} class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out" />
+					<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+				</div>
+			);
+		})()}
 
 		<div class="grid grid-cols-1 lg:grid-cols-3 gap-16 animate-fade-in-up" style="animation-delay: 200ms;">
 			<div class="lg:col-span-2 prose prose-invert prose-lg md:prose-xl max-w-none">

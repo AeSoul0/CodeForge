@@ -1,70 +1,63 @@
 /**
  * @file backend/src/models/Projects.ts
- * @description Mongoose schema and model definition for the Projects collection.
- *
- * Projects can belong to multiple macro-domains.
- *
- * Example:
- *   categorie: ["Full-Stack", "AI"]
+ * @description Mongoose database schema definitions.
  */
 
-import mongoose from "mongoose";
+import mongoose, { Document, Schema } from 'mongoose';
 
-const projectSchema = new mongoose.Schema(
+export interface IProject extends Document {
+    titolo: string;
+    descrizione: string;
+    descrizioneLunga?: string;
+    tecnologie: string[];
+    categoria?: string;
+    categorie: string[];
+    linkGithub?: string;
+    image?: string;
+    experienceId?: mongoose.Types.ObjectId;
+}
+
+const ProjectSchema: Schema = new Schema(
     {
         titolo: {
             type: String,
             required: true,
         },
-
         descrizione: {
             type: String,
             required: true,
         },
-
+        descrizioneLunga: {
+            type: String,
+        },
         tecnologie: [
             {
                 type: String,
                 required: true,
             },
         ],
-
-        /*
-         * A project can belong to multiple macro-domain categories.
-         *
-         * Examples:
-         *   ["Full-Stack"]
-         *   ["Full-Stack", "AI"]
-         *   ["Full-Stack", "IoT"]
-         *   ["Full-Stack", "Embedded"]
-         */
-        categorie: {
-            type: [
-                {
-                    type: String,
-                    enum: [
-                        "Full-Stack",
-                        "Embedded",
-                        "AI",
-                        "IoT",
-                        "Data",
-                    ],
-                },
-            ],
-            required: true,
-            default: ["Full-Stack"],
+        categoria: {
+            type: String,
         },
-
+        categorie: [
+            {
+                type: String,
+            },
+        ],
         linkGithub: {
             type: String,
-            required: false,
         },
+        image: {
+            type: String,
+        },
+        experienceId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Experience'
+        }
     },
     {
         timestamps: true,
-    },
+    }
 );
 
-export default
-    mongoose.models.Project ||
-    mongoose.model("Project", projectSchema);
+export default mongoose.model<IProject>('Project', ProjectSchema);
