@@ -1,4 +1,11 @@
 ---
+/**
+ * @file frontend/src/pages/projects/[id].astro
+ * @description Dedicated project deep-dive page dynamically generated at build time.
+ * Utilizes Astro's getStaticPaths to fetch project data from the backend and
+ * construct static, highly performant dedicated pages for each project.
+ */
+
 import Layout from '../../layouts/Layout.astro';
 import type { Project } from '../../components/ProjectsGrid.astro';
 

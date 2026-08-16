@@ -238,6 +238,13 @@ const allCategories = [
 									),
 								)}
 							</div>
+
+							<div class="mt-6 flex justify-end relative z-20">
+								<a href={`/projects/${project._id || (project as any).id}`} class="text-xs font-semibold text-white/70 hover:text-white flex items-center gap-1 transition-colors group/link">
+									Explore Project 
+									<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover/link:translate-x-1 transition-transform"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+								</a>
+							</div>
 						</article>
 					);
 				})

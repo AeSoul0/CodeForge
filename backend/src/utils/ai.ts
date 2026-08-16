@@ -1,3 +1,10 @@
+/**
+ * @file backend/src/utils/ai.ts
+ * @description Background service for generating automated project documentation
+ * utilizing Large Language Models (LLMs) such as OpenAI GPT or Google Gemini.
+ * It enriches project records with technical deep-dives automatically.
+ */
+
 import { ProjectService } from '../services/ProjectService';
 
 // Fallback to a placeholder if no API keys are provided.
