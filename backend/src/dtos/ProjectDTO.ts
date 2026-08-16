@@ -1,6 +1,7 @@
 export interface CreateProjectDTO {
     titolo: string;
     descrizione: string;
+    descrizioneLunga?: string;
     tecnologie: string[];
     categoria?: string;
     categorie?: string[];
@@ -11,6 +12,7 @@ export interface CreateProjectDTO {
 export interface UpdateProjectDTO {
     titolo?: string;
     descrizione?: string;
+    descrizioneLunga?: string;
     tecnologie?: string[];
     categoria?: string;
     categorie?: string[];
@@ -22,6 +24,7 @@ export interface ProjectResponse {
     id: string;
     titolo: string;
     descrizione: string;
+    descrizioneLunga?: string;
     tecnologie: string[];
     categoria?: string;
     categorie?: string[];

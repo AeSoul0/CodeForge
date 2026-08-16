@@ -53,6 +53,7 @@ export default async function projectRoutes(
             properties: {
                 titolo: { type: 'string', minLength: 3, maxLength: 100 },
                 descrizione: { type: 'string', minLength: 10, maxLength: 5000 },
+                descrizioneLunga: { type: 'string', maxLength: 50000 },
                 tecnologie: { type: 'array', maxItems: 30, items: { type: 'string', maxLength: 50 } },
                 categoria: { type: 'string', maxLength: 50 },
                 categorie: { type: 'array', maxItems: 10, items: { type: 'string', maxLength: 50 } },
@@ -91,6 +92,7 @@ export default async function projectRoutes(
             properties: {
                 titolo: { type: 'string', minLength: 3, maxLength: 100 },
                 descrizione: { type: 'string', minLength: 10, maxLength: 5000 },
+                descrizioneLunga: { type: 'string', maxLength: 50000 },
                 tecnologie: { type: 'array', maxItems: 30, items: { type: 'string', maxLength: 50 } },
                 categoria: { type: 'string', maxLength: 50 },
                 categorie: { type: 'array', maxItems: 10, items: { type: 'string', maxLength: 50 } },

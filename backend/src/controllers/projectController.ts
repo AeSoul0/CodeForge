@@ -13,6 +13,8 @@ export async function getProjects(request: FastifyRequest<{ Querystring: { page?
 
 import { triggerVercelDeploy } from '../utils/vercel';
 
+import { processProjectAI } from '../utils/ai';
+
 export async function createProject(
     request: FastifyRequest<{ Body: CreateProjectDTO }>,
     reply: FastifyReply
@@ -29,7 +31,10 @@ export async function createProject(
         actor: request.user ? (request.user as any).username : 'admin'
     });
 
-    // Trigger Vercel deploy
+    // Run AI description generation in background
+    processProjectAI(newProject.id);
+
+    // Trigger Vercel deploy (Note: The AI script also triggers deploy after finishing, but we trigger here to update the card first)
     triggerVercelDeploy();
 
     return reply.status(201).send({ success: true, data: newProject });

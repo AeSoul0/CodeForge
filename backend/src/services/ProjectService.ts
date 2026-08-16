@@ -14,6 +14,7 @@ export class ProjectService {
             id: project._id.toString(),
             titolo: project.titolo,
             descrizione: project.descrizione,
+            descrizioneLunga: project.descrizioneLunga,
             tecnologie: project.tecnologie || [],
             categoria: project.categoria,
             categorie: project.categorie,

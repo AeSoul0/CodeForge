@@ -8,6 +8,10 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   integrations: [react()],
 
+  redirects: {
+    '/docs': 'https://codeforge-ukq5.onrender.com/docs',
+  },
+
   vite: {
     plugins: [tailwindcss()]
   },
