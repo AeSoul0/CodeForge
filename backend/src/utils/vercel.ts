@@ -1,5 +1,3 @@
-import fetch from 'node-fetch'; // Fastify/Node 18+ has native fetch, but we can just use native fetch directly since engines.node is >=22.12.0
-
 export async function triggerVercelDeploy() {
     const deployHookUrl = process.env.VERCEL_DEPLOY_HOOK_URL;
     if (!deployHookUrl) {
