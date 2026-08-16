@@ -14,38 +14,11 @@ export interface Project {
 	linkGithub?: string;
 }
 
-const apiUrl =
-	import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") ||
-	"http://localhost:3002";
-
-let projects: Project[] = [];
-
-/* ======================================================
-   FETCH PROJECTS
-   ====================================================== */
-
-try {
-	const response = await fetch(`${apiUrl}/api/projects`);
-
-	if (!response.ok) {
-		throw new Error(
-			`Projects API request failed with status ${response.status}`,
-		);
-	}
-
-	const data: unknown = await response.json();
-
-	if (Array.isArray(data)) {
-		projects = data as Project[];
-	} else {
-		console.warn("[API Warning] Expected an array of projects.");
-	}
-} catch (error) {
-	console.error(
-		"[Backend Connection Error] Failed to fetch projects:",
-		error,
-	);
+interface Props {
+	projects: Project[];
 }
+
+const { projects = [] } = Astro.props;
 
 /* ======================================================
    HELPERS
