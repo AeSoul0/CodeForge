@@ -1,3 +1,8 @@
+/**
+ * @file backend/src/routes/authRoutes.ts
+ * @description Fastify route definitions and API schema validation.
+ */
+
 import { FastifyInstance } from 'fastify';
 import { adminService } from '../services/AdminService';
 

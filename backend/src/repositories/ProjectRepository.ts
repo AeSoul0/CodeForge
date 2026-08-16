@@ -1,3 +1,8 @@
+/**
+ * @file backend/src/repositories/ProjectRepository.ts
+ * @description Database repository for interacting with MongoDB.
+ */
+
 import Project from '../models/Projects';
 import { CreateProjectDTO, UpdateProjectDTO } from '../dtos/ProjectDTO';
 import { DatabaseError } from '../errors/AppError';

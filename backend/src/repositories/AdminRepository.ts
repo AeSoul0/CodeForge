@@ -1,3 +1,8 @@
+/**
+ * @file backend/src/repositories/AdminRepository.ts
+ * @description Database repository for interacting with MongoDB.
+ */
+
 import { Admin } from '../models/Admin';
 
 export class AdminRepository {

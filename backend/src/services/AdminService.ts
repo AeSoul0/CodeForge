@@ -1,3 +1,8 @@
+/**
+ * @file backend/src/services/AdminService.ts
+ * @description Service layer implementing core business logic.
+ */
+
 import { adminRepository } from '../repositories/AdminRepository';
 import { UnauthorizedError } from '../errors/AppError';
 import bcrypt from 'bcrypt';

@@ -1,3 +1,8 @@
+/**
+ * @file backend/src/services/ProjectService.ts
+ * @description Service layer implementing core business logic.
+ */
+
 import { ProjectRepository } from '../repositories/ProjectRepository';
 import { CreateProjectDTO, UpdateProjectDTO, ProjectResponse } from '../dtos/ProjectDTO';
 import { NotFoundError } from '../errors/AppError';

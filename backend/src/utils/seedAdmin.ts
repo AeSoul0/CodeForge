@@ -1,3 +1,8 @@
+/**
+ * @file backend/src/utils/seedAdmin.ts
+ * @description Core module for CodeForge application.
+ */
+
 import bcrypt from 'bcrypt';
 import { Admin } from '../models/Admin';
 

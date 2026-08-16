@@ -1,3 +1,8 @@
+/**
+ * @file backend/src/middleware/metrics.ts
+ * @description Core module for CodeForge application.
+ */
+
 import { FastifyRequest, FastifyReply } from 'fastify';
 import mongoose from 'mongoose';
 

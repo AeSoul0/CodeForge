@@ -1,3 +1,8 @@
+/**
+ * @file backend/src/dtos/ExperienceDTO.ts
+ * @description Data Transfer Objects (DTO) and TypeScript interfaces.
+ */
+
 export interface CreateExperienceDTO {
     role: string;
     company: string;

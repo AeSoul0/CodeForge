@@ -34,7 +34,7 @@ Explain the potential architecture, the problems it solves, and the impact of th
                     temperature: 0.7
                 })
             });
-            const data = await response.json();
+            const data: any = await response.json();
             if (data.choices && data.choices.length > 0) {
                 return data.choices[0].message.content;
             }
@@ -52,7 +52,7 @@ Explain the potential architecture, the problems it solves, and the impact of th
                     contents: [{ parts: [{ text: prompt }] }]
                 })
              });
-             const data = await response.json();
+             const data: any = await response.json();
              if (data.candidates && data.candidates.length > 0) {
                  return data.candidates[0].content.parts[0].text;
              }

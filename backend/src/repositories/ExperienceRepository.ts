@@ -1,3 +1,8 @@
+/**
+ * @file backend/src/repositories/ExperienceRepository.ts
+ * @description Database repository for interacting with MongoDB.
+ */
+
 import Experience from '../models/Experiences';
 import { CreateExperienceDTO, UpdateExperienceDTO } from '../dtos/ExperienceDTO';
 import { DatabaseError } from '../errors/AppError';

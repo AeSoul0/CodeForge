@@ -1,3 +1,8 @@
+/**
+ * @file backend/src/utils/auditLogger.ts
+ * @description Core module for CodeForge application.
+ */
+
 import pino from 'pino';
 
 // Reuse Fastify's logger instance configuration

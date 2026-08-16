@@ -1,3 +1,8 @@
+/**
+ * @file backend/src/controllers/healthController.ts
+ * @description Controller handling incoming HTTP requests and responses.
+ */
+
 import { FastifyRequest, FastifyReply } from 'fastify';
 import mongoose from 'mongoose';
 

@@ -1,3 +1,8 @@
+/**
+ * @file backend/src/dtos/ProjectDTO.ts
+ * @description Data Transfer Objects (DTO) and TypeScript interfaces.
+ */
+
 export interface CreateProjectDTO {
     titolo: string;
     descrizione: string;

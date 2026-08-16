@@ -1,3 +1,8 @@
+/**
+ * @file backend/src/routes/healthRoutes.ts
+ * @description Fastify route definitions and API schema validation.
+ */
+
 import { FastifyInstance } from 'fastify';
 import { checkLiveness, checkReadiness } from '../controllers/healthController';
 import { getMetrics } from '../middleware/metrics';

@@ -1,3 +1,8 @@
+/**
+ * @file backend/src/models/Admin.ts
+ * @description Mongoose database schema definitions.
+ */
+
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IAdmin extends Document {

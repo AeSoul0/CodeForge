@@ -1,3 +1,8 @@
+/**
+ * @file backend/src/controllers/experienceController.ts
+ * @description Controller handling incoming HTTP requests and responses.
+ */
+
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { ExperienceService } from '../services/ExperienceService';
 import { CreateExperienceDTO, UpdateExperienceDTO } from '../dtos/ExperienceDTO';

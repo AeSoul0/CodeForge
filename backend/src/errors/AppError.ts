@@ -1,3 +1,8 @@
+/**
+ * @file backend/src/errors/AppError.ts
+ * @description Core module for CodeForge application.
+ */
+
 export class AppError extends Error {
     public readonly statusCode: number;
     public readonly code: string;

@@ -1,3 +1,8 @@
+/**
+ * @file backend/src/services/ExperienceService.ts
+ * @description Service layer implementing core business logic.
+ */
+
 import { ExperienceRepository } from '../repositories/ExperienceRepository';
 import { CreateExperienceDTO, UpdateExperienceDTO, ExperienceResponse } from '../dtos/ExperienceDTO';
 import { NotFoundError } from '../errors/AppError';

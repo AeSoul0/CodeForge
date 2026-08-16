@@ -1,3 +1,8 @@
+/**
+ * @file backend/src/controllers/projectController.ts
+ * @description Controller handling incoming HTTP requests and responses.
+ */
+
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { ProjectService } from '../services/ProjectService';
 import { CreateProjectDTO, UpdateProjectDTO } from '../dtos/ProjectDTO';

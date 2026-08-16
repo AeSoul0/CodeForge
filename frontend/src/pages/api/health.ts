@@ -1,3 +1,8 @@
+/**
+ * @file frontend/src/pages/api/health.ts
+ * @description Core module for CodeForge application.
+ */
+
 // Exports the asynchronous GET function to handle HTTP GET requests to this endpoint
 export async function GET() {
     // Returns a new Response object (standard Web API used by Astro)
