@@ -24,6 +24,12 @@ jobs:
       run:
         working-directory: ./backend
 
+    services:
+      mongodb:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+
     strategy:
       matrix:
         # Test against the current Maintenance LTS Node versions
@@ -59,6 +65,9 @@ jobs:
 
       - name: Execute Vitest Suite
         # Runs the automated tests we configured in the previous roadmap phase.
+        env:
+          MONGODB_URI: 'mongodb://localhost:27017/codeforge_test'
+          JWT_SECRET: 'testsecret123'
         run: npm run test
 
   frontend-checks:
