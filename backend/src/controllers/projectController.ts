@@ -1,266 +1,71 @@
-/**
- * @file backend/src/controllers/projectController.ts
- * @description Controller layer for the Projects resource.
- *
- * Handles retrieval, creation, partial updates, and deletion of
- * project records while keeping database access isolated from
- * the route definitions.
- *
- * Projects can belong to multiple macro-domain categories.
- */
+import { FastifyRequest, FastifyReply } from 'fastify';
+import { ProjectService } from '../services/ProjectService';
+import { CreateProjectDTO, UpdateProjectDTO } from '../dtos/ProjectDTO';
+import { auditLogger } from '../utils/auditLogger';
 
-import {
-    FastifyRequest,
-    FastifyReply,
-} from "fastify";
+const projectService = new ProjectService();
 
-import mongoose from "mongoose";
-import Project from "../models/Projects";
-
-/**
- * Shape of the payload accepted when creating a project.
- */
-interface CreateProjectPayload {
-    titolo: string;
-    descrizione: string;
-    tecnologie: string[];
-    categorie?: string[];
-    linkGithub?: string;
-    image?: string;
+export async function getProjects(request: FastifyRequest<{ Querystring: { page?: number; limit?: number } }>, reply: FastifyReply) {
+    const { page = 1, limit = 10 } = request.query;
+    const projects = await projectService.getAllProjects(Number(page), Number(limit));
+    return reply.send({ success: true, data: projects });
 }
 
-/**
- * Shape of the payload accepted when partially updating a project.
- *
- * Every field is optional because PATCH operations are intended
- * to update only the values explicitly provided by the caller.
- */
-interface UpdateProjectPayload {
-    titolo?: string;
-    descrizione?: string;
-    tecnologie?: string[];
-    categorie?: string[];
-    linkGithub?: string | null;
-    image?: string | null;
+export async function createProject(
+    request: FastifyRequest<{ Body: CreateProjectDTO }>,
+    reply: FastifyReply
+) {
+    const newProject = await projectService.createProject(request.body);
+    
+    // Audit Log
+    auditLogger.log({
+        requestId: request.id as string,
+        action: 'CREATE_PROJECT',
+        resource: 'Project',
+        resourceId: newProject.id,
+        result: 'success',
+        actor: request.user ? (request.user as any).username : 'admin'
+    });
+
+    return reply.status(201).send({ success: true, data: newProject });
 }
 
-/**
- * Route parameters containing a project identifier.
- */
-interface ProjectIdParams {
-    id: string;
+export async function updateProject(
+    request: FastifyRequest<{ Params: { id: string }; Body: UpdateProjectDTO }>,
+    reply: FastifyReply
+) {
+    const { id } = request.params;
+    const updatedProject = await projectService.updateProject(id, request.body);
+
+    // Audit Log
+    auditLogger.log({
+        requestId: request.id as string,
+        action: 'UPDATE_PROJECT',
+        resource: 'Project',
+        resourceId: updatedProject.id,
+        result: 'success',
+        actor: request.user ? (request.user as any).username : 'admin'
+    });
+
+    return reply.send({ success: true, data: updatedProject });
 }
 
-/**
- * Retrieves all projects from MongoDB.
- *
- * Projects are sorted by creation date in descending order so that
- * the newest project appears first.
- */
-export const getProjects = async (
-    _request: FastifyRequest,
-    reply: FastifyReply,
-) => {
-    try {
-        const projects = await Project
-            .find()
-            .sort({ createdAt: -1 })
-            .lean();
+export async function deleteProject(
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+) {
+    const { id } = request.params;
+    await projectService.deleteProject(id);
 
-        return reply.send(projects);
-    } catch (error) {
-        /**
-         * Delegate unexpected errors to Fastify's global error handler.
-         */
-        throw error;
-    }
-};
+    // Audit Log
+    auditLogger.log({
+        requestId: request.id as string,
+        action: 'DELETE_PROJECT',
+        resource: 'Project',
+        resourceId: id,
+        result: 'success',
+        actor: request.user ? (request.user as any).username : 'admin'
+    });
 
-/**
- * Creates a new project in MongoDB.
- *
- * Request validation is handled by the route schema before
- * this controller is executed.
- */
-export const createProject = async (
-    request: FastifyRequest,
-    reply: FastifyReply,
-) => {
-    try {
-        const projectData =
-            request.body as CreateProjectPayload;
-
-        const newProject =
-            await Project.create(
-                projectData,
-            );
-
-        return reply.status(201).send({
-            success: true,
-            message:
-                "Project created successfully.",
-            data: newProject,
-        });
-    } catch (error) {
-        /**
-         * Delegate unexpected errors to Fastify's global error handler.
-         */
-        throw error;
-    }
-};
-
-/**
- * Partially updates an existing project.
- *
- * Only the fields included in the request body are modified.
- * Existing values remain untouched.
- */
-export const updateProject = async (
-    request: FastifyRequest<{
-        Params: ProjectIdParams;
-        Body: UpdateProjectPayload;
-    }>,
-    reply: FastifyReply,
-) => {
-    try {
-        const { id } = request.params;
-
-        /**
-         * Validate the MongoDB ObjectId before querying the database.
-         */
-        if (
-            !mongoose.Types.ObjectId.isValid(
-                id,
-            )
-        ) {
-            return reply.status(400).send({
-                success: false,
-                error: "Invalid project ID.",
-            });
-        }
-
-        const updateData =
-            request.body as UpdateProjectPayload;
-
-        /**
-         * Remove undefined values so PATCH only modifies
-         * fields explicitly provided by the caller.
-         */
-        const filteredUpdateData =
-            Object.fromEntries(
-                Object.entries(
-                    updateData,
-                ).filter(
-                    ([, value]) =>
-                        value !==
-                        undefined,
-                ),
-            );
-
-        if (
-            Object.keys(
-                filteredUpdateData,
-            ).length === 0
-        ) {
-            return reply.status(400).send({
-                success: false,
-                error:
-                    "No fields provided for update.",
-            });
-        }
-
-        /**
-         * Update the project and return the resulting document.
-         *
-         * runValidators ensures the Mongoose schema rules
-         * are still applied to the updated fields.
-         */
-        const updatedProject =
-            await Project.findByIdAndUpdate(
-                id,
-                filteredUpdateData,
-                {
-                    new: true,
-                    runValidators: true,
-                },
-            );
-
-        if (!updatedProject) {
-            return reply.status(404).send({
-                success: false,
-                error: "Project not found.",
-            });
-        }
-
-        return reply.send({
-            success: true,
-            message:
-                "Project updated successfully.",
-            data: updatedProject,
-        });
-    } catch (error) {
-        /**
-         * Delegate unexpected errors to Fastify's global error handler.
-         */
-        throw error;
-    }
-};
-
-/**
- * Deletes an existing project from MongoDB.
- *
- * The operation permanently removes the complete project document.
- */
-export const deleteProject = async (
-    request: FastifyRequest<{
-        Params: ProjectIdParams;
-    }>,
-    reply: FastifyReply,
-) => {
-    try {
-        const { id } = request.params;
-
-        /**
-         * Validate the MongoDB ObjectId before attempting deletion.
-         */
-        if (
-            !mongoose.Types.ObjectId.isValid(
-                id,
-            )
-        ) {
-            return reply.status(400).send({
-                success: false,
-                error: "Invalid project ID.",
-            });
-        }
-
-        /**
-         * Permanently delete the project from MongoDB.
-         */
-        const deletedProject =
-            await Project.findByIdAndDelete(
-                id,
-            );
-
-        if (!deletedProject) {
-            return reply.status(404).send({
-                success: false,
-                error: "Project not found.",
-            });
-        }
-
-        return reply.send({
-            success: true,
-            message:
-                "Project deleted successfully.",
-            data: {
-                _id: deletedProject._id,
-            },
-        });
-    } catch (error) {
-        /**
-         * Delegate unexpected errors to Fastify's global error handler.
-         */
-        throw error;
-    }
-};
+    return reply.send({ success: true, message: 'Project successfully deleted.' });
+}

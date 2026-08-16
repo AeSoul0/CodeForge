@@ -1,3 +1,5 @@
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
 /**
  * @file backend/src/index.ts
  * @description Main entry point for the Fastify server.
@@ -16,6 +18,13 @@ import rateLimit from '@fastify/rate-limit';
 
 import projectRoutes from './routes/projectRoutes';
 import experienceRoutes from './routes/experienceRoutes';
+import authRoutes from './routes/authRoutes';
+import healthRoutes from './routes/healthRoutes';
+import { seedAdmin } from './utils/seedAdmin';
+import { metricsHook } from './middleware/metrics';
+import fastifyJwt from '@fastify/jwt';
+import fastifyCookie from '@fastify/cookie';
+import mongoose from 'mongoose';
 
 import connectDB from './config/db';
 
@@ -23,6 +32,8 @@ import 'dotenv/config';
 
 const app = fastify({
     logger: true,
+    connectionTimeout: 10000, // Drop connections hanging for > 10s
+    keepAliveTimeout: 5000,
 });
 
 /**
@@ -43,9 +54,36 @@ async function startServer(): Promise<void> {
          * the HTTP server.
          */
         await connectDB();
+        await seedAdmin();
 
         // ======================================================
-        // 2. SECURITY / MIDDLEWARES
+        // 2. API DOCUMENTATION (SWAGGER)
+        // ======================================================
+
+        await app.register(swagger, {
+            swagger: {
+                info: {
+                    title: 'CodeForge API',
+                    description: 'API documentation for CodeForge portfolio backend',
+                    version: '1.0.0'
+                },
+                host: 'localhost:3002',
+                schemes: ['http', 'https'],
+                consumes: ['application/json'],
+                produces: ['application/json']
+            }
+        });
+
+        await app.register(swaggerUi, {
+            routePrefix: '/api-docs',
+            uiConfig: {
+                docExpansion: 'full',
+                deepLinking: false
+            }
+        });
+
+        // ======================================================
+        // 3. SECURITY / MIDDLEWARES
         // ======================================================
 
         /**
@@ -53,6 +91,30 @@ async function startServer(): Promise<void> {
          */
         await app.register(helmet, {
             global: true,
+            contentSecurityPolicy: {
+                directives: {
+                    defaultSrc: ["'self'"],
+                    scriptSrc: ["'self'"],
+                    styleSrc: ["'self'", "'unsafe-inline'"],
+                    imgSrc: ["'self'", "data:", "https:"],
+                    connectSrc: ["'self'", process.env.FRONTEND_URL || 'http://localhost:4321']
+                }
+            },
+            hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+            referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+            frameguard: { action: 'deny' }
+        });
+
+        app.addHook('onRequest', async (request, reply) => {
+            reply.header('Permissions-Policy', 'geolocation=(), microphone=(), camera=(), payment=()');
+        });
+
+        app.addHook('onResponse', metricsHook);
+
+        await app.register(fastifyCookie);
+        await app.register(fastifyJwt, {
+            secret: process.env.JWT_SECRET as string,
+            cookie: { cookieName: 'token', signed: false }
         });
 
         /**
@@ -111,40 +173,71 @@ async function startServer(): Promise<void> {
          * Production responses intentionally hide stack traces
          * and internal error details.
          */
-        app.setErrorHandler(
-            (error: any, request, reply) => {
-                request.log.error(error);
-
-                const statusCode =
-                    error.statusCode || 500;
-
-                const isProduction =
-                    process.env.NODE_ENV ===
-                    'production';
-
-                reply.status(statusCode).send({
+        app.setErrorHandler((error: any, request, reply) => {
+            const isProduction = process.env.NODE_ENV === 'production';
+            
+            // Mongoose DB Error Mapping
+            if (error.name === 'MongoServerError' && error.code === 11000) {
+                return reply.status(409).send({
                     success: false,
-                    statusCode,
-
-                    error:
-                        statusCode === 404
-                            ? 'Not Found'
-                            : 'Internal Server Error',
-
-                    message:
-                        statusCode === 500 &&
-                            isProduction
-                            ? 'An unexpected error occurred on the server.'
-                            : error.message,
-
-                    ...(isProduction
-                        ? {}
-                        : {
-                            stack: error.stack,
-                        }),
+                    error: {
+                        code: 'CONFLICT',
+                        message: 'Duplicate key error. A resource with these unique values already exists.',
+                        details: isProduction ? undefined : error.keyValue
+                    }
                 });
-            },
-        );
+            }
+            if (error.name === 'ValidationError' && error.errors) {
+                return reply.status(400).send({
+                    success: false,
+                    error: {
+                        code: 'VALIDATION_ERROR',
+                        message: 'Database validation failed.',
+                        details: Object.keys(error.errors).map(key => error.errors[key].message)
+                    }
+                });
+            }
+            if (error.name === 'CastError') {
+                return reply.status(400).send({
+                    success: false,
+                    error: {
+                        code: 'INVALID_ID',
+                        message: 'Invalid identifier format.',
+                    }
+                });
+            }
+
+            if (error.statusCode && error.code) {
+                if (error.statusCode >= 500) request.log.error(error);
+                else request.log.warn(error);
+
+                return reply.status(error.statusCode).send({
+                    success: false,
+                    error: { code: error.code, message: error.message }
+                });
+            }
+
+            if (error.validation) {
+                return reply.status(400).send({
+                    success: false,
+                    error: {
+                        code: 'VALIDATION_ERROR',
+                        message: error.message,
+                        details: error.validation
+                    }
+                });
+            }
+
+            request.log.error(error);
+            reply.status(500).send({
+                success: false,
+                error: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    message: isProduction ? 'An unexpected error occurred.' : error.message,
+                    ...(isProduction ? {} : { stack: error.stack })
+                }
+            });
+        });
 
         // ======================================================
         // 4. API ROUTES
@@ -171,14 +264,11 @@ async function startServer(): Promise<void> {
         });
 
         /**
-         * Lightweight health endpoint used by the deployment
-         * platform and monitoring systems.
+         * Health endpoints (/live and /ready)
+         * Used by the deployment platform and monitoring systems.
          */
-        app.get('/api/health', async () => {
-            return {
-                status: 'ok',
-                uptime: process.uptime(),
-            };
+        await app.register(healthRoutes, {
+            prefix: '/',
         });
 
         // ======================================================
@@ -215,4 +305,24 @@ async function startServer(): Promise<void> {
     }
 }
 
-void startServer();
+const closeGracefully = async (signal: string) => {
+    app.log.info(`Received signal to terminate: ${signal}`);
+    try {
+        await app.close();
+        app.log.info('Fastify closed.');
+        await mongoose.disconnect();
+        app.log.info('MongoDB disconnected.');
+        process.exit(0);
+    } catch (err) {
+        app.log.error('Error during graceful shutdown:', err);
+        process.exit(1);
+    }
+};
+
+process.on('SIGINT', () => closeGracefully('SIGINT'));
+process.on('SIGTERM', () => closeGracefully('SIGTERM'));
+
+export default app;
+if (process.env.NODE_ENV !== 'test') {
+    void startServer();
+}

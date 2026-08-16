@@ -1,3 +1,5 @@
+import { CreateExperienceDTO, UpdateExperienceDTO } from '../dtos/ExperienceDTO';
+import { authenticateAdmin } from '../middleware/auth';
 /**
  * @file backend/src/routes/experienceRoutes.ts
  * @description Fastify route definitions for the Experiences resource.
@@ -14,6 +16,7 @@ import { FastifyInstance } from "fastify";
 import {
     getExperiences,
     createExperience,
+    updateExperience,
     updateExperienceImage,
     deleteExperience,
 } from "../controllers/experienceController";
@@ -47,96 +50,23 @@ export default async function experienceRoutes(
      */
     const createExperienceSchema = {
         body: {
-            type: "object",
-
-            required: [
-                "role",
-                "company",
-                "description",
-                "startDate",
-            ],
-
+            type: 'object',
+            additionalProperties: false,
+            required: ['role', 'company', 'description', 'startDate'],
             properties: {
-                /**
-                 * Experience role or position title.
-                 */
-                role: {
-                    type: "string",
-                    minLength: 2,
-                },
-
-                /**
-                 * Organization or institution name.
-                 */
-                company: {
-                    type: "string",
-                    minLength: 2,
-                },
-
-                /**
-                 * Experience description.
-                 */
-                description: {
-                    type: "string",
-                    minLength: 10,
-                },
-
-                /**
-                 * Technologies associated with the experience.
-                 */
-                technologies: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
-                },
-
-                /**
-                 * ISO-compatible start date.
-                 */
-                startDate: {
-                    type: "string",
-                },
-
-                /**
-                 * Optional ISO-compatible end date.
-                 */
-                endDate: {
-                    anyOf: [
-                        {
-                            type: "string",
-                        },
-                        {
-                            type: "null",
-                        },
-                    ],
-                },
-
-                /**
-                 * Indicates whether the experience is ongoing.
-                 */
-                current: {
-                    type: "boolean",
-                },
-
-                /**
-                 * Optional image or logo URL/path.
-                 */
-                image: {
-                    anyOf: [
-                        {
-                            type: "string",
-                        },
-                        {
-                            type: "null",
-                        },
-                    ],
-                },
-            },
-        },
+                role: { type: 'string', minLength: 2, maxLength: 100 },
+                company: { type: 'string', minLength: 2, maxLength: 100 },
+                description: { type: 'string', minLength: 10, maxLength: 5000 },
+                technologies: { type: 'array', maxItems: 30, items: { type: 'string', maxLength: 50 } },
+                startDate: { type: 'string', maxLength: 50 },
+                endDate: { anyOf: [{ type: 'string', maxLength: 50 }, { type: 'null' }] },
+                current: { type: 'boolean' },
+                image: { anyOf: [{ type: 'string', maxLength: 500 }, { type: 'null' }] }
+            }
+        }
     };
 
-    fastify.post(
+    fastify.post<{ Body: CreateExperienceDTO }>(
         "/",
         {
             schema: createExperienceSchema,
@@ -145,32 +75,7 @@ export default async function experienceRoutes(
              * Protect experience creation with the project's
              * existing x-api-key authentication mechanism.
              */
-            preHandler: async (
-                request,
-                reply,
-            ) => {
-                const apiKey =
-                    request.headers[
-                    "x-api-key"
-                    ];
-
-                const adminKey =
-                    process.env.ADMIN_API_KEY ||
-                    "super_secret_dev_key";
-
-                if (
-                    !apiKey ||
-                    apiKey !== adminKey
-                ) {
-                    return reply
-                        .status(401)
-                        .send({
-                            success: false,
-                            error:
-                                "Unauthorized. Invalid or missing x-api-key.",
-                        });
-                }
-            },
+            preHandler: [authenticateAdmin],
         },
         createExperience,
     );
@@ -188,89 +93,22 @@ export default async function experienceRoutes(
      */
     const updateExperienceSchema = {
         body: {
-            type: "object",
-
+            type: 'object',
+            additionalProperties: false,
             properties: {
-                /**
-                 * Experience role or position title.
-                 */
-                role: {
-                    type: "string",
-                    minLength: 2,
-                },
-
-                /**
-                 * Organization or institution name.
-                 */
-                company: {
-                    type: "string",
-                    minLength: 2,
-                },
-
-                /**
-                 * Experience description.
-                 */
-                description: {
-                    type: "string",
-                    minLength: 10,
-                },
-
-                /**
-                 * Technologies associated with the experience.
-                 */
-                technologies: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
-                },
-
-                /**
-                 * ISO-compatible start date.
-                 */
-                startDate: {
-                    type: "string",
-                },
-
-                /**
-                 * Optional ISO-compatible end date.
-                 */
-                endDate: {
-                    anyOf: [
-                        {
-                            type: "string",
-                        },
-                        {
-                            type: "null",
-                        },
-                    ],
-                },
-
-                /**
-                 * Indicates whether the experience is ongoing.
-                 */
-                current: {
-                    type: "boolean",
-                },
-
-                /**
-                 * Optional image or logo URL/path.
-                 */
-                image: {
-                    anyOf: [
-                        {
-                            type: "string",
-                        },
-                        {
-                            type: "null",
-                        },
-                    ],
-                },
-            },
-        },
+                role: { type: 'string', minLength: 2, maxLength: 100 },
+                company: { type: 'string', minLength: 2, maxLength: 100 },
+                description: { type: 'string', minLength: 10, maxLength: 5000 },
+                technologies: { type: 'array', maxItems: 30, items: { type: 'string', maxLength: 50 } },
+                startDate: { type: 'string', maxLength: 50 },
+                endDate: { anyOf: [{ type: 'string', maxLength: 50 }, { type: 'null' }] },
+                current: { type: 'boolean' },
+                image: { anyOf: [{ type: 'string', maxLength: 500 }, { type: 'null' }] }
+            }
+        }
     };
 
-    fastify.patch(
+    fastify.patch<{ Params: { id: string }, Body: UpdateExperienceDTO }>(
         "/:id",
         {
             schema: updateExperienceSchema,
@@ -279,34 +117,9 @@ export default async function experienceRoutes(
              * Protect full experience updates with the same
              * administrator API-key authentication mechanism.
              */
-            preHandler: async (
-                request,
-                reply,
-            ) => {
-                const apiKey =
-                    request.headers[
-                    "x-api-key"
-                    ];
-
-                const adminKey =
-                    process.env.ADMIN_API_KEY ||
-                    "super_secret_dev_key";
-
-                if (
-                    !apiKey ||
-                    apiKey !== adminKey
-                ) {
-                    return reply
-                        .status(401)
-                        .send({
-                            success: false,
-                            error:
-                                "Unauthorized. Invalid or missing x-api-key.",
-                        });
-                }
-            },
+            preHandler: [authenticateAdmin],
         },
-        updateExperienceImage,
+        updateExperience,
     );
 
     // ---------------------------------------------------------------------------
@@ -346,7 +159,7 @@ export default async function experienceRoutes(
         },
     };
 
-    fastify.patch(
+    fastify.patch<{ Params: { id: string }, Body: { image: string | null } }>(
         "/:id/image",
         {
             schema: updateExperienceImageSchema,
@@ -355,32 +168,7 @@ export default async function experienceRoutes(
              * Protect image updates with the same API key
              * authentication mechanism used by creation.
              */
-            preHandler: async (
-                request,
-                reply,
-            ) => {
-                const apiKey =
-                    request.headers[
-                    "x-api-key"
-                    ];
-
-                const adminKey =
-                    process.env.ADMIN_API_KEY ||
-                    "super_secret_dev_key";
-
-                if (
-                    !apiKey ||
-                    apiKey !== adminKey
-                ) {
-                    return reply
-                        .status(401)
-                        .send({
-                            success: false,
-                            error:
-                                "Unauthorized. Invalid or missing x-api-key.",
-                        });
-                }
-            },
+            preHandler: [authenticateAdmin],
         },
         updateExperienceImage,
     );
@@ -393,39 +181,14 @@ export default async function experienceRoutes(
     /**
      * Deletes a complete experience record from MongoDB.
      */
-    fastify.delete(
+    fastify.delete<{ Params: { id: string } }>(
         "/:id",
         {
             /**
              * Protect deletion with the project's existing
              * administrator API-key authentication.
              */
-            preHandler: async (
-                request,
-                reply,
-            ) => {
-                const apiKey =
-                    request.headers[
-                    "x-api-key"
-                    ];
-
-                const adminKey =
-                    process.env.ADMIN_API_KEY ||
-                    "super_secret_dev_key";
-
-                if (
-                    !apiKey ||
-                    apiKey !== adminKey
-                ) {
-                    return reply
-                        .status(401)
-                        .send({
-                            success: false,
-                            error:
-                                "Unauthorized. Invalid or missing x-api-key.",
-                        });
-                }
-            },
+            preHandler: [authenticateAdmin],
         },
         deleteExperience,
     );

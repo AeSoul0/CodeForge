@@ -36,23 +36,48 @@
         let isVisible = true;
         let animationFrameId = null;
 
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+        // Adaptive particle count based on screen size and motion preferences
+        const getParticleCount = () => {
+            if (prefersReducedMotion.matches) return 0;
+            const width = window.innerWidth;
+            if (width > 1024) return 55;   // Desktop
+            if (width > 768) return 35;    // Tablet
+            return 20;                     // Mobile
+        };
+
+        const initParticles = () => {
+            particles = [];
+            const count = getParticleCount();
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle());
+            }
+        };
+
         // Updates drawing bounds dynamically without disrupting viewport scaling
         const resize = () => {
             w = canvas.width = window.innerWidth;
             h = canvas.height = window.innerHeight;
+            // Optionally, re-init particles if crossing breakpoints
+            // For stability, we only set bounds here, but we can re-init too
+            initParticles();
         };
-        window.addEventListener("resize", resize);
-        resize();
 
-        // Mouse coordinates capturing loops
-        window.addEventListener("mousemove", (e) => {
+        const onMouseMove = (e) => {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
-        });
-        window.addEventListener("mouseout", () => {
+        };
+
+        const onMouseOut = () => {
             mouse.x = null;
             mouse.y = null;
-        });
+        };
+
+        window.addEventListener("resize", resize);
+        window.addEventListener("mousemove", onMouseMove);
+        window.addEventListener("mouseout", onMouseOut);
+        prefersReducedMotion.addEventListener("change", initParticles);
 
         // Particle structural node architecture
         class Particle {
@@ -80,19 +105,20 @@
             }
         }
 
-        // Allocate network particles allocation load
-        for (let i = 0; i < 55; i++) {
-            particles.push(new Particle());
-        }
+        // Initial setup
+        resize();
 
         // Main execution rendering loop running inside the native animation thread
         function animate() {
             // Performance optimization: Pause computation when canvas is off-screen
-            if (!isVisible) {
+            if (!isVisible || particles.length === 0) {
                 if (animationFrameId) {
                     cancelAnimationFrame(animationFrameId);
                     animationFrameId = null;
                 }
+                // If particles exist but offscreen, we just return.
+                // If no particles, we also don't animate.
+                if (particles.length === 0) return;
                 return;
             }
 
@@ -143,17 +169,29 @@
                 entries.forEach((entry) => {
                     isVisible = entry.isIntersecting;
                     // Resume the animation loop if the canvas re-enters the viewport
-                    if (isVisible && !animationFrameId) {
+                    if (isVisible && !animationFrameId && particles.length > 0) {
                         animate();
                     }
                 });
             },
             { threshold: 0.05 },
-        ); // Triggers when at least 5% is visible
+        );
 
         observer.observe(canvas);
 
         // Trigger initial animation
-        animate();
+        if (particles.length > 0) {
+            animate();
+        }
+
+        // Lifecycle cleanup for SPA navigation
+        document.addEventListener('astro:before-swap', () => {
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            observer.disconnect();
+            window.removeEventListener("resize", resize);
+            window.removeEventListener("mousemove", onMouseMove);
+            window.removeEventListener("mouseout", onMouseOut);
+            prefersReducedMotion.removeEventListener("change", initParticles);
+        }, { once: true });
     });
 </script>

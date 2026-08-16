@@ -11,3 +11,8 @@ Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
+
+# Variabili d'ambiente
+.env
+.env.*
+!.env.example

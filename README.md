@@ -1,125 +1,84 @@
-# 🚀 CodeForge | Portfolio Ecosystem
+# CodeForge
 
-**CodeForge** is a modern, high-performance digital ecosystem developed by [AeSoul]. It features an ultra-fast frontend built with Astro and a robust backend powered by Fastify, designed to seamlessly manage and showcase a dynamic collection of technological projects.
+**CodeForge** is the official portfolio of Samuele Arabia (ÆSoul) — an aspiring Full-Stack Developer & Software Architect. Built for performance, security, and scalability, CodeForge is designed to showcase engineering rigor and a strong foundation in modern web development.
 
----
+## 🚀 Engineering Highlights
 
-## 🛠️ Tech Stack
+This repository is built with production-grade engineering principles:
 
-### Frontend
-- **Framework:** [Astro 6.3.1](https://astro.build/) (utilizing Islands Architecture for maximum performance).
-- **UI Library:** [React 19.2.6](https://react.dev/) for interactive components.
-- **Styling:** [Tailwind CSS 4.2.4](https://tailwindcss.com/) for a modern, responsive design.
-- **Language:** TypeScript/JavaScript integration.
-- **Features:** Glassmorphism UI, interactive particle animations via Canvas API, and smooth scrolling.
-
-### Backend
-- **Runtime:** Node.js (>= 22.12.0).
-- **Framework:** [Fastify 5.8.5](https://www.fastify.io/) (extremely fast and lightweight).
-- **Database:** [MongoDB](https://www.mongodb.com/) via **Mongoose 9.6.2**.
-- **Logging:** [Pino-pretty 13.1.3](https://github.com/pinojs/pino-pretty) for clear, readable system logs.
+- **⚡ Astro Performance:** Pre-rendered UI with minimal JS payload.
+- **🔐 Security:** Full helmet configurations, strict CSP, rate limiting, and robust authentication with JWT and bcrypt. No hardcoded secrets.
+- **🧪 Test Coverage:** Unit and integration testing setup with Vitest and Supertest.
+- **🐳 Docker:** Hardened, non-root `node:22-alpine` and `nginx` minimal containers with healthchecks.
+- **🚀 CI/CD:** Ready for deployment with structured `docker-compose`.
+- **♿ Accessibility:** Fully compliant with WCAG 2.2 AA (semantic HTML, ARIA, focus traps, `prefers-reduced-motion`).
+- **📊 Observability:** Fastify structured logging (Pino) and a custom metrics dashboard for telemetry.
+- **🛡️ API Hardening:** Decoupled `Controller -> Service -> Repository -> MongoDB` architecture.
 
 ---
 
-## ✨ Key Features
+## 🏗️ Architecture
 
-- **Premium Design:** A "Midnight High-Tech" interface based on *Glassmorphism* (frosted glass effect) with illuminated borders and hover glow effects.
-- **Interactive Background:** A custom JavaScript particle system that reacts to mouse movements.
-- **Real-time Synchronization:** The portfolio dynamically fetches data from a MongoDB database to display up-to-date projects.
-- **Professional Architecture:** Clean separation between business logic (backend) and user interface (frontend), complete with API proxying/routing.
-- **Unified Development Server:** Run both the Astro frontend and the Fastify backend simultaneously with a single root command.
+The project employs a modern separated frontend and backend stack.
 
----
+### Stack
 
-## 📂 Project Structure
+- **Frontend:** Astro, TailwindCSS, Vanilla JS (minimal framework footprint).
+- **Backend:** Node.js 22, Fastify, TypeScript, Mongoose.
+- **Database:** MongoDB.
+- **Tooling:** Docker, Vitest, ESLint.
 
-```text
-AeSouls-CodeForge/
-├── frontend/             # Astro & React source code
-│   ├── src/pages/        # Main Astro routes
-│   │   ├── api/          # Astro server-side API routes (e.g., health.ts)
-│   │   └── index.astro   # Main landing page
-│   ├── src/components/   # Reusable UI components (e.g., TestBackend.jsx)
-│   └── src/styles/       # Global styling (e.g., global.css)
-├── backend/              # REST API with Fastify
-│   ├── src/config/       # Database and server configs (e.g., db.js)
-│   ├── src/models/       # Mongoose schemas (e.g., Projects.js)
-│   ├── src/routes/       # API endpoints (e.g., health.js, projectRoutes.js)
-│   └── src/index.js      # Server entry point
-└── package.json          # Global dependency & script management (concurrently)
-
-```
+See the [Architecture Documentation](docs/architecture.md) for more details.
 
 ---
 
-## 🚀 Quick Start
+## 🛠️ Setup & Installation
 
-### 1. Prerequisites
+### Local Development
 
-* **Node.js** v22.12.0 or higher
-* An active **MongoDB** cluster (e.g., MongoDB Atlas)
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/AeSoul0/CodeForge.git
+   cd CodeForge
+   ```
 
-### 2. Installation
+2. **Environment Variables:**
+   Copy `.env.example` to `.env` in both `frontend` and `backend` directories and configure your local MongoDB credentials and JWT secret.
 
-Clone the repository and install the dependencies for the root, backend, and frontend environments:
+3. **Run using Docker Compose (Recommended):**
+   ```bash
+   docker-compose up --build
+   ```
 
-```bash
-# Clone the repository
-git clone [https://github.com/AeSouls/CodeForge.git](https://github.com/AeSouls/CodeForge.git)
-cd CodeForge
-
-# Install root dependencies (concurrently)
-npm install
-
-# Install backend dependencies
-cd backend
-npm install
-
-# Install frontend dependencies
-cd ../frontend
-npm install
-
-# Return to root directory
-cd ..
-
-```
-
-### 3. Environment Configuration
-
-Create a `.env` file inside the `backend` folder with your MongoDB connection string:
-
-```env
-# backend/.env
-MONGO_URI=mongodb+srv://your_user:your_password@cluster.mongodb.net/aesouls
-
-```
-
-### 4. Run the Ecosystem
-
-You don't need to start the servers separately. Thanks to the root configuration, you can launch both the frontend and the backend simultaneously from the root directory:
-
-```bash
-npm run dev
-
-```
+4. **Run Locally:**
+   - **Backend:** `cd backend && npm install && npm run dev`
+   - **Frontend:** `cd frontend && npm install && npm run dev`
 
 ---
 
-## 📡 API Endpoints
+## 📚 Documentation
 
-| Method | Endpoint | Description |
-| --- | --- | --- |
-| `GET` | `/api/health` | Check the server health status. |
-| `GET` | `/api/projects` | Fetch all projects from the database. |
-| `POST` | `/api/projects` | Upload a new project to the portfolio. |
+Detailed documentation is available in the `docs/` directory:
 
-*(Note: The Astro frontend also includes a dedicated route at `frontend/src/pages/api/health.ts` for localized health checks or SSR capabilities).*
+- [Architecture Design](docs/architecture.md)
+- [API Documentation](docs/api.md)
+- [Security Posture](docs/security.md)
+- [Testing Strategy](docs/testing.md)
+- [Deployment Guide](docs/deployment.md)
 
-### Example: Adding a Project (PowerShell)
+---
 
-```powershell
-Invoke-RestMethod -Uri "http://localhost:3002/api/projects" -Method Post -ContentType "application/json" -Body '{"titolo": "ÆSouls", "descrizione": "Full-Stack Portfolio", "tecnologie": ["Astro", "Fastify"]}'
+## 🌐 API
 
-```
+The backend exposes a secure REST API. 
+Swagger documentation is available at `/api-docs` when running the backend in development mode.
 
-© 2026 ÆSoul
+---
+
+## 🤝 Contribution
+
+This is a personal portfolio and MVP project, developed internally following strict CI/CD and roadmap guidelines.
+
+## 📄 License
+
+All rights reserved by Samuele Arabia (ÆSoul).

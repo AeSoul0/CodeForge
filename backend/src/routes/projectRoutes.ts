@@ -1,3 +1,5 @@
+import { CreateProjectDTO, UpdateProjectDTO } from '../dtos/ProjectDTO';
+import { authenticateAdmin } from '../middleware/auth';
 /**
  * @file backend/src/routes/projectRoutes.ts
  * @description Fastify route definitions for the Projects resource.
@@ -46,65 +48,20 @@ export default async function projectRoutes(
     const createProjectSchema = {
         body: {
             type: 'object',
-
-            required: [
-                'titolo',
-                'descrizione',
-                'tecnologie',
-            ],
-
+            additionalProperties: false,
+            required: ['titolo', 'descrizione', 'tecnologie'],
             properties: {
-                /**
-                 * Project title.
-                 */
-                titolo: {
-                    type: 'string',
-                    minLength: 3,
-                },
-
-                /**
-                 * Project description.
-                 */
-                descrizione: {
-                    type: 'string',
-                    minLength: 10,
-                },
-
-                /**
-                 * Technologies used by the project.
-                 */
-                tecnologie: {
-                    type: 'array',
-                    items: {
-                        type: 'string',
-                    },
-                },
-
-                /**
-                 * Project category.
-                 */
-                categoria: {
-                    type: 'string',
-                },
-
-                /**
-                 * Optional GitHub or live project link.
-                 */
-                linkGithub: {
-                    type: 'string',
-                },
-
-                /**
-                 * Optional project image.
-                 */
-                image: {
-                    type: 'string',
-                },
-            },
-        },
+                titolo: { type: 'string', minLength: 3, maxLength: 100 },
+                descrizione: { type: 'string', minLength: 10, maxLength: 5000 },
+                tecnologie: { type: 'array', maxItems: 30, items: { type: 'string', maxLength: 50 } },
+                categoria: { type: 'string', maxLength: 50 },
+                linkGithub: { type: 'string', maxLength: 500, pattern: '^https?:\\/\\/.+' },
+                image: { type: 'string', maxLength: 500 }
+            }
+        }
     };
 
-    fastify.post(
+    fastify.post<{ Body: CreateProjectDTO }>(
         '/',
         {
             schema: createProjectSchema,
@@ -112,30 +69,7 @@ export default async function projectRoutes(
             /**
              * Protect project creation from unauthorized write operations.
              */
-            preHandler: async (
-                request,
-                reply,
-            ) => {
-                const apiKey =
-                    request.headers['x-api-key'];
-
-                const adminKey =
-                    process.env.ADMIN_API_KEY ||
-                    'super_secret_dev_key';
-
-                if (
-                    !apiKey ||
-                    apiKey !== adminKey
-                ) {
-                    return reply
-                        .status(401)
-                        .send({
-                            success: false,
-                            error:
-                                'Unauthorized. Invalid or missing x-api-key.',
-                        });
-                }
-            },
+            preHandler: [authenticateAdmin],
         },
         createProject,
     );
@@ -152,77 +86,19 @@ export default async function projectRoutes(
     const updateProjectSchema = {
         body: {
             type: 'object',
-
+            additionalProperties: false,
             properties: {
-                /**
-                 * Updated project title.
-                 */
-                titolo: {
-                    type: 'string',
-                    minLength: 3,
-                },
-
-                /**
-                 * Updated project description.
-                 */
-                descrizione: {
-                    type: 'string',
-                    minLength: 10,
-                },
-
-                /**
-                 * Updated technology list.
-                 */
-                tecnologie: {
-                    type: 'array',
-                    items: {
-                        type: 'string',
-                    },
-                },
-
-                /**
-                 * Updated project category.
-                 */
-                categoria: {
-                    type: 'string',
-                },
-
-                /**
-                 * Updated GitHub or live project link.
-                 *
-                 * Null can be used to remove the existing link.
-                 */
-                linkGithub: {
-                    anyOf: [
-                        {
-                            type: 'string',
-                        },
-                        {
-                            type: 'null',
-                        },
-                    ],
-                },
-
-                /**
-                 * Updated project image.
-                 *
-                 * Null can be used to remove the existing image.
-                 */
-                image: {
-                    anyOf: [
-                        {
-                            type: 'string',
-                        },
-                        {
-                            type: 'null',
-                        },
-                    ],
-                },
-            },
-        },
+                titolo: { type: 'string', minLength: 3, maxLength: 100 },
+                descrizione: { type: 'string', minLength: 10, maxLength: 5000 },
+                tecnologie: { type: 'array', maxItems: 30, items: { type: 'string', maxLength: 50 } },
+                categoria: { type: 'string', maxLength: 50 },
+                linkGithub: { anyOf: [{ type: 'string', maxLength: 500, pattern: '^https?:\\/\\/.+' }, { type: 'null' }] },
+                image: { anyOf: [{ type: 'string', maxLength: 500 }, { type: 'null' }] }
+            }
+        }
     };
 
-    fastify.patch(
+    fastify.patch<{ Params: { id: string }, Body: UpdateProjectDTO }>(
         '/:id',
         {
             schema: updateProjectSchema,
@@ -230,30 +106,7 @@ export default async function projectRoutes(
             /**
              * Protect project updates with the administrator API key.
              */
-            preHandler: async (
-                request,
-                reply,
-            ) => {
-                const apiKey =
-                    request.headers['x-api-key'];
-
-                const adminKey =
-                    process.env.ADMIN_API_KEY ||
-                    'super_secret_dev_key';
-
-                if (
-                    !apiKey ||
-                    apiKey !== adminKey
-                ) {
-                    return reply
-                        .status(401)
-                        .send({
-                            success: false,
-                            error:
-                                'Unauthorized. Invalid or missing x-api-key.',
-                        });
-                }
-            },
+            preHandler: [authenticateAdmin],
         },
         updateProject,
     );
@@ -263,36 +116,13 @@ export default async function projectRoutes(
     // Protected endpoint used to permanently delete a project.
     // ---------------------------------------------------------------------------
 
-    fastify.delete(
+    fastify.delete<{ Params: { id: string } }>(
         '/:id',
         {
             /**
              * Protect destructive operations with the administrator API key.
              */
-            preHandler: async (
-                request,
-                reply,
-            ) => {
-                const apiKey =
-                    request.headers['x-api-key'];
-
-                const adminKey =
-                    process.env.ADMIN_API_KEY ||
-                    'super_secret_dev_key';
-
-                if (
-                    !apiKey ||
-                    apiKey !== adminKey
-                ) {
-                    return reply
-                        .status(401)
-                        .send({
-                            success: false,
-                            error:
-                                'Unauthorized. Invalid or missing x-api-key.',
-                        });
-                }
-            },
+            preHandler: [authenticateAdmin],
         },
         deleteProject,
     );

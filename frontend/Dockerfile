@@ -1,35 +1,29 @@
-# /frontend/Dockerfile
-# ------------------------------------------------------------------------------
-# @description Multi-stage Dockerfile for the Astro frontend.
-# Builds the static site and serves it via a highly optimized Nginx web server.
-# ------------------------------------------------------------------------------
-
-# Stage 1: Build Environment
-FROM node:20-alpine AS builder
-
+FROM node:22.12.0-alpine3.20 AS builder
 WORKDIR /app
-
-# Copy package files and install dependencies
 COPY package*.json ./
 RUN npm ci
-
-# Copy the rest of the frontend source code
 COPY . .
-
-# Build the Astro project (outputs to the /dist folder by default)
 RUN npm run build
 
-# Stage 2: Production Server (Nginx)
-FROM nginx:alpine
+FROM nginx:1.27-alpine
 
-# Remove default Nginx static assets
+# Remove default assets
 RUN rm -rf /usr/share/nginx/html/*
-
-# Copy the compiled static files from the builder stage to Nginx
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Expose port 80 (standard HTTP port inside the container)
+# Harden Nginx for non-root execution
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chown -R nginx:nginx /var/cache/nginx && \
+    chown -R nginx:nginx /var/log/nginx && \
+    chown -R nginx:nginx /etc/nginx/conf.d && \
+    touch /var/run/nginx.pid && \
+    chown -R nginx:nginx /var/run/nginx.pid
+
+USER nginx
+
 EXPOSE 80
 
-# Start Nginx
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget -qO- http://localhost/ || exit 1
+
 CMD ["nginx", "-g", "daemon off;"]

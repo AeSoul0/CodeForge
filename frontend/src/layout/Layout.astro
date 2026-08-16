@@ -101,6 +101,16 @@ const ogImageUrl = new URL("/og-image.png", Astro.url).href;
                 scroll-behavior: smooth;
             }
 
+            /* ======================================================
+               ACCESSIBILITY: FOCUS INDICATORS
+               ====================================================== */
+            *:focus-visible {
+                outline: 2px solid #22d3ee;
+                outline-offset: 4px;
+                border-radius: 2px;
+                transition: outline-offset 0.2s ease;
+            }
+
             body {
                 -webkit-font-smoothing: antialiased;
                 -moz-osx-font-smoothing: grayscale;

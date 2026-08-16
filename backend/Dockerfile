@@ -1,39 +1,27 @@
-# /backend/Dockerfile
-# ------------------------------------------------------------------------------
-# @description Multi-stage Dockerfile for the Fastify Node.js backend.
-# Uses a lightweight Alpine Linux image for security and performance.
-# ------------------------------------------------------------------------------
-
-# Stage 1: Build & Dependencies
-FROM node:20-alpine AS builder
-
+FROM node:22.12.0-alpine3.20 AS builder
 WORKDIR /app
-
-# Copy package files and install ALL dependencies (including devDependencies for TS compilation)
 COPY package*.json ./
 RUN npm ci
-
-# Copy the rest of the source code
 COPY . .
-
-# Compile TypeScript to JavaScript (assumes you have a "build" script in package.json)
-# e.g., "build": "tsc"
 RUN npm run build
 
-# Stage 2: Production Image
-FROM node:20-alpine
-
+FROM node:22.12.0-alpine3.20
 WORKDIR /app
-
-# Copy package files and install ONLY production dependencies for a smaller attack surface
 COPY package*.json ./
 RUN npm ci --omit=dev
-
-# Copy compiled JavaScript from the builder stage
 COPY --from=builder /app/dist ./dist
 
-# Expose the API port
+# Non-root user
+RUN chown -R node:node /app
+USER node
+
 EXPOSE 3000
 
-# Start the compiled Fastify server
+# Ensure the port matches the exposed port
+ENV PORT=3000
+
+# Healthcheck targeting the new P2 endpoint
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget -qO- http://localhost:3000/live || exit 1
+
 CMD ["node", "dist/index.js"]
