@@ -96,11 +96,23 @@ For the best recruiter-facing presentation, add one desktop screenshot and one m
 
 ## ✅ Engineering Evidence
 
-The repository intentionally separates implemented controls from measured results.
+CodeForge keeps **implemented engineering controls** separate from **measured results**.
 
-See [`docs/evidence.md`](docs/evidence.md) for the current verified state of CI, testing, coverage, performance, accessibility, and dependency health.
+The current backend verification state includes:
 
-Performance, accessibility, and test-coverage numbers should only be published after they have been measured against the current build.
+* **Typecheck:** passed
+* **Production build:** passed
+* **Automated tests:** **7/7 tests passed** across 2 test files
+* **Test framework:** Vitest with Supertest integration testing
+* **Coverage tooling:** V8 coverage is configured
+* **Dependency audit:** **0 vulnerabilities**
+* **CI:** GitHub Actions is configured for backend linting, typechecking, build and tests, plus frontend linting, typechecking and Astro build
+
+The current test execution produces only non-blocking warnings related to future Vite configuration changes, a deprecated Mongoose option, and the absence of an AI provider in the test environment. These warnings do not cause the test suite to fail.
+
+Coverage percentages, accessibility scores, performance metrics, and formal WCAG compliance are **not claimed until they are freshly measured against the current build**.
+
+See [`docs/evidence.md`](docs/evidence.md) for the detailed verification status, testing evidence, dependency health, and reproducibility information.
 
 ---
 
