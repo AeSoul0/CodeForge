@@ -74,14 +74,14 @@ ${project.linkGithub ? `**GitHub Repository:** ${project.linkGithub}` : ''}
     return `### Architectural Foundation\n\nThis system, **${project.titolo}**, represents a robust engineering solution built upon a modern stack comprising **${project.tecnologie.join(', ')}**.\n\n### Technical Deep Dive\n\nBased on the core technologies utilized, this application is engineered to handle demanding workloads efficiently:\n\n- **Scalability:** The architecture leverages decoupled components to ensure horizontal scaling capabilities.\n- **Maintainability:** Adherence to clean code principles and modular design guarantees long-term maintainability.\n- **Performance:** Optimized data flow and state management reduce latency and improve the overall user experience.\n\n> **Note for Administrator:** Ensure that \`OPENAI_API_KEY\` or \`GEMINI_API_KEY\` is configured in the production environment variables to activate dynamic, AI-driven architectural analysis.`;
 }
 
-export async function processProjectAI(projectId: string) {
+export async function processProjectAI(projectId: string, force: boolean = false) {
     try {
         console.log(`[AI] Starting background AI generation for project ${projectId}`);
         const service = new ProjectService();
         const project = await service.getProjectById(projectId);
         
-        // Se ha già la descrizione lunga, skippa
-        if ((project as any).descrizioneLunga) {
+        // Se ha già la descrizione lunga e non stiamo forzando, skippa
+        if ((project as any).descrizioneLunga && !force) {
              console.log(`[AI] Project ${projectId} already has a detailed description.`);
              return;
         }

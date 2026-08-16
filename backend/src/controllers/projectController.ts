@@ -90,3 +90,20 @@ export async function deleteProject(
 
     return reply.send({ success: true, message: 'Project successfully deleted.' });
 }
+export async function generateAIForProject(
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+) {
+    const { id } = request.params;
+    const project = await projectService.getProjectById(id);
+    if (!project) {
+        return reply.status(404).send({ success: false, message: 'Project not found' });
+    }
+    
+    processProjectAI(id, true);
+    
+    return reply.status(200).send({ 
+        success: true, 
+        message: 'AI generation started in background. The static site will be rebuilt upon completion.' 
+    });
+}

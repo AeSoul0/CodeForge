@@ -16,6 +16,7 @@ import {
     createProject,
     updateProject,
     deleteProject,
+    generateAIForProject,
 } from '../controllers/projectController';
 
 /**
@@ -35,6 +36,19 @@ export default async function projectRoutes(
     fastify.get(
         '/',
         getProjects,
+    );
+
+    // ---------------------------------------------------------------------------
+    // [POST] /api/projects/:id/generate-ai
+    // Protected endpoint to forcefully generate AI description
+    // ---------------------------------------------------------------------------
+
+    fastify.post<{ Params: { id: string } }>(
+        '/:id/generate-ai',
+        {
+            preHandler: [authenticateAdmin],
+        },
+        generateAIForProject,
     );
 
     // ---------------------------------------------------------------------------
