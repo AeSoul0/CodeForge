@@ -145,6 +145,8 @@ async function startServer(): Promise<void> {
             frontendUrl,
             'http://localhost:4321',
             'http://127.0.0.1:4321',
+            'http://localhost:2003',
+            'http://127.0.0.1:2003',
         ].filter(
             (origin, index, array) =>
                 array.indexOf(origin) === index,
