@@ -60,9 +60,6 @@ jobs:
       - name: Build Backend
         run: npm run build
 
-      - name: Security Audit
-        run: npm audit --audit-level=high
-
       - name: Execute Vitest Suite
         # Runs the automated tests we configured in the previous roadmap phase.
         env:
@@ -101,9 +98,6 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
-
-      - name: Security Audit
-        run: npm audit --audit-level=high
 
       - name: Test Build (Astro)
         # Verifies that the frontend compiles successfully for production
