@@ -1,22 +1,33 @@
 /**
  * @file backend/src/utils/seedAdmin.ts
- * @description Core module for CodeForge application.
+ * @description Bootstrap for the initial administrative account.
  */
 
 import bcrypt from 'bcrypt';
 import { Admin } from '../models/Admin';
 
-export async function seedAdmin() {
+export async function seedAdmin(): Promise<void> {
     const adminCount = await Admin.countDocuments();
-    if (adminCount === 0) {
-        const username = 'admin';
-        // Fallback to a default if ADMIN_API_KEY is not used as the initial password
-        const password = process.env.ADMIN_API_KEY || 'super_secret_dev_key';
-        
-        const salt = await bcrypt.genSalt(10);
-        const passwordHash = await bcrypt.hash(password, salt);
-        
-        await Admin.create({ username, passwordHash });
-        console.log('✅ Admin user seeded successfully. Use ADMIN_API_KEY as the initial password.');
+
+    if (adminCount > 0) {
+        return;
     }
+
+    const adminApiKey = process.env.ADMIN_API_KEY?.trim();
+
+    if (!adminApiKey) {
+        throw new Error(
+            'ADMIN_API_KEY is required when no administrator account exists. Refusing to bootstrap with a default credential.',
+        );
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(adminApiKey, salt);
+
+    await Admin.create({
+        username: 'admin',
+        passwordHash,
+    });
+
+    console.log('✅ Admin user seeded successfully.');
 }

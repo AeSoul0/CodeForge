@@ -61,10 +61,11 @@ jobs:
         run: npm run build
 
       - name: Execute Vitest Suite
-        # Runs the automated tests we configured in the previous roadmap phase.
         env:
+          NODE_ENV: test
           MONGODB_URI: 'mongodb://localhost:27017/codeforge_test'
           JWT_SECRET: 'testsecret123'
+          ADMIN_API_KEY: 'test-admin-api-key'
         run: npm run test
 
   frontend-checks:

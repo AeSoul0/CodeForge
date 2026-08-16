@@ -4,7 +4,7 @@
  * academic experience through the backend API.
  */
 
-import "dotenv/config";
+import "../../../config/env";
 import * as readline from "readline/promises";
 import {
     stdin as input,

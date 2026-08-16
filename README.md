@@ -1,19 +1,19 @@
 # CodeForge
 
-**CodeForge** is the official portfolio of Samuele Arabia (ÆSoul) — an aspiring Full-Stack Developer & Software Architect. Built for performance, security, and scalability, CodeForge is designed to showcase engineering rigor and a strong foundation in modern web development.
+**CodeForge** is the official portfolio of Samuele Arabia (ÆSoul) — an aspiring Full-Stack Developer & Software Architect. Built to showcase practical engineering, product thinking, security fundamentals, and modern web development through a real personal portfolio/MVP.
 
 ## 🚀 Engineering Highlights
 
-This repository is built with production-grade engineering principles:
+This repository is built with a strong focus on practical engineering principles:
 
 - **⚡ Astro Performance:** Pre-rendered UI with minimal JS payload.
-- **🔐 Security:** Full helmet configurations, strict CSP, rate limiting, and robust authentication with JWT and bcrypt. No hardcoded secrets.
-- **🧪 Test Coverage:** Unit and integration testing setup with Vitest and Supertest.
-- **🐳 Docker:** Hardened, non-root `node:22-alpine` and `nginx` minimal containers with healthchecks.
-- **🚀 CI/CD:** Ready for deployment with structured `docker-compose`.
-- **♿ Accessibility:** Fully compliant with WCAG 2.2 AA (semantic HTML, ARIA, focus traps, `prefers-reduced-motion`).
-- **📊 Observability:** Fastify structured logging (Pino) and a custom metrics dashboard for telemetry.
-- **🛡️ API Hardening:** Decoupled `Controller -> Service -> Repository -> MongoDB` architecture.
+- **🔐 Security:** Helmet configurations, CSP, rate limiting, JWT authentication, bcrypt, restricted CORS, and environment-based secrets. Administrator bootstrap requires an explicit `ADMIN_API_KEY` and does not use a default credential.
+- **🧪 Testing:** Unit and integration testing setup with Vitest and Supertest, with V8 coverage reporting available through the test configuration.
+- **🐳 Docker:** Containerized frontend/backend stack with Docker Compose, using non-root application containers.
+- **🚀 CI/CD:** GitHub Actions for linting, typechecking, builds, and backend test execution.
+- **♿ Accessibility:** Semantic HTML, ARIA where appropriate, focus handling, and `prefers-reduced-motion` support. Formal WCAG compliance should be verified with automated and manual audits.
+- **📊 Observability:** Fastify structured logging and application metrics.
+- **🛡️ API Architecture:** Decoupled `Controller -> Service -> Repository -> MongoDB` architecture.
 
 ---
 
@@ -65,6 +65,7 @@ Detailed documentation is available in the `docs/` directory:
 - [Security Posture](docs/security.md)
 - [Testing Strategy](docs/testing.md)
 - [Deployment Guide](docs/deployment.md)
+- [Engineering Evidence](docs/evidence.md)
 
 ---
 
@@ -75,9 +76,37 @@ Swagger documentation is available at `/api-docs` when running the backend in de
 
 ---
 
+## 🤖 AI-assisted Project Documentation
+
+CodeForge can enrich portfolio projects with technical documentation generated from selected public GitHub repository context, including repository metadata, README content, and `package.json` when available.
+
+Generated Markdown is sanitized before being rendered publicly. The AI workflow is designed to stay grounded in the supplied repository context and avoid inventing unsupported implementation details.
+
+---
+
+## 📸 Screenshots & Demo
+
+The live application is available at:
+
+**https://codeforge-aesouls.vercel.app**
+
+For the best recruiter-facing presentation, add one desktop screenshot and one mobile screenshot above this section or in the repository assets.
+
+---
+
+## ✅ Engineering Evidence
+
+The repository intentionally separates implemented controls from measured results.
+
+See [`docs/evidence.md`](docs/evidence.md) for the current verified state of CI, testing, coverage, performance, accessibility, and dependency health.
+
+Performance, accessibility, and test-coverage numbers should only be published after they have been measured against the current build.
+
+---
+
 ## 🤝 Contribution
 
-This is a personal portfolio and MVP project, developed internally following strict CI/CD and roadmap guidelines.
+This is a personal portfolio and MVP project, developed internally following a focused roadmap and iterative engineering workflow.
 
 ## 📄 License
 

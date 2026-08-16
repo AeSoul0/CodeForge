@@ -16,7 +16,7 @@
  * such as "Tailwind".
  */
 
-import "dotenv/config";
+import "../../../config/env";
 import mongoose from "mongoose";
 import Project from "../../../models/Projects";
 

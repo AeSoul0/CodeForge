@@ -7,7 +7,7 @@
  * or its exact project title.
  */
 
-import "dotenv/config";
+import "../../../config/env";
 import * as readline from "readline/promises";
 import {
     stdin as input,
