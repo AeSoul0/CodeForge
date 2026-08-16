@@ -86,14 +86,17 @@ try {
 		);
 	}
 
-	const data: unknown = await response.json();
+	const responseBody: any = await response.json();
 
 	/**
 	 * Validate the top-level API response before assigning it
 	 * to the strongly typed projects collection.
+	 * The backend wraps the response in { success: true, data: [...] }
 	 */
-	if (Array.isArray(data)) {
-		projects = data as Project[];
+	if (responseBody && Array.isArray(responseBody.data)) {
+		projects = responseBody.data as Project[];
+	} else if (Array.isArray(responseBody)) {
+		projects = responseBody as Project[];
 	} else {
 		console.warn("[API Warning] Expected an array of projects.");
 	}
@@ -126,14 +129,17 @@ try {
 		);
 	}
 
-	const data: unknown = await response.json();
+	const responseBody: any = await response.json();
 
 	/**
 	 * Validate the API response before passing the records
 	 * to the Experience component.
+	 * The backend wraps the response in { success: true, data: [...] }
 	 */
-	if (Array.isArray(data)) {
-		experiences = data as ExperienceItem[];
+	if (responseBody && Array.isArray(responseBody.data)) {
+		experiences = responseBody.data as ExperienceItem[];
+	} else if (Array.isArray(responseBody)) {
+		experiences = responseBody as ExperienceItem[];
 	} else {
 		console.warn("[API Warning] Expected an array of experiences.");
 	}
