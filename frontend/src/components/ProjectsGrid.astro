@@ -95,7 +95,11 @@ const getCategoryLabel = (category: string) => {
 };
 
 const projectCategories = projects.flatMap(
-	(project) => project.categorie ?? [],
+	(project) => {
+		if (Array.isArray(project.categorie)) return project.categorie;
+		if (typeof project.categoria === 'string') return [project.categoria];
+		return [];
+	}
 );
 
 const normalizedProjectCategories = [
@@ -191,10 +195,15 @@ const allCategories = [
 				</>
 			) : (
 				projects.map((project) => {
+					let rawCategories = [];
+					if (Array.isArray(project.categorie)) {
+						rawCategories = project.categorie;
+					} else if (typeof project.categoria === 'string') {
+						rawCategories = [project.categoria];
+					}
+
 					const categories = [
-						...new Set(
-							(project.categorie ?? []).map(normalizeCategory),
-						),
+						...new Set(rawCategories.map(normalizeCategory)),
 					].filter(Boolean);
 
 					return (
