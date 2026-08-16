@@ -628,7 +628,7 @@ const ogImageUrl = new URL("/og-image.png", Astro.url).href;
         <script is:inline>
             (() => {
                 const initSectionHashObserver = () => {
-                    const monitoredSectionIds = ["home", "projects"];
+                    const monitoredSectionIds = ["home", "projects&experiences"];
                     const sectionElements = monitoredSectionIds
                         .map((id) => document.getElementById(id))
                         .filter(Boolean);
