@@ -1,11 +1,11 @@
-FROM node:22.12.0-alpine3.20 AS builder
+FROM node:24.1.0-alpine3.20 AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM node:22.12.0-alpine3.20
+FROM node:24.1.0-alpine3.20
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev
