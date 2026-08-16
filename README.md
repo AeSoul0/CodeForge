@@ -90,7 +90,8 @@ The live application is available at:
 
 **https://www.aesoul0.com**
 
-For the best recruiter-facing presentation, add one desktop screenshot and one mobile screenshot above this section or in the repository assets.
+<img width="1900" height="938" alt="image" src="https://github.com/user-attachments/assets/321a799f-1a97-4553-9d9f-f436c995f1ff" />
+
 
 ---
 
