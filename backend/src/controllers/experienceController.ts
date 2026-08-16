@@ -11,22 +11,28 @@ export async function getExperiences(request: FastifyRequest<{ Querystring: { pa
     return reply.send({ success: true, data: experiences });
 }
 
+import { triggerVercelDeploy } from '../utils/vercel';
+
 export async function createExperience(
     request: FastifyRequest<{ Body: CreateExperienceDTO }>,
     reply: FastifyReply
 ) {
-    const newExp = await experienceService.createExperience(request.body);
+    const newExperience = await experienceService.createExperience(request.body);
     
+    // Audit Log
     auditLogger.log({
         requestId: request.id as string,
         action: 'CREATE_EXPERIENCE',
         resource: 'Experience',
-        resourceId: newExp.id,
+        resourceId: newExperience.id,
         result: 'success',
         actor: request.user ? (request.user as any).username : 'admin'
     });
 
-    return reply.status(201).send({ success: true, data: newExp });
+    // Trigger Vercel deploy
+    triggerVercelDeploy();
+
+    return reply.status(201).send({ success: true, data: newExperience });
 }
 
 export async function updateExperience(
@@ -44,6 +50,9 @@ export async function updateExperience(
         result: 'success',
         actor: request.user ? (request.user as any).username : 'admin'
     });
+
+    // Trigger Vercel deploy
+    triggerVercelDeploy();
 
     return reply.send({ success: true, data: updatedExp });
 }
@@ -74,6 +83,7 @@ export async function deleteExperience(
     const { id } = request.params;
     await experienceService.deleteExperience(id);
 
+    // Audit Log
     auditLogger.log({
         requestId: request.id as string,
         action: 'DELETE_EXPERIENCE',
@@ -82,6 +92,9 @@ export async function deleteExperience(
         result: 'success',
         actor: request.user ? (request.user as any).username : 'admin'
     });
+
+    // Trigger Vercel deploy
+    triggerVercelDeploy();
 
     return reply.send({ success: true, message: 'Experience successfully deleted.' });
 }

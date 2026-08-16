@@ -11,6 +11,8 @@ export async function getProjects(request: FastifyRequest<{ Querystring: { page?
     return reply.send({ success: true, data: projects });
 }
 
+import { triggerVercelDeploy } from '../utils/vercel';
+
 export async function createProject(
     request: FastifyRequest<{ Body: CreateProjectDTO }>,
     reply: FastifyReply
@@ -26,6 +28,9 @@ export async function createProject(
         result: 'success',
         actor: request.user ? (request.user as any).username : 'admin'
     });
+
+    // Trigger Vercel deploy
+    triggerVercelDeploy();
 
     return reply.status(201).send({ success: true, data: newProject });
 }
@@ -47,6 +52,9 @@ export async function updateProject(
         actor: request.user ? (request.user as any).username : 'admin'
     });
 
+    // Trigger Vercel deploy
+    triggerVercelDeploy();
+
     return reply.send({ success: true, data: updatedProject });
 }
 
@@ -66,6 +74,9 @@ export async function deleteProject(
         result: 'success',
         actor: request.user ? (request.user as any).username : 'admin'
     });
+
+    // Trigger Vercel deploy
+    triggerVercelDeploy();
 
     return reply.send({ success: true, message: 'Project successfully deleted.' });
 }
