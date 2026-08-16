@@ -88,7 +88,7 @@ Generated Markdown is sanitized before being rendered publicly. The AI workflow 
 
 The live application is available at:
 
-**https://codeforge-aesouls.vercel.app**
+**https://www.aesoul0.com**
 
 For the best recruiter-facing presentation, add one desktop screenshot and one mobile screenshot above this section or in the repository assets.
 
