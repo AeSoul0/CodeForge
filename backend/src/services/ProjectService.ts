@@ -16,6 +16,7 @@ export class ProjectService {
             descrizione: project.descrizione,
             tecnologie: project.tecnologie || [],
             categoria: project.categoria,
+            categorie: project.categorie,
             linkGithub: project.linkGithub,
             image: project.image,
             createdAt: project.createdAt,

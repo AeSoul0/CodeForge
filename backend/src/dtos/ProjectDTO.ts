@@ -3,6 +3,7 @@ export interface CreateProjectDTO {
     descrizione: string;
     tecnologie: string[];
     categoria?: string;
+    categorie?: string[];
     linkGithub?: string;
     image?: string;
 }
@@ -12,6 +13,7 @@ export interface UpdateProjectDTO {
     descrizione?: string;
     tecnologie?: string[];
     categoria?: string;
+    categorie?: string[];
     linkGithub?: string | null;
     image?: string | null;
 }
@@ -22,6 +24,7 @@ export interface ProjectResponse {
     descrizione: string;
     tecnologie: string[];
     categoria?: string;
+    categorie?: string[];
     linkGithub?: string | null;
     image?: string | null;
     createdAt: Date;
