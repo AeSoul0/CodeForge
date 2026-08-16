@@ -131,11 +131,54 @@ function formatPeriod(
              EMPTY STATE
              ================================================== -->
 
-        {experiences.length === 0 && (
-            <div class="experience-card p-7 sm:p-9 text-slate-400">
-                No experience available.
-            </div>
-        )}
+        {experiences.length === 0 ? (
+            <>
+                <div class="experience-timeline-item">
+                    <article class="experience-card experience-skeleton p-7 sm:p-9 relative overflow-hidden flex flex-col md:flex-row md:items-stretch gap-6 md:gap-10" aria-hidden="true">
+                        <div class="md:w-1/4 flex-shrink-0">
+                            <div class="experience-meta">
+                                <div class="skeleton-date"></div>
+                                <div class="skeleton-logo"></div>
+                            </div>
+                        </div>
+                        <div class="md:w-3/4 flex flex-col">
+                            <div class="skeleton-role"></div>
+                            <div class="skeleton-company"></div>
+                            <div class="skeleton-desc"></div>
+                            <div class="skeleton-desc short"></div>
+                            <div class="skeleton-badges-flex mt-auto">
+                                <span></span><span></span><span></span>
+                            </div>
+                        </div>
+                    </article>
+                    <div class="experience-timeline-connector" aria-hidden="true">
+                        <div class="experience-energy-rail">
+                            <span class="experience-energy-runner"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="experience-timeline-item">
+                    <article class="experience-card experience-skeleton p-7 sm:p-9 relative overflow-hidden flex flex-col md:flex-row md:items-stretch gap-6 md:gap-10" aria-hidden="true">
+                        <div class="md:w-1/4 flex-shrink-0">
+                            <div class="experience-meta">
+                                <div class="skeleton-date" style="width: 140px;"></div>
+                                <div class="skeleton-logo"></div>
+                            </div>
+                        </div>
+                        <div class="md:w-3/4 flex flex-col">
+                            <div class="skeleton-role" style="width: 50%;"></div>
+                            <div class="skeleton-company" style="width: 40%;"></div>
+                            <div class="skeleton-desc"></div>
+                            <div class="skeleton-desc short" style="width: 85%;"></div>
+                            <div class="skeleton-badges-flex mt-auto">
+                                <span></span><span></span>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </>
+        ) : (
 
 
         <!-- ==================================================
@@ -690,6 +733,88 @@ function formatPeriod(
 
 
     /* ============================================================
+       SKELETON LOADER
+       ============================================================ */
+
+    .experience-skeleton::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.035), transparent);
+        transform: translateX(-100%);
+        animation: exp-skeleton-shimmer 1.8s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    .skeleton-date,
+    .skeleton-logo,
+    .skeleton-role,
+    .skeleton-company,
+    .skeleton-desc,
+    .skeleton-badges-flex span {
+        position: relative;
+        z-index: 1;
+        background: rgba(255, 255, 255, 0.07);
+        animation: exp-skeleton-pulse 1.6s ease-in-out infinite;
+        border-radius: 9999px;
+    }
+
+    .skeleton-date {
+        width: 100px;
+        height: 18px;
+    }
+
+    .skeleton-logo {
+        width: 116px;
+        height: 116px;
+        margin-top: 22px;
+    }
+
+    .skeleton-role {
+        width: 60%;
+        height: 22px;
+        margin-bottom: 0.5rem;
+    }
+
+    .skeleton-company {
+        width: 30%;
+        height: 14px;
+        margin-bottom: 1.5rem;
+    }
+
+    .skeleton-desc {
+        width: 90%;
+        height: 11px;
+        margin-bottom: 0.7rem;
+    }
+
+    .skeleton-desc.short {
+        width: 70%;
+        margin-bottom: 2rem;
+    }
+
+    .skeleton-badges-flex {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .skeleton-badges-flex span {
+        width: 52px;
+        height: 22px;
+    }
+
+    @keyframes exp-skeleton-pulse {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 0.75; }
+    }
+
+    @keyframes exp-skeleton-shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+
+    /* ============================================================
        RESPONSIVE LAYOUT
        ============================================================ */
 
@@ -742,7 +867,14 @@ function formatPeriod(
         .experience-card,
         .tech-badge,
         .experience-logo,
-        .experience-energy-runner {
+        .experience-energy-runner,
+        .experience-skeleton::after,
+        .skeleton-date,
+        .skeleton-logo,
+        .skeleton-role,
+        .skeleton-company,
+        .skeleton-desc,
+        .skeleton-badges-flex span {
             transition: none !important;
             animation: none !important;
         }
