@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@plugin "@tailwindcss/typography";
 
 @keyframes tap-pulse {
 
@@ -17,18 +16,14 @@
     }
 }
 
-@theme {
-  --animate-fade-in-up: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  
-  @keyframes fade-in-up {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -36,5 +31,35 @@
   .animate-fade-in-up {
     animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     opacity: 0;
+  }
+}
+
+/* ============================================================
+   PROJECT DETAIL PAGE
+   ============================================================ */
+
+.project-prose {
+  max-width: 72ch;
+}
+
+.project-prose :where(h3, h4) {
+  color: #f8fafc;
+}
+
+.project-prose :where(p, li) {
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.project-prose :where(code):not(:where(pre *)) {
+  font-weight: 600;
+}
+
+.project-prose :where(pre) {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+@media (max-width: 768px) {
+  .project-prose {
+    max-width: 100%;
   }
 }

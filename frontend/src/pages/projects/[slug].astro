@@ -1,134 +1,598 @@
 ---
 /**
  * @file frontend/src/pages/projects/[slug].astro
- * @description Dedicated project deep-dive page dynamically generated at build time.
+ * @description Dynamic project detail page.
+ *
+ * The page is statically generated from the backend project collection.
+ * AI-generated documentation is rendered from Markdown into sanitized HTML
+ * before being injected into the page.
+ *
+ * The page intentionally keeps the visual hierarchy simple:
+ * - project identity
+ * - hero media
+ * - technical documentation
+ * - technology stack
+ * - repository actions
  */
 
-import Layout from '../../layout/Layout.astro';
-import ParticleCanvas from '../../components/ParticleCanvas.astro';
-import type { Project } from '../../components/ProjectsGrid.astro';
+import { marked } from "marked";
+import sanitizeHtml from "sanitize-html";
 
+import Layout from "../../layout/Layout.astro";
+import ParticleCanvas from "../../components/ParticleCanvas.astro";
+import "../../styles/global.css";
+
+interface Project {
+	_id?: string;
+	id?: string;
+	titolo: string;
+	descrizione: string;
+	descrizioneLunga?: string;
+	tecnologie: string[];
+	categoria?: string;
+	categorie?: string[];
+	linkGithub?: string | null;
+	image?: string | null;
+	experienceImage?: string | null;
+}
+
+interface Props {
+	project: Project;
+}
+
+/**
+ * Fetch the project collection at build time and generate one static page
+ * for every project.
+ */
 export async function getStaticPaths() {
-	const apiUrl = import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") || "http://localhost:3002";
+	const apiUrl =
+		import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") ||
+		"http://localhost:3002";
+
 	let projects: Project[] = [];
-	
+
 	try {
 		const response = await fetch(`${apiUrl}/api/projects`);
-		if (response.ok) {
-			const data = await response.json();
-			if (data && Array.isArray(data.data)) {
-				projects = data.data;
-			} else if (Array.isArray(data)) {
-				projects = data;
-			}
+
+		if (!response.ok) {
+			throw new Error(
+				`Project API request failed with status ${response.status}`,
+			);
 		}
-	} catch (e) {
-		console.error("Failed to fetch projects for static paths", e);
+
+		const responseBody = await response.json();
+
+		if (responseBody && Array.isArray(responseBody.data)) {
+			projects = responseBody.data;
+		} else if (Array.isArray(responseBody)) {
+			projects = responseBody;
+		}
+	} catch (error) {
+		console.error(
+			"[Projects] Failed to fetch projects for static paths:",
+			error,
+		);
 	}
 
 	return projects.map((project) => {
-		const slug = project.titolo.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+		/**
+		 * Convert the project title into a stable URL slug.
+		 *
+		 * Unicode characters are normalized first so accented characters
+		 * do not create unexpected URLs.
+		 */
+		const slug = project.titolo
+			.toLowerCase()
+			.normalize("NFD")
+			.replace(/[\u0300-\u036f]/g, "")
+			.replace(/[^a-z0-9]+/g, "-")
+			.replace(/(^-|-$)+/g, "");
+
 		return {
-			params: { slug },
-			props: { project },
+			params: {
+				slug,
+			},
+			props: {
+				project,
+			},
 		};
 	});
 }
 
-interface Props {
-	project: Project & { id?: string; descrizioneLunga?: string };
+const { project } = Astro.props;
+
+/**
+ * Normalize the category structure so both the current `categorie` field
+ * and the legacy `categoria` field remain supported.
+ */
+const categories =
+	Array.isArray(project.categorie) && project.categorie.length > 0
+		? project.categorie
+		: project.categoria
+			? [project.categoria]
+			: ["Other"];
+
+/**
+ * Resolve the most appropriate project image.
+ */
+const displayImage = project.image || project.experienceImage || null;
+
+/**
+ * Convert project Markdown into sanitized HTML.
+ *
+ * `marked.parse()` can return either a string or a Promise depending on
+ * the configured marked pipeline. Awaiting the result keeps the function
+ * type-safe for both cases.
+ *
+ * Sanitization is mandatory before using Astro's `set:html` directive,
+ * because Markdown content ultimately becomes raw HTML.
+ */
+async function renderMarkdown(markdown: string): Promise<string> {
+	const renderedHtml = await marked.parse(markdown, {
+		gfm: true,
+		breaks: false,
+	});
+
+	return sanitizeHtml(renderedHtml, {
+		/**
+		 * Only allow HTML elements required by technical documentation.
+		 *
+		 * This prevents arbitrary HTML from the generated Markdown from
+		 * becoming executable or visually destructive content.
+		 */
+		allowedTags: [
+			"h1",
+			"h2",
+			"h3",
+			"h4",
+			"h5",
+			"h6",
+			"p",
+			"br",
+			"strong",
+			"em",
+			"del",
+			"blockquote",
+			"ul",
+			"ol",
+			"li",
+			"code",
+			"pre",
+			"a",
+			"hr",
+			"table",
+			"thead",
+			"tbody",
+			"tr",
+			"th",
+			"td",
+		],
+
+		/**
+		 * Allow only attributes required for links, code blocks and tables.
+		 */
+		allowedAttributes: {
+			a: ["href", "title", "target", "rel"],
+			code: ["class"],
+			pre: ["class"],
+			th: ["align"],
+			td: ["align"],
+		},
+
+		/**
+		 * Restrict URLs to safe schemes.
+		 */
+		allowedSchemes: ["http", "https", "mailto"],
+
+		allowedSchemesByTag: {
+			a: ["http", "https", "mailto"],
+		},
+
+		/**
+		 * Remove unsupported HTML rather than escaping it into visible text.
+		 */
+		disallowedTagsMode: "discard",
+	});
 }
 
-const { project } = Astro.props;
-const categories = Array.isArray(project.categorie) && project.categorie.length > 0 
-	? project.categorie 
-	: (project.categoria ? [project.categoria] : ['Other']);
+/**
+ * Determine whether a valid AI-generated description is available.
+ */
+const hasAiDescription =
+	typeof project.descrizioneLunga === "string" &&
+	project.descrizioneLunga.trim().length > 0 &&
+	!project.descrizioneLunga.includes("AI analysis is currently processing");
 
-const displayImage = project.image || project.experienceImage;
+/**
+ * Parse the AI documentation before rendering the page.
+ *
+ * Astro supports top-level await in the frontmatter section.
+ */
+const renderedDescription = hasAiDescription
+	? await renderMarkdown(project.descrizioneLunga!)
+	: "";
 ---
 
 <Layout title={`${project.titolo} | CodeForge`}>
-	<ParticleCanvas />
-	<div class="fixed top-0 left-0 w-full h-[500px] bg-gradient-to-b from-blue-900/10 via-transparent to-transparent pointer-events-none z-0 mix-blend-screen"></div>
+	<!-- ==============================================================
+	     AMBIENT BACKGROUND
+	     ============================================================== -->
 
-	<main class="pt-32 pb-32 min-h-screen px-6 max-w-6xl mx-auto relative z-10 selection:bg-blue-500/30">
-		<nav class="mb-12 animate-fade-in-up">
-			<a href="/#projects&experiences" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all duration-300 font-medium text-sm group backdrop-blur-md">
-				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:-translate-x-1 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
-				Return to Portfolio
+	<ParticleCanvas />
+
+	<div
+		class="pointer-events-none fixed inset-x-0 top-0 z-0 h-[420px] bg-gradient-to-b from-cyan-500/[0.07] via-transparent to-transparent"
+	>
+	</div>
+
+	<!-- ==============================================================
+	     MAIN PROJECT CONTAINER
+	     ============================================================== -->
+
+	<main
+		class="relative z-10 mx-auto w-full max-w-6xl px-6 pb-24 pt-28 md:pb-32 md:pt-32"
+	>
+		<!-- ==========================================================
+		     BACK NAVIGATION
+		     =========================================================== -->
+
+		<nav class="mb-10 md:mb-14">
+			<a
+				href="/#projects&experiences"
+				class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/60 backdrop-blur-md transition-all duration-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="16"
+					height="16"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					aria-hidden="true"
+				>
+					<path d="m15 18-6-6 6-6"></path>
+				</svg>
+
+				Back to projects
 			</a>
 		</nav>
 
-		<header class="mb-20 animate-fade-in-up" style="animation-delay: 100ms;">
-			<div class="flex flex-wrap items-center gap-3 mb-8">
-				{categories.map((cat) => (
-					<span class="px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.2em] bg-white text-black rounded-full shadow-[0_0_15px_rgba(255,255,255,0.3)]">
-						{cat}
-					</span>
-				))}
+		<!-- ==========================================================
+		     PROJECT HEADER
+		     =========================================================== -->
+
+		<header class="max-w-4xl">
+			<!-- Project categories -->
+			<div class="mb-5 flex flex-wrap gap-2">
+				{
+					categories.map((category) => (
+						<span class="rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300">
+							{category}
+						</span>
+					))
+				}
 			</div>
 
-			<h1 class="text-5xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-white/90 to-white/30 mb-8 tracking-tighter leading-[1.1]">
+			<!-- Project title -->
+			<h1
+				class="max-w-5xl text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl md:text-6xl lg:text-7xl"
+			>
 				{project.titolo}
 			</h1>
 
-			<p class="text-2xl md:text-3xl text-white/50 font-light leading-relaxed max-w-4xl tracking-tight">
+			<!-- Project summary -->
+			<p
+				class="mt-6 max-w-3xl text-lg leading-8 text-white/55 md:text-xl md:leading-9"
+			>
 				{project.descrizione}
 			</p>
 		</header>
 
-		{displayImage && (
-			<figure class="w-full aspect-[16/9] md:aspect-[21/9] rounded-[2rem] overflow-hidden mb-24 border border-white/10 shadow-[0_30px_100px_-20px_rgba(0,0,0,1)] relative animate-fade-in-up group" style="animation-delay: 200ms;">
-				<img src={displayImage} alt={project.titolo} class="w-full h-full object-cover transform scale-100 group-hover:scale-[1.02] transition-transform duration-[1.5s] ease-[cubic-bezier(0.16,1,0.3,1)]" />
-				<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent pointer-events-none"></div>
-				
-				{project.linkGithub && (
-					<div class="absolute bottom-8 right-8 z-20">
-						<a href={project.linkGithub} target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 bg-white text-black px-6 py-4 rounded-full font-bold shadow-2xl hover:scale-105 transition-transform duration-300">
-							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.02c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A4.8 4.8 0 0 0 8 18v4"/><path d="M12 18v-4"/></svg>
-							Repository
-						</a>
-					</div>
-				)}
-			</figure>
-		)}
+		<!-- ==========================================================
+		     HERO IMAGE
+		     =========================================================== -->
 
-		<div class="grid grid-cols-1 xl:grid-cols-12 gap-16 lg:gap-24 animate-fade-in-up" style="animation-delay: 300ms;">
-			<div class="xl:col-span-8 prose prose-invert prose-lg md:prose-xl max-w-none prose-headings:font-black prose-headings:tracking-tight prose-headings:text-white prose-p:text-white/70 prose-p:leading-relaxed prose-a:text-white prose-a:underline-offset-4 prose-strong:text-white prose-code:text-white prose-code:bg-white/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-pre:bg-white/5 prose-pre:border prose-pre:border-white/10 prose-li:text-white/70">
-				
-				{!project.descrizioneLunga || project.descrizioneLunga.includes('AI analysis is currently processing') ? (
-					<div class="bg-gradient-to-br from-white/5 to-transparent border border-white/10 rounded-[2rem] p-12 text-center backdrop-blur-md relative overflow-hidden">
-						<div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.05)_0%,transparent_70%)]"></div>
-						<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-white/30 mb-6 animate-pulse"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg>
-						<h3 class="text-2xl font-bold text-white mb-3">Architectural Analysis Processing</h3>
-						<p class="text-white/50 text-lg">Our AI is deeply analyzing the codebase and infrastructure pattern to generate a comprehensive technical report.</p>
-					</div>
-				) : (
-					<div set:html={project.descrizioneLunga.replace(/\n/g, '<br/>')} />
-				)}
-			</div>
-			
-			<aside class="xl:col-span-4 relative">
-				<div class="sticky top-32 flex flex-col gap-8">
-					<div class="bg-white/5 border border-white/10 rounded-[2rem] p-8 backdrop-blur-xl">
-						<h3 class="text-xs font-black text-white/40 mb-6 uppercase tracking-[0.2em]">Technology Stack</h3>
-						<div class="flex flex-wrap gap-2">
-							{project.tecnologie.map((tech) => (
-								<span class="px-4 py-2 bg-black/40 border border-white/5 rounded-xl text-white/80 font-medium text-sm tracking-wide hover:bg-white/10 transition-colors cursor-default">
-									{tech}
-								</span>
-							))}
+		{
+			displayImage && (
+				<figure class="group relative mt-12 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] shadow-[0_30px_100px_-40px_rgba(0,0,0,0.9)] md:mt-16">
+					<img
+						src={displayImage}
+						alt={project.titolo}
+						loading="eager"
+						decoding="async"
+						class="aspect-[16/9] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015] md:aspect-[21/9]"
+					/>
+
+					<div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+
+					{project.linkGithub && (
+						<div class="absolute bottom-5 right-5 md:bottom-7 md:right-7">
+							<a
+								href={project.linkGithub}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-black shadow-2xl transition-transform duration-300 hover:scale-[1.03]"
+							>
+								View repository
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="17"
+									height="17"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									aria-hidden="true"
+								>
+									<path d="M7 17 17 7" />
+									<path d="M7 7h10v10" />
+								</svg>
+							</a>
 						</div>
-					</div>
-
-					{!displayImage && project.linkGithub && (
-						<a href={project.linkGithub} target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-8 bg-white text-black rounded-[2rem] font-bold hover:scale-[1.02] transition-transform duration-300">
-							<span class="text-lg">View Source Code</span>
-							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-						</a>
 					)}
+				</figure>
+			)
+		}
+
+		<!-- ==========================================================
+		     CONTENT + SIDEBAR
+		     =========================================================== -->
+
+		<div
+			class="mt-14 grid grid-cols-1 gap-12 lg:mt-20 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-16"
+		>
+			<!-- ======================================================
+			     AI DOCUMENTATION
+			     ======================================================= -->
+
+			<section class="min-w-0">
+				{
+					hasAiDescription ? (
+						<article
+							class="project-prose prose prose-invert max-w-none prose-headings:scroll-mt-24 prose-headings:font-bold prose-headings:tracking-[-0.02em] prose-h3:mb-5 prose-h3:mt-12 prose-h3:text-2xl prose-h4:mb-4 prose-h4:mt-10 prose-h4:text-xl prose-p:my-5 prose-p:text-[16px] prose-p:leading-8 prose-p:text-white/65 prose-strong:text-white prose-a:text-cyan-300 prose-a:no-underline hover:prose-a:underline prose-blockquote:border-cyan-400/30 prose-blockquote:text-white/60 prose-code:rounded-md prose-code:bg-white/[0.07] prose-code:px-1.5 prose-code:py-0.5 prose-code:text-cyan-200 prose-pre:overflow-x-auto prose-pre:rounded-2xl prose-pre:border prose-pre:border-white/10 prose-pre:bg-black/35 prose-pre:p-5 prose-li:text-white/65 prose-li:leading-8 prose-hr:border-white/10 prose-table:overflow-hidden prose-th:bg-white/[0.05] prose-th:text-white prose-td:border-white/10"
+							set:html={renderedDescription}
+						/>
+					) : (
+						<div class="rounded-3xl border border-white/10 bg-white/[0.03] p-8 md:p-10">
+							<div class="mb-5 flex items-center gap-3">
+								<span class="h-2.5 w-2.5 animate-pulse rounded-full bg-cyan-400" />
+
+								<h2 class="text-lg font-semibold text-white">
+									Architectural analysis is being generated
+								</h2>
+							</div>
+
+							<p class="max-w-2xl text-base leading-7 text-white/50">
+								The project has been created successfully. The
+								AI documentation will appear here after the
+								background generation process completes.
+							</p>
+						</div>
+					)
+				}
+			</section>
+
+			<!-- ======================================================
+			     TECHNOLOGY / REPOSITORY SIDEBAR
+			     ======================================================= -->
+
+			<aside>
+				<div class="sticky top-24 space-y-5">
+					<!-- Technology stack -->
+					<section
+						class="rounded-3xl border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl"
+					>
+						<p
+							class="text-[10px] font-bold uppercase tracking-[0.18em] text-white/35"
+						>
+							Technology stack
+						</p>
+
+						<div class="mt-5 flex flex-wrap gap-2">
+							{
+								(project.tecnologie ?? []).map((technology) => (
+									<span class="rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs font-medium text-white/70">
+										{technology}
+									</span>
+								))
+							}
+						</div>
+					</section>
+
+					<!-- Repository CTA -->
+					{
+						project.linkGithub && (
+							<a
+								href={project.linkGithub}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="flex items-center justify-between rounded-3xl border border-white/10 bg-white/[0.05] p-6 transition-all duration-300 hover:border-white/20 hover:bg-white/[0.08]"
+							>
+								<div>
+									<p class="text-sm font-semibold text-white">
+										Source code
+									</p>
+
+									<p class="mt-1 text-xs text-white/40">
+										Open GitHub repository
+									</p>
+								</div>
+
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="20"
+									height="20"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									aria-hidden="true"
+								>
+									<path d="M5 12h14" />
+									<path d="m12 5 7 7-7 7" />
+								</svg>
+							</a>
+						)
+					}
 				</div>
 			</aside>
 		</div>
 	</main>
 </Layout>
+
+<style>
+	/**
+	 * Keep Markdown content readable without depending entirely on
+	 * Tailwind Typography being available.
+	 */
+	.project-prose {
+		max-width: 72ch;
+		color: rgba(255, 255, 255, 0.68);
+		line-height: 1.85;
+	}
+
+	.project-prose :global(h1),
+	.project-prose :global(h2),
+	.project-prose :global(h3),
+	.project-prose :global(h4),
+	.project-prose :global(h5),
+	.project-prose :global(h6) {
+		color: #f8fafc;
+		font-weight: 700;
+		letter-spacing: -0.02em;
+	}
+
+	.project-prose :global(h3) {
+		margin-top: 3rem;
+		margin-bottom: 1rem;
+		font-size: 1.5rem;
+		line-height: 1.3;
+	}
+
+	.project-prose :global(h4) {
+		margin-top: 2rem;
+		margin-bottom: 0.75rem;
+		font-size: 1.2rem;
+		line-height: 1.4;
+	}
+
+	.project-prose :global(p) {
+		margin: 1.25rem 0;
+		color: rgba(255, 255, 255, 0.68);
+		line-height: 1.85;
+	}
+
+	.project-prose :global(strong) {
+		color: #ffffff;
+		font-weight: 700;
+	}
+
+	.project-prose :global(em) {
+		color: rgba(255, 255, 255, 0.8);
+	}
+
+	.project-prose :global(a) {
+		color: #67e8f9;
+		text-decoration: none;
+	}
+
+	.project-prose :global(a:hover) {
+		text-decoration: underline;
+	}
+
+	.project-prose :global(ul),
+	.project-prose :global(ol) {
+		margin: 1.25rem 0;
+		padding-left: 1.5rem;
+	}
+
+	.project-prose :global(li) {
+		margin: 0.4rem 0;
+		color: rgba(255, 255, 255, 0.68);
+		line-height: 1.8;
+	}
+
+	.project-prose :global(blockquote) {
+		margin: 1.5rem 0;
+		border-left: 2px solid rgba(34, 211, 238, 0.35);
+		padding-left: 1rem;
+		color: rgba(255, 255, 255, 0.6);
+	}
+
+	.project-prose :global(code) {
+		border-radius: 0.375rem;
+		background: rgba(255, 255, 255, 0.07);
+		padding: 0.15rem 0.4rem;
+		color: #a5f3fc;
+		font-size: 0.9em;
+	}
+
+	.project-prose :global(pre) {
+		margin: 1.5rem 0;
+		overflow-x: auto;
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 1rem;
+		background: rgba(0, 0, 0, 0.35);
+		padding: 1.25rem;
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+	}
+
+	.project-prose :global(pre code) {
+		background: transparent;
+		padding: 0;
+		color: inherit;
+	}
+
+	.project-prose :global(hr) {
+		margin: 2.5rem 0;
+		border: 0;
+		border-top: 1px solid rgba(255, 255, 255, 0.1);
+	}
+
+	.project-prose :global(table) {
+		display: block;
+		width: 100%;
+		overflow-x: auto;
+		margin: 1.5rem 0;
+		border-collapse: collapse;
+	}
+
+	.project-prose :global(th),
+	.project-prose :global(td) {
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		padding: 0.75rem;
+		text-align: left;
+	}
+
+	.project-prose :global(th) {
+		background: rgba(255, 255, 255, 0.05);
+		color: #ffffff;
+	}
+
+	.project-prose :global(td) {
+		color: rgba(255, 255, 255, 0.65);
+	}
+
+	.project-prose :global(img) {
+		max-width: 100%;
+		height: auto;
+		border-radius: 1rem;
+	}
+
+	.project-prose :global(p:first-child) {
+		margin-top: 0;
+	}
+
+	@media (max-width: 768px) {
+		.project-prose {
+			max-width: 100%;
+		}
+	}
+</style>

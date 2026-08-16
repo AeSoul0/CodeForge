@@ -1,15 +1,25 @@
-import { CreateProjectDTO, UpdateProjectDTO } from '../dtos/ProjectDTO';
-import { authenticateAdmin } from '../middleware/auth';
 /**
  * @file backend/src/routes/projectRoutes.ts
- * @description Fastify route definitions for the Projects resource.
+ * @description Fastify route definitions for the Project resource.
  *
- * The GET endpoint is public because projects are part of the public
- * portfolio. Creation, updates, and deletion are protected using
- * the administrator API key.
+ * Public:
+ * - GET /api/projects
+ *
+ * Protected:
+ * - POST /api/projects
+ * - PATCH /api/projects/:id
+ * - DELETE /api/projects/:id
+ * - POST /api/projects/:id/generate-ai
  */
 
 import { FastifyInstance } from 'fastify';
+
+import {
+    CreateProjectDTO,
+    UpdateProjectDTO,
+} from '../dtos/ProjectDTO';
+
+import { authenticateAdmin } from '../middleware/auth';
 
 import {
     getProjects,
@@ -20,41 +30,49 @@ import {
 } from '../controllers/projectController';
 
 /**
- * Registers all API endpoints related to projects.
- *
- * Expected route prefix:
- * /api/projects
+ * Register project-related API routes.
  */
 export default async function projectRoutes(
     fastify: FastifyInstance,
 ) {
-    // ---------------------------------------------------------------------------
-    // [GET] /api/projects
-    // Public endpoint used by the portfolio frontend.
-    // ---------------------------------------------------------------------------
+    // ============================================================
+    // GET /api/projects
+    // ============================================================
 
+    /**
+     * Public endpoint used by the portfolio frontend.
+     */
     fastify.get(
         '/',
         getProjects,
     );
 
-    // ---------------------------------------------------------------------------
-    // [POST] /api/projects/:id/generate-ai
-    // Protected endpoint to forcefully generate AI description
-    // ---------------------------------------------------------------------------
+    // ============================================================
+    // POST /api/projects/:id/generate-ai
+    // ============================================================
 
-    fastify.post<{ Params: { id: string } }>(
+    /**
+     * Forcefully regenerate the AI-generated project documentation.
+     *
+     * This endpoint remains available for explicit manual regeneration.
+     */
+    fastify.post<{
+        Params: {
+            id: string;
+        };
+    }>(
         '/:id/generate-ai',
         {
-            preHandler: [authenticateAdmin],
+            preHandler: [
+                authenticateAdmin,
+            ],
         },
         generateAIForProject,
     );
 
-    // ---------------------------------------------------------------------------
-    // [POST] /api/projects
-    // Protected endpoint used to create new projects.
-    // ---------------------------------------------------------------------------
+    // ============================================================
+    // POST /api/projects
+    // ============================================================
 
     /**
      * JSON schema used to validate project creation payloads.
@@ -62,87 +80,229 @@ export default async function projectRoutes(
     const createProjectSchema = {
         body: {
             type: 'object',
+
             additionalProperties: false,
-            required: ['titolo', 'descrizione', 'tecnologie'],
+
+            required: [
+                'titolo',
+                'descrizione',
+                'tecnologie',
+            ],
+
             properties: {
-                titolo: { type: 'string', minLength: 3, maxLength: 100 },
-                descrizione: { type: 'string', minLength: 10, maxLength: 5000 },
-                descrizioneLunga: { type: 'string', maxLength: 50000 },
-                tecnologie: { type: 'array', maxItems: 30, items: { type: 'string', maxLength: 50 } },
-                categoria: { type: 'string', maxLength: 50 },
-                categorie: { type: 'array', maxItems: 10, items: { type: 'string', maxLength: 50 } },
-                linkGithub: { type: 'string', maxLength: 500, pattern: '^https?:\\/\\/.+' },
-                image: { type: 'string', maxLength: 500 },
-                experienceId: { type: 'string', pattern: '^[0-9a-fA-F]{24}$' }
-            }
-        }
+                titolo: {
+                    type: 'string',
+                    minLength: 3,
+                    maxLength: 100,
+                },
+
+                descrizione: {
+                    type: 'string',
+                    minLength: 10,
+                    maxLength: 5000,
+                },
+
+                descrizioneLunga: {
+                    type: 'string',
+                    maxLength: 50000,
+                },
+
+                tecnologie: {
+                    type: 'array',
+                    maxItems: 30,
+                    items: {
+                        type: 'string',
+                        maxLength: 50,
+                    },
+                },
+
+                categoria: {
+                    type: 'string',
+                    maxLength: 50,
+                },
+
+                categorie: {
+                    type: 'array',
+                    maxItems: 10,
+                    items: {
+                        type: 'string',
+                        maxLength: 50,
+                    },
+                },
+
+                linkGithub: {
+                    type: 'string',
+                    maxLength: 500,
+                    pattern: '^https?:\\\\/\\\\/.+',
+                },
+
+                image: {
+                    type: 'string',
+                    maxLength: 500,
+                },
+
+                experienceId: {
+                    type: 'string',
+                    pattern: '^[0-9a-fA-F]{24}$',
+                },
+            },
+        },
     };
 
-    fastify.post<{ Body: CreateProjectDTO }>(
+    fastify.post<{
+        Body: CreateProjectDTO;
+    }>(
         '/',
         {
             schema: createProjectSchema,
 
-            /**
-             * Protect project creation from unauthorized write operations.
-             */
-            preHandler: [authenticateAdmin],
+            preHandler: [
+                authenticateAdmin,
+            ],
         },
         createProject,
     );
 
-    // ---------------------------------------------------------------------------
-    // [PATCH] /api/projects/:id
-    // Protected endpoint used to partially update an existing project.
-    // ---------------------------------------------------------------------------
+    // ============================================================
+    // PATCH /api/projects/:id
+    // ============================================================
 
     /**
-     * PATCH allows individual project fields to be changed without
-     * replacing the entire database document.
+     * JSON schema used to validate project update payloads.
      */
     const updateProjectSchema = {
         body: {
             type: 'object',
+
             additionalProperties: false,
+
             properties: {
-                titolo: { type: 'string', minLength: 3, maxLength: 100 },
-                descrizione: { type: 'string', minLength: 10, maxLength: 5000 },
-                descrizioneLunga: { type: 'string', maxLength: 50000 },
-                tecnologie: { type: 'array', maxItems: 30, items: { type: 'string', maxLength: 50 } },
-                categoria: { type: 'string', maxLength: 50 },
-                categorie: { type: 'array', maxItems: 10, items: { type: 'string', maxLength: 50 } },
-                linkGithub: { anyOf: [{ type: 'string', maxLength: 500, pattern: '^https?:\\/\\/.+' }, { type: 'null' }] },
-                image: { anyOf: [{ type: 'string', maxLength: 500 }, { type: 'null' }] },
-                experienceId: { anyOf: [{ type: 'string', pattern: '^[0-9a-fA-F]{24}$' }, { type: 'null' }] }
-            }
-        }
+                titolo: {
+                    type: 'string',
+                    minLength: 3,
+                    maxLength: 100,
+                },
+
+                descrizione: {
+                    type: 'string',
+                    minLength: 10,
+                    maxLength: 5000,
+                },
+
+                descrizioneLunga: {
+                    type: 'string',
+                    maxLength: 50000,
+                },
+
+                tecnologie: {
+                    type: 'array',
+                    maxItems: 30,
+                    items: {
+                        type: 'string',
+                        maxLength: 50,
+                    },
+                },
+
+                categoria: {
+                    type: 'string',
+                    maxLength: 50,
+                },
+
+                categorie: {
+                    type: 'array',
+                    maxItems: 10,
+                    items: {
+                        type: 'string',
+                        maxLength: 50,
+                    },
+                },
+
+                linkGithub: {
+                    anyOf: [
+                        {
+                            type: 'string',
+                            maxLength: 500,
+                            pattern: '^https?:\\\\/\\\\/.+',
+                        },
+                        {
+                            type: 'null',
+                        },
+                    ],
+                },
+
+                image: {
+                    anyOf: [
+                        {
+                            type: 'string',
+                            maxLength: 500,
+                        },
+                        {
+                            type: 'null',
+                        },
+                    ],
+                },
+
+                experienceId: {
+                    anyOf: [
+                        {
+                            type: 'string',
+                            pattern: '^[0-9a-fA-F]{24}$',
+                        },
+                        {
+                            type: 'null',
+                        },
+                    ],
+                },
+
+                /**
+                 * This flag controls the AI regeneration workflow.
+                 *
+                 * It is consumed by the controller and is not persisted
+                 * as part of the Project document.
+                 */
+                regenerateAI: {
+                    type: 'boolean',
+                    default: false,
+                },
+            },
+        },
     };
 
-    fastify.patch<{ Params: { id: string }, Body: UpdateProjectDTO }>(
+    fastify.patch<{
+        Params: {
+            id: string;
+        };
+
+        Body: UpdateProjectDTO;
+    }>(
         '/:id',
         {
             schema: updateProjectSchema,
 
-            /**
-             * Protect project updates with the administrator API key.
-             */
-            preHandler: [authenticateAdmin],
+            preHandler: [
+                authenticateAdmin,
+            ],
         },
         updateProject,
     );
 
-    // ---------------------------------------------------------------------------
-    // [DELETE] /api/projects/:id
-    // Protected endpoint used to permanently delete a project.
-    // ---------------------------------------------------------------------------
+    // ============================================================
+    // DELETE /api/projects/:id
+    // ============================================================
 
-    fastify.delete<{ Params: { id: string } }>(
+    /**
+     * Permanently delete a project.
+     */
+    fastify.delete<{
+        Params: {
+            id: string;
+        };
+    }>(
         '/:id',
         {
-            /**
-             * Protect destructive operations with the administrator API key.
-             */
-            preHandler: [authenticateAdmin],
+            preHandler: [
+                authenticateAdmin,
+            ],
         },
         deleteProject,
     );
