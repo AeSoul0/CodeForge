@@ -9,13 +9,21 @@ import { ProjectService } from '../services/ProjectService';
 
 // Fallback to a placeholder if no API keys are provided.
 export async function generateDetailedDescription(project: any): Promise<string> {
-    const prompt = `
-You are an expert technical writer. Write a detailed, engaging, and professional deep dive (about 300 words) for the following tech project:
-Title: ${project.titolo}
-Short Description: ${project.descrizione}
-Technologies: ${project.tecnologie.join(', ')}
+    const prompt = `You are a Senior Software Architect with 20+ years of experience.
+Write a highly professional, technically deep, and engaging architectural analysis in Markdown for the following project:
 
-Explain the potential architecture, the problems it solves, and the impact of the technologies used. Use markdown formatting. Do not include a title.
+**Project Name:** ${project.titolo}
+**Description:** ${project.descrizione}
+**Technologies:** ${project.tecnologie.join(', ')}
+${project.linkGithub ? `**GitHub Repository:** ${project.linkGithub}` : ''}
+
+**Instructions:**
+- Use professional US English.
+- Start directly with a markdown h3 "### Architectural Overview" or similar.
+- Do NOT include generic greetings or filler text.
+- Break down how the listed technologies work together in a production environment.
+- Highlight potential scaling strategies, design patterns, and engineering decisions.
+- Format beautifully using Markdown (bolding, bullet points, inline code).
 `;
 
     // Here you would connect to OpenAI, Anthropic, or Gemini.
@@ -29,8 +37,8 @@ Explain the potential architecture, the problems it solves, and the impact of th
                     'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
                 },
                 body: JSON.stringify({
-                    model: 'gpt-3.5-turbo',
-                    messages: [{ role: 'user', content: prompt }],
+                    model: 'gpt-4o-mini',
+                    messages: [{ role: 'system', content: 'You are an elite Software Architect.' }, { role: 'user', content: prompt }],
                     temperature: 0.7
                 })
             });
@@ -49,6 +57,7 @@ Explain the potential architecture, the problems it solves, and the impact of th
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    systemInstruction: { parts: [{ text: "You are an elite Software Architect." }]},
                     contents: [{ parts: [{ text: prompt }] }]
                 })
              });
@@ -61,8 +70,8 @@ Explain the potential architecture, the problems it solves, and the impact of th
          }
     }
 
-    // Default Fallback
-    return `### Introduction\nThis project, **${project.titolo}**, is an incredible piece of engineering built with ${project.tecnologie.join(', ')}.\n\n### Architecture & Deep Dive\nBased on the technologies utilized, this application demonstrates a modern, scalable approach to solving complex problems. The architecture is designed to handle demanding workloads efficiently. \n\n*(Note: Configure OPENAI_API_KEY or GEMINI_API_KEY in the backend .env to auto-generate real AI descriptions!)*`;
+    // Advanced Fallback if APIs are missing or fail
+    return `### Architectural Foundation\n\nThis system, **${project.titolo}**, represents a robust engineering solution built upon a modern stack comprising **${project.tecnologie.join(', ')}**.\n\n### Technical Deep Dive\n\nBased on the core technologies utilized, this application is engineered to handle demanding workloads efficiently:\n\n- **Scalability:** The architecture leverages decoupled components to ensure horizontal scaling capabilities.\n- **Maintainability:** Adherence to clean code principles and modular design guarantees long-term maintainability.\n- **Performance:** Optimized data flow and state management reduce latency and improve the overall user experience.\n\n> **Note for Administrator:** Ensure that \`OPENAI_API_KEY\` or \`GEMINI_API_KEY\` is configured in the production environment variables to activate dynamic, AI-driven architectural analysis.`;
 }
 
 export async function processProjectAI(projectId: string) {
