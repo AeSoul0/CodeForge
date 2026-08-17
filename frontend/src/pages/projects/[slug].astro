@@ -22,6 +22,8 @@ import Layout from "../../layout/Layout.astro";
 import ParticleCanvas from "../../components/ParticleCanvas.astro";
 import "../../styles/global.css";
 
+export const prerender = true;
+
 interface Project {
 	_id?: string;
 	id?: string;
@@ -47,7 +49,7 @@ interface Props {
 export async function getStaticPaths() {
 	const apiUrl =
 		import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") ||
-		"http://localhost:3002";
+		"https://codeforge-ukq5.onrender.com";
 
 	let projects: Project[] = [];
 
