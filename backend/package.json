@@ -7,7 +7,7 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "dotenvx run -f .env -- tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "add-project": "tsx src/services/scripts/add-project.ts",
