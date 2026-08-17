@@ -20,8 +20,10 @@ Swagger UI is available at `/api-docs` when running the backend locally.
 ### Experiences
 - `GET /api/experiences`: Retrieve all experiences.
 - `GET /api/experiences/:id`: Retrieve a specific experience.
+- `GET /api/experiences/:id/image`: Retrieve the image of an experience.
 - `POST /api/experiences`: (Admin only) Create an experience.
 - `PUT /api/experiences/:id`: (Admin only) Update an experience.
+- `PATCH /api/experiences/:id/image`: (Admin only) Update or remove the image of an experience (accepts Base64).
 - `DELETE /api/experiences/:id`: (Admin only) Delete an experience.
 
 ### Auth

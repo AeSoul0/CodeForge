@@ -73,6 +73,7 @@ Detailed documentation is available in the `docs/` directory:
 
 The backend exposes a secure REST API. 
 Swagger documentation is available at `/api-docs` when running the backend in development mode.
+It includes endpoints for managing projects and experiences, including Base64 image upload/retrieval for experiences.
 
 ---
 

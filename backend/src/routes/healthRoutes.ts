@@ -5,7 +5,7 @@
 
 import { FastifyInstance } from 'fastify';
 import { checkLiveness, checkReadiness } from '../controllers/healthController';
-import { getMetrics } from '../middleware/metrics';
+import { getMetrics } from '../middlewares/metrics';
 
 export default async function healthRoutes(fastify: FastifyInstance) {
     fastify.get('/', async (request, reply) => {

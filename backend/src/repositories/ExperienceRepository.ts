@@ -37,7 +37,7 @@ export class ExperienceRepository {
 
     async update(id: string, data: UpdateExperienceDTO) {
         try {
-            return await Experience.findByIdAndUpdate(id, data, { new: true, runValidators: true }).lean();
+            return await Experience.findByIdAndUpdate(id, data, { returnDocument: 'after', runValidators: true }).lean();
         } catch (error) {
             throw new DatabaseError('Failed to update experience in database');
         }

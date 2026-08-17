@@ -672,6 +672,10 @@ export async function processProjectAI(
     force = false,
     triggerDeploy = true,
 ): Promise<boolean> {
+    if (process.env.NODE_ENV === 'test') {
+        return false;
+    }
+
     try {
         console.log(
             `[AI] Starting description generation for project ${projectId}.`,
@@ -762,6 +766,9 @@ export async function processProjectAI(
  * - Avoid triggering one deployment per project.
  */
 export async function generateMissingProjectDescriptions(): Promise<void> {
+    if (process.env.NODE_ENV === 'test') {
+        return;
+    }
     const service =
         new ProjectService();
 

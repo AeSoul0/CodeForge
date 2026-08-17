@@ -28,7 +28,7 @@ import projectRoutes from './routes/projectRoutes';
 import experienceRoutes from './routes/experienceRoutes';
 import healthRoutes from './routes/healthRoutes';
 
-import { metricsHook } from './middleware/metrics';
+import { metricsHook } from './middlewares/metrics';
 
 /**
  * Configure the Fastify application.

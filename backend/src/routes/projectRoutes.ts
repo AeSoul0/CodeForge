@@ -19,7 +19,7 @@ import {
     UpdateProjectDTO,
 } from '../dtos/ProjectDTO';
 
-import { authenticateAdmin } from '../middleware/auth';
+import { authenticateAdmin } from '../middlewares/auth';
 
 import {
     getProjects,

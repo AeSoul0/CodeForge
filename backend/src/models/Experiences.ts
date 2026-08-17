@@ -3,11 +3,10 @@
  * @description Mongoose schema and model definition for the Experiences collection.
  *
  * Experience records represent professional and academic activities displayed
- * in the public portfolio. Dates are stored as native MongoDB Date values
- * to support reliable chronological sorting.
+ * in the public portfolio.
  */
 
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 /**
  * Mongoose schema for experience records.
@@ -53,8 +52,6 @@ const experienceSchema = new mongoose.Schema(
 
         /**
          * Start date of the experience.
-         *
-         * This field is used as the primary chronological sorting key.
          */
         startDate: {
             type: Date,
@@ -82,10 +79,10 @@ const experienceSchema = new mongoose.Schema(
         },
 
         /**
-         * Optional image or logo associated with the experience.
+         * Public URL used by the frontend to retrieve the image.
          *
-         * The value may contain a local public path or an externally
-         * hosted image URL.
+         * Example:
+         * /api/experiences/<id>/image
          */
         image: {
             type: String,
@@ -93,27 +90,56 @@ const experienceSchema = new mongoose.Schema(
             default: null,
             trim: true,
         },
+
+        /**
+         * Binary image payload stored directly in MongoDB.
+         *
+         * This is intentionally separate from `image` so the normal
+         * experience JSON payload does not contain the binary data.
+         */
+        imageData: {
+            type: Buffer,
+            required: false,
+            default: null,
+        },
+
+        /**
+         * MIME type used when returning the stored image.
+         *
+         * Example:
+         * image/jpeg
+         * image/png
+         * image/webp
+         */
+        imageMimeType: {
+            type: String,
+            required: false,
+            default: null,
+            trim: true,
+        },
+
+        /**
+         * Original image filename, when available.
+         */
+        imageFileName: {
+            type: String,
+            required: false,
+            default: null,
+            trim: true,
+        },
     },
     {
-        /**
-         * Automatically maintain createdAt and updatedAt timestamps.
-         */
         timestamps: true,
     },
 );
 
 /**
  * Index used to optimize chronological experience queries.
- *
- * The API retrieves experiences from newest to oldest.
  */
 experienceSchema.index({ startDate: -1 });
 
 /**
  * Reuse the compiled model when available.
- *
- * This prevents Mongoose model overwrite errors during development
- * and hot module reloads.
  */
 export default mongoose.models.Experience ||
-    mongoose.model('Experience', experienceSchema);
+    mongoose.model("Experience", experienceSchema);

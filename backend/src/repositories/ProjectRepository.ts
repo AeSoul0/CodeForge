@@ -43,7 +43,7 @@ export class ProjectRepository {
 
     async update(id: string, data: UpdateProjectDTO) {
         try {
-            return await Project.findByIdAndUpdate(id, data, { new: true, runValidators: true }).populate('experienceId').lean();
+            return await Project.findByIdAndUpdate(id, data, { returnDocument: 'after', runValidators: true }).populate('experienceId').lean();
         } catch (error) {
             throw new DatabaseError('Failed to update project in database');
         }
