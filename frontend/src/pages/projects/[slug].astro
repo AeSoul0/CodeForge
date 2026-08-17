@@ -115,8 +115,8 @@ const categories =
 			: ["Other"];
 
 const rawDisplayImage = project.image || project.experienceImage || null;
-const displayImage = rawDisplayImage?.startsWith('/') ? `${apiUrl}${rawDisplayImage}` : rawDisplayImage;
-
+const componentApiUrl = import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") || "https://codeforge-ukq5.onrender.com";
+const displayImage = rawDisplayImage?.startsWith('/') ? `${componentApiUrl}${rawDisplayImage}` : rawDisplayImage;
 /**
  * Convert project Markdown into sanitized HTML.
  *

@@ -208,8 +208,9 @@ function formatPeriod(
 
 
                             {exp.image && (() => {
+                                const apiUrl = import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") || "http://localhost:3002";
                                 const resolvedImage = exp.image.startsWith('/') 
-                                    ? `${import.meta.env.PUBLIC_API_URL || "http://localhost:3002"}${exp.image}` 
+                                    ? `${apiUrl}${exp.image}` 
                                     : exp.image;
                                 return (
                                     <div class="experience-logo-wrapper">
