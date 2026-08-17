@@ -207,16 +207,21 @@ function formatPeriod(
                             </span>
 
 
-                            {exp.image && (
-                                <div class="experience-logo-wrapper">
-                                    <img
-                                        src={exp.image}
-                                        alt={`${exp.company} logo`}
-                                        class="experience-logo"
-                                        loading="lazy"
-                                    />
-                                </div>
-                            )}
+                            {exp.image && (() => {
+                                const resolvedImage = exp.image.startsWith('/') 
+                                    ? `${import.meta.env.PUBLIC_API_URL || "http://localhost:3002"}${exp.image}` 
+                                    : exp.image;
+                                return (
+                                    <div class="experience-logo-wrapper">
+                                        <img
+                                            src={resolvedImage}
+                                            alt={`${exp.company} logo`}
+                                            class="experience-logo"
+                                            loading="lazy"
+                                        />
+                                    </div>
+                                );
+                            })()}
 
                         </div>
                     </div>

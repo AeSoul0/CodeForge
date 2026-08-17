@@ -114,10 +114,8 @@ const categories =
 			? [project.categoria]
 			: ["Other"];
 
-/**
- * Resolve the most appropriate project image.
- */
-const displayImage = project.image || project.experienceImage || null;
+const rawDisplayImage = project.image || project.experienceImage || null;
+const displayImage = rawDisplayImage?.startsWith('/') ? `${apiUrl}${rawDisplayImage}` : rawDisplayImage;
 
 /**
  * Convert project Markdown into sanitized HTML.
