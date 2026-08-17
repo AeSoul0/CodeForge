@@ -115,6 +115,10 @@ async function configureApp(
             },
         },
 
+        crossOriginResourcePolicy: {
+            policy: 'cross-origin',
+        },
+
         hsts: {
             maxAge: 31536000,
             includeSubDomains: true,
