@@ -3,7 +3,12 @@
  * @file frontend/src/pages/projects/[slug].astro
  * @description Dynamic project detail page.
  *
- * The page is statically generated from the backend project collection.
+ * The page is rendered on-demand (SSR) for every request, fetching the
+ * matching project directly from the backend. This replaces the previous
+ * build-time static generation (getStaticPaths + prerender = true), which
+ * caused this page to remain frozen with stale data after any update to
+ * the project in the database until the next deploy/build.
+ *
  * AI-generated documentation is rendered from Markdown into sanitized HTML
  * before being injected into the page.
  *
@@ -22,7 +27,11 @@ import Layout from "../../layout/Layout.astro";
 import ParticleCanvas from "../../components/ParticleCanvas.astro";
 import "../../styles/global.css";
 
-export const prerender = true;
+// SSR: this page is rendered per-request, not at build time.
+// astro.config.mjs already sets `output: 'server'`, so simply NOT setting
+// `prerender = true` (and removing getStaticPaths) is enough to make this
+// route dynamic. We keep the flag explicit for clarity.
+export const prerender = false;
 
 interface Project {
 	_id?: string;
@@ -38,70 +47,59 @@ interface Project {
 	experienceImage?: string | null;
 }
 
-interface Props {
-	project: Project;
+/**
+ * Convert a project title into the same stable URL slug format used
+ * elsewhere in the app (e.g. in the projects grid links).
+ *
+ * Unicode characters are normalized first so accented characters do not
+ * create unexpected URLs.
+ */
+function slugify(title: string): string {
+	return title
+		.toLowerCase()
+		.normalize("NFD")
+		.replace(/[\u0300-\u036f]/g, "")
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/(^-|-$)+/g, "");
 }
 
-/**
- * Fetch the project collection at build time and generate one static page
- * for every project.
- */
-export async function getStaticPaths() {
-	const apiUrl =
-		import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") ||
-		"https://codeforge-ukq5.onrender.com";
+const apiUrl =
+	import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") ||
+	"https://codeforge-ukq5.onrender.com";
 
-	let projects: Project[] = [];
+const { slug } = Astro.params;
 
-	try {
-		const response = await fetch(`${apiUrl}/api/projects`);
+let project: Project | null = null;
 
-		if (!response.ok) {
-			throw new Error(
-				`Project API request failed with status ${response.status}`,
-			);
-		}
+try {
+	const response = await fetch(`${apiUrl}/api/projects`);
 
-		const responseBody = await response.json();
-
-		if (responseBody && Array.isArray(responseBody.data)) {
-			projects = responseBody.data;
-		} else if (Array.isArray(responseBody)) {
-			projects = responseBody;
-		}
-	} catch (error) {
-		console.error(
-			"[Projects] Failed to fetch projects for static paths:",
-			error,
+	if (!response.ok) {
+		throw new Error(
+			`Project API request failed with status ${response.status}`,
 		);
 	}
 
-	return projects.map((project) => {
-		/**
-		 * Convert the project title into a stable URL slug.
-		 *
-		 * Unicode characters are normalized first so accented characters
-		 * do not create unexpected URLs.
-		 */
-		const slug = project.titolo
-			.toLowerCase()
-			.normalize("NFD")
-			.replace(/[\u0300-\u036f]/g, "")
-			.replace(/[^a-z0-9]+/g, "-")
-			.replace(/(^-|-$)+/g, "");
+	const responseBody = await response.json();
 
-		return {
-			params: {
-				slug,
-			},
-			props: {
-				project,
-			},
-		};
-	});
+	const projects: Project[] = Array.isArray(responseBody?.data)
+		? responseBody.data
+		: Array.isArray(responseBody)
+			? responseBody
+			: [];
+
+	project = projects.find((p) => slugify(p.titolo) === slug) ?? null;
+} catch (error) {
+	console.error("[Projects] Failed to fetch project for slug", slug, error);
 }
 
-const { project } = Astro.props;
+// No matching project: return a proper 404 instead of rendering an empty page.
+if (!project) {
+	return new Response(null, {
+		status: 404,
+		statusText: "Not Found",
+	});
+}
 
 /**
  * Normalize the category structure so both the current `categorie` field
@@ -115,8 +113,11 @@ const categories =
 			: ["Other"];
 
 const rawDisplayImage = project.image || project.experienceImage || null;
-const componentApiUrl = import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") || "https://codeforge-ukq5.onrender.com";
-const displayImage = rawDisplayImage?.startsWith('/') ? `${componentApiUrl}${rawDisplayImage}` : rawDisplayImage;
+const componentApiUrl = apiUrl;
+const displayImage = rawDisplayImage?.startsWith("/")
+	? `${componentApiUrl}${rawDisplayImage}`
+	: rawDisplayImage;
+
 /**
  * Convert project Markdown into sanitized HTML.
  *
