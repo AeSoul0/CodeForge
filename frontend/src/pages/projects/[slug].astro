@@ -3,9 +3,9 @@
  * @file frontend/src/pages/projects/[slug].astro
  * @description Dynamic project detail page.
  *
- * The page is rendered on-demand (SSR) for every request.
- * Project data is fetched directly from the backend API on every request,
- * so changes made in MongoDB are reflected without requiring a new build.
+ * The page is rendered on-demand from the backend project collection.
+ * Project data is fetched on every request so changes in MongoDB are
+ * reflected without requiring a new frontend build.
  *
  * AI-generated documentation is rendered from Markdown into sanitized HTML
  * before being injected into the page.
@@ -26,17 +26,11 @@ import ParticleCanvas from "../../components/ParticleCanvas.astro";
 import "../../styles/global.css";
 
 /**
- * IMPORTANT:
- *
- * The page must be rendered on-demand instead of being generated at build
- * time, because project data can change in MongoDB after deployment.
+ * Render this route dynamically on every request.
  *
  * astro.config.mjs already uses:
- *
  * output: "server"
  * adapter: vercel()
- *
- * Therefore this route can safely use SSR.
  */
 export const prerender = false;
 
@@ -58,18 +52,13 @@ interface Project {
  * Convert a project title into a stable URL slug.
  *
  * Unicode characters are normalized first so accented characters
- * do not produce unexpected URLs.
- *
- * Examples:
- *
- * "Città Digitale" -> "citta-digitale"
- * "My Project"     -> "my-project"
+ * do not create unexpected URLs.
  */
 function slugify(value: string): string {
 	return value
+		.toLowerCase()
 		.normalize("NFD")
 		.replace(/[\u0300-\u036f]/g, "")
-		.toLowerCase()
 		.replace(/[^a-z0-9]+/g, "-")
 		.replace(/(^-|-$)+/g, "");
 }
@@ -77,35 +66,31 @@ function slugify(value: string): string {
 /**
  * Backend API base URL.
  *
- * PUBLIC_API_URL is preferred when configured.
- * Render remains the production fallback.
+ * PUBLIC_API_URL can override the production fallback.
  */
 const apiUrl =
-	import.meta.env.PUBLIC_API_URL?.replace(/\/+$/, "") ||
+	import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") ||
 	"https://codeforge-ukq5.onrender.com";
 
 /**
- * Dynamic route parameter.
+ * Slug coming from the current URL.
  */
 const requestedSlug = slugify(Astro.params.slug ?? "");
 
 let project: Project | null = null;
 
 /**
- * Fetch the current project collection directly from the backend.
+ * Fetch the latest project data directly from the backend.
  *
- * There is intentionally NO getStaticPaths() here.
- * The request is executed when the page is requested by the browser.
- *
- * `cache: "no-store"` prevents the fetch from reusing stale API data.
+ * This runs when the page is requested instead of during the build.
+ * Therefore changes in MongoDB are reflected on the next page request.
  */
 try {
 	const response = await fetch(`${apiUrl}/api/projects`, {
-		cache: "no-store",
 		headers: {
 			Accept: "application/json",
-			"Cache-Control": "no-cache",
 		},
+		cache: "no-store",
 	});
 
 	if (!response.ok) {
@@ -116,14 +101,18 @@ try {
 
 	const responseBody = await response.json();
 
-	const projects: Project[] = Array.isArray(responseBody?.data)
-		? responseBody.data
-		: Array.isArray(responseBody)
-			? responseBody
-			: [];
+	let projects: Project[] = [];
+
+	if (responseBody && Array.isArray(responseBody.data)) {
+		projects = responseBody.data;
+	} else if (Array.isArray(responseBody)) {
+		projects = responseBody;
+	}
 
 	project =
-		projects.find((item) => slugify(item.titolo) === requestedSlug) ?? null;
+		projects.find(
+			(item) => slugify(item.titolo) === requestedSlug,
+		) ?? null;
 } catch (error) {
 	console.error(
 		"[Projects] Failed to fetch project:",
@@ -137,31 +126,13 @@ try {
 }
 
 /**
- * Avoid throwing a server-side 500 when the project does not exist.
+ * Keep the response a normal 404 when the project does not exist.
  *
- * A missing project is a normal 404.
+ * Do not throw an exception here: a missing project is not a server error.
  */
 if (!project) {
-	return new Response(
-		`<!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="robots" content="noindex" />
-		<title>Project not found | CodeForge</title>
-	</head>
-	<body>
-		<h1>Project not found</h1>
-	</body>
-</html>`,
-		{
-			status: 404,
-			headers: {
-				"Content-Type": "text/html; charset=utf-8",
-				"Cache-Control": "no-store, max-age=0",
-			},
-		},
-	);
+	Astro.response.status = 404;
+	Astro.response.statusText = "Not Found";
 }
 
 /**
@@ -169,24 +140,17 @@ if (!project) {
  * and the legacy `categoria` field remain supported.
  */
 const categories =
-	Array.isArray(project.categorie) && project.categorie.length > 0
+	Array.isArray(project?.categorie) && project.categorie.length > 0
 		? project.categorie
-		: project.categoria
+		: project?.categoria
 			? [project.categoria]
 			: ["Other"];
 
 /**
  * Resolve the most appropriate project image.
  */
-const rawDisplayImage = project.image || project.experienceImage || null;
-
-const componentApiUrl =
-	import.meta.env.PUBLIC_API_URL?.replace(/\/+$/, "") ||
-	"https://codeforge-ukq5.onrender.com";
-
-const displayImage = rawDisplayImage?.startsWith("/")
-	? `${componentApiUrl}${rawDisplayImage}`
-	: rawDisplayImage;
+const displayImage =
+	project?.image || project?.experienceImage || null;
 
 /**
  * Convert project Markdown into sanitized HTML.
@@ -270,21 +234,30 @@ async function renderMarkdown(markdown: string): Promise<string> {
  * Determine whether a valid AI-generated description is available.
  */
 const hasAiDescription =
-	typeof project.descrizioneLunga === "string" &&
+	typeof project?.descrizioneLunga === "string" &&
 	project.descrizioneLunga.trim().length > 0 &&
-	!project.descrizioneLunga.includes("AI analysis is currently processing");
+	!project.descrizioneLunga.includes(
+		"AI analysis is currently processing",
+	);
 
 /**
  * Parse the AI documentation before rendering the page.
  *
  * Astro supports top-level await in the frontmatter section.
  */
-const renderedDescription = hasAiDescription
-	? await renderMarkdown(project.descrizioneLunga!)
-	: "";
+const renderedDescription =
+	hasAiDescription && project
+		? await renderMarkdown(project.descrizioneLunga!)
+		: "";
 ---
 
-<Layout title={`${project.titolo} | CodeForge`}>
+<Layout
+	title={
+		project
+			? `${project.titolo} | CodeForge`
+			: "Project Not Found | CodeForge"
+	}
+>
 	<!-- ==============================================================
 	     AMBIENT BACKGROUND
 	     ============================================================== -->
@@ -331,190 +304,200 @@ const renderedDescription = hasAiDescription
 			</a>
 		</nav>
 
-		<!-- ==========================================================
-		     PROJECT HEADER
-		     =========================================================== -->
-
-		<header class="max-w-4xl">
-			<!-- Project categories -->
-			<div class="mb-5 flex flex-wrap gap-2">
-				{
-					categories.map((category) => (
-						<span class="rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300">
-							{category}
-						</span>
-					))
-				}
-			</div>
-
-			<!-- Project title -->
-			<h1
-				class="max-w-5xl text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl md:text-6xl lg:text-7xl"
-			>
-				{project.titolo}
-			</h1>
-
-			<!-- Project summary -->
-			<p
-				class="mt-6 max-w-3xl text-lg leading-8 text-white/55 md:text-xl md:leading-9"
-			>
-				{project.descrizione}
-			</p>
-		</header>
-
-		<!-- ==========================================================
-		     HERO IMAGE
-		     =========================================================== -->
-
 		{
-			displayImage && (
-				<figure class="group relative mt-12 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] shadow-[0_30px_100px_-40px_rgba(0,0,0,0.9)] md:mt-16">
-					<img
-						src={displayImage}
-						alt={project.titolo}
-						loading="eager"
-						decoding="async"
-						class="aspect-[16/9] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015] md:aspect-[21/9]"
-					/>
+			project ? (
+				<>
+					<!-- ==========================================================
+					     PROJECT HEADER
+					     =========================================================== -->
 
-					<div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-
-					{project.linkGithub && (
-						<div class="absolute bottom-5 right-5 md:bottom-7 md:right-7">
-							<a
-								href={project.linkGithub}
-								target="_blank"
-								rel="noopener noreferrer"
-								class="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-black shadow-2xl transition-transform duration-300 hover:scale-[1.03]"
-							>
-								View repository
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="17"
-									height="17"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									aria-hidden="true"
-								>
-									<path d="M7 17 17 7" />
-									<path d="M7 7h10v10" />
-								</svg>
-							</a>
+					<header class="max-w-4xl">
+						<div class="mb-5 flex flex-wrap gap-2">
+							{categories.map((category) => (
+								<span class="rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300">
+									{category}
+								</span>
+							))}
 						</div>
-					)}
-				</figure>
-			)
-		}
 
-		<!-- ==========================================================
-		     CONTENT + SIDEBAR
-		     =========================================================== -->
-
-		<div
-			class="mt-14 grid grid-cols-1 gap-12 lg:mt-20 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-16"
-		>
-			<!-- ======================================================
-			     AI DOCUMENTATION
-			     ======================================================= -->
-
-			<section class="min-w-0">
-				{
-					hasAiDescription ? (
-						<article
-							class="project-prose prose prose-invert max-w-none prose-headings:scroll-mt-24 prose-headings:font-bold prose-headings:tracking-[-0.02em] prose-h3:mb-5 prose-h3:mt-12 prose-h3:text-2xl prose-h4:mb-4 prose-h4:mt-10 prose-h4:text-xl prose-p:my-5 prose-p:text-[16px] prose-p:leading-8 prose-p:text-white/65 prose-strong:text-white prose-a:text-cyan-300 prose-a:no-underline hover:prose-a:underline prose-blockquote:border-cyan-400/30 prose-blockquote:text-white/60 prose-code:rounded-md prose-code:bg-white/[0.07] prose-code:px-1.5 prose-code:py-0.5 prose-code:text-cyan-200 prose-pre:overflow-x-auto prose-pre:rounded-2xl prose-pre:border prose-pre:border-white/10 prose-pre:bg-black/35 prose-pre:p-5 prose-li:text-white/65 prose-li:leading-8 prose-hr:border-white/10 prose-table:overflow-hidden prose-th:bg-white/[0.05] prose-th:text-white prose-td:border-white/10"
-							set:html={renderedDescription}
-						/>
-					) : (
-						<div class="rounded-3xl border border-white/10 bg-white/[0.03] p-8 md:p-10">
-							<div class="mb-5 flex items-center gap-3">
-								<span class="h-2.5 w-2.5 animate-pulse rounded-full bg-cyan-400" />
-
-								<h2 class="text-lg font-semibold text-white">
-									Architectural analysis is being generated
-								</h2>
-							</div>
-
-							<p class="max-w-2xl text-base leading-7 text-white/50">
-								The project has been created successfully. The
-								AI documentation will appear here after the
-								background generation process completes.
-							</p>
-						</div>
-					)
-				}
-			</section>
-
-			<!-- ======================================================
-			     TECHNOLOGY / REPOSITORY SIDEBAR
-			     ======================================================= -->
-
-			<aside>
-				<div class="sticky top-24 space-y-5">
-					<!-- Technology stack -->
-					<section
-						class="rounded-3xl border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl"
-					>
-						<p
-							class="text-[10px] font-bold uppercase tracking-[0.18em] text-white/35"
+						<h1
+							class="max-w-5xl text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl md:text-6xl lg:text-7xl"
 						>
-							Technology stack
+							{project.titolo}
+						</h1>
+
+						<p
+							class="mt-6 max-w-3xl text-lg leading-8 text-white/55 md:text-xl md:leading-9"
+						>
+							{project.descrizione}
 						</p>
+					</header>
 
-						<div class="mt-5 flex flex-wrap gap-2">
-							{
-								(project.tecnologie ?? []).map((technology) => (
-									<span class="rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs font-medium text-white/70">
-										{technology}
-									</span>
-								))
-							}
-						</div>
-					</section>
+					<!-- ==========================================================
+					     HERO IMAGE
+					     =========================================================== -->
 
-					<!-- Repository CTA -->
 					{
-						project.linkGithub && (
-							<a
-								href={project.linkGithub}
-								target="_blank"
-								rel="noopener noreferrer"
-								class="flex items-center justify-between rounded-3xl border border-white/10 bg-white/[0.05] p-6 transition-all duration-300 hover:border-white/20 hover:bg-white/[0.08]"
-							>
-								<div>
-									<p class="text-sm font-semibold text-white">
-										Source code
-									</p>
+						displayImage && (
+							<figure class="group relative mt-12 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] shadow-[0_30px_100px_-40px_rgba(0,0,0,0.9)] md:mt-16">
+								<img
+									src={displayImage}
+									alt={project.titolo}
+									loading="eager"
+									decoding="async"
+									class="aspect-[16/9] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015] md:aspect-[21/9]"
+								/>
 
-									<p class="mt-1 text-xs text-white/40">
-										Open GitHub repository
-									</p>
-								</div>
+								<div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
 
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="20"
-									height="20"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									aria-hidden="true"
-								>
-									<path d="M5 12h14" />
-									<path d="m12 5 7 7-7 7" />
-								</svg>
-							</a>
+								{project.linkGithub && (
+									<div class="absolute bottom-5 right-5 md:bottom-7 md:right-7">
+										<a
+											href={project.linkGithub}
+											target="_blank"
+											rel="noopener noreferrer"
+											class="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-black shadow-2xl transition-transform duration-300 hover:scale-[1.03]"
+										>
+											View repository
+
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												width="17"
+												height="17"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												stroke-width="2"
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												aria-hidden="true"
+											>
+												<path d="M7 17 17 7" />
+												<path d="M7 7h10v10" />
+											</svg>
+										</a>
+									</div>
+								)}
+							</figure>
 						)
 					}
-				</div>
-			</aside>
-		</div>
+
+					<!-- ==========================================================
+					     CONTENT + SIDEBAR
+					     =========================================================== -->
+
+					<div
+						class="mt-14 grid grid-cols-1 gap-12 lg:mt-20 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-16"
+					>
+						<!-- ======================================================
+						     AI DOCUMENTATION
+						     ======================================================= -->
+
+						<section class="min-w-0">
+							{
+								hasAiDescription ? (
+									<article
+										class="project-prose prose prose-invert max-w-none prose-headings:scroll-mt-24 prose-headings:font-bold prose-headings:tracking-[-0.02em] prose-h3:mb-5 prose-h3:mt-12 prose-h3:text-2xl prose-h4:mb-4 prose-h4:mt-10 prose-h4:text-xl prose-p:my-5 prose-p:text-[16px] prose-p:leading-8 prose-p:text-white/65 prose-strong:text-white prose-a:text-cyan-300 prose-a:no-underline hover:prose-a:underline prose-blockquote:border-cyan-400/30 prose-blockquote:text-white/60 prose-code:rounded-md prose-code:bg-white/[0.07] prose-code:px-1.5 prose-code:py-0.5 prose-code:text-cyan-200 prose-pre:overflow-x-auto prose-pre:rounded-2xl prose-pre:border prose-pre:border-white/10 prose-pre:bg-black/35 prose-pre:p-5 prose-li:text-white/65 prose-li:leading-8 prose-hr:border-white/10 prose-table:overflow-hidden prose-th:bg-white/[0.05] prose-th:text-white prose-td:border-white/10"
+										set:html={renderedDescription}
+									/>
+								) : (
+									<div class="rounded-3xl border border-white/10 bg-white/[0.03] p-8 md:p-10">
+										<div class="mb-5 flex items-center gap-3">
+											<span class="h-2.5 w-2.5 animate-pulse rounded-full bg-cyan-400" />
+
+											<h2 class="text-lg font-semibold text-white">
+												Architectural analysis is being generated
+											</h2>
+										</div>
+
+										<p class="max-w-2xl text-base leading-7 text-white/50">
+											The project has been created successfully. The
+											AI documentation will appear here after the
+											background generation process completes.
+										</p>
+									</div>
+								)
+							}
+						</section>
+
+						<!-- ======================================================
+						     TECHNOLOGY / REPOSITORY SIDEBAR
+						     ======================================================= -->
+
+						<aside>
+							<div class="sticky top-24 space-y-5">
+								<!-- Technology stack -->
+								<section
+									class="rounded-3xl border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl"
+								>
+									<p
+										class="text-[10px] font-bold uppercase tracking-[0.18em] text-white/35"
+									>
+										Technology stack
+									</p>
+
+									<div class="mt-5 flex flex-wrap gap-2">
+										{(project.tecnologie ?? []).map((technology) => (
+											<span class="rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs font-medium text-white/70">
+												{technology}
+											</span>
+										))}
+									</div>
+								</section>
+
+								<!-- Repository CTA -->
+								{
+									project.linkGithub && (
+										<a
+											href={project.linkGithub}
+											target="_blank"
+											rel="noopener noreferrer"
+											class="flex items-center justify-between rounded-3xl border border-white/10 bg-white/[0.05] p-6 transition-all duration-300 hover:border-white/20 hover:bg-white/[0.08]"
+										>
+											<div>
+												<p class="text-sm font-semibold text-white">
+													Source code
+												</p>
+
+												<p class="mt-1 text-xs text-white/40">
+													Open GitHub repository
+												</p>
+											</div>
+
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												width="20"
+												height="20"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												stroke-width="2"
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												aria-hidden="true"
+											>
+												<path d="M5 12h14" />
+												<path d="m12 5 7 7-7 7" />
+											</svg>
+										</a>
+									)
+								}
+							</div>
+						</aside>
+					</div>
+				</>
+			) : (
+				<section class="rounded-3xl border border-white/10 bg-white/[0.03] p-8 md:p-10">
+					<h1 class="text-3xl font-black tracking-[-0.03em] text-white">
+						Project not found
+					</h1>
+
+					<p class="mt-4 max-w-2xl text-base leading-7 text-white/50">
+						The requested project could not be found.
+					</p>
+				</section>
+			)
+		}
 	</main>
 </Layout>
 
