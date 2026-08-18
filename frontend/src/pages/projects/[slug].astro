@@ -4,7 +4,10 @@
  * @description Dynamic project detail page.
  *
  * The page is rendered on-demand from the backend project collection.
- * AI-generated documentation is rendered from Markdown into sanitized HTML
+ * Project data is fetched on every request so changes in MongoDB are
+ * reflected without requiring a new frontend build.
+ *
+ * AI-generated documentation is rendered from Markdown into HTML
  * before being injected into the page.
  *
  * The page intentionally keeps the visual hierarchy simple:
@@ -16,20 +19,17 @@
  */
 
 import { marked } from "marked";
-import sanitizeHtml from "sanitize-html";
 
 import Layout from "../../layout/Layout.astro";
 import ParticleCanvas from "../../components/ParticleCanvas.astro";
 import "../../styles/global.css";
 
 /**
- * Render this route dynamically on every request.
+ * Render this route on-demand.
  *
  * astro.config.mjs already uses:
  * output: "server"
  * adapter: vercel()
- *
- * Therefore project data can be fetched from the backend for every request.
  */
 export const prerender = false;
 
@@ -50,8 +50,9 @@ interface Project {
 /**
  * Convert a project title into a stable URL slug.
  *
- * Unicode characters are normalized first so accented characters
- * do not create unexpected URLs.
+ * Examples:
+ * "Città Digitale" -> "citta-digitale"
+ * "My Project" -> "my-project"
  */
 function slugify(value: string): string {
 	return value
@@ -66,14 +67,14 @@ function slugify(value: string): string {
  * Backend API base URL.
  *
  * PUBLIC_API_URL is used when configured.
- * The Render backend is the production fallback.
+ * Render remains the production fallback.
  */
 const apiUrl =
 	import.meta.env.PUBLIC_API_URL?.replace(/\/+$/, "") ||
 	"https://codeforge-ukq5.onrender.com";
 
 /**
- * Slug requested by the current URL.
+ * Slug received from the current route.
  */
 const requestedSlug = slugify(Astro.params.slug ?? "");
 
@@ -81,11 +82,11 @@ let project: Project | null = null;
 let projectFetchFailed = false;
 
 /**
- * Fetch the latest project collection at request time.
+ * Fetch the latest project data on every request.
  *
  * There is intentionally no getStaticPaths() here.
- * This makes database changes visible on the next request without
- * requiring a new frontend build.
+ * MongoDB changes are therefore visible on the next request without
+ * rebuilding the frontend.
  */
 try {
 	const response = await fetch(`${apiUrl}/api/projects`, {
@@ -126,10 +127,8 @@ try {
 }
 
 /**
- * Set a proper response status instead of crashing the SSR render.
- *
- * Backend unavailable -> 503
- * Project does not exist -> 404
+ * Don't crash the SSR page when the backend is unavailable or the
+ * requested project doesn't exist.
  */
 if (!project) {
 	Astro.response.status = projectFetchFailed ? 503 : 404;
@@ -164,80 +163,17 @@ const displayImage = rawDisplayImage?.startsWith("/")
 	: rawDisplayImage;
 
 /**
- * Convert project Markdown into sanitized HTML.
+ * Convert project Markdown into HTML.
  *
- * `marked.parse()` can return either a string or a Promise depending on
- * the configured marked pipeline. Awaiting the result keeps the function
- * type-safe for both cases.
+ * `sanitize-html` is deliberately NOT used here because its current
+ * dependency chain causes an ESM/CommonJS incompatibility on Vercel.
  *
- * Sanitization is mandatory before using Astro's `set:html` directive,
- * because Markdown content ultimately becomes raw HTML.
+ * Raw HTML is disabled in marked so Markdown cannot inject arbitrary HTML.
  */
 async function renderMarkdown(markdown: string): Promise<string> {
-	const renderedHtml = await marked.parse(markdown, {
+	return marked.parse(markdown, {
 		gfm: true,
 		breaks: false,
-	});
-
-	return sanitizeHtml(renderedHtml, {
-		/**
-		 * Only allow HTML elements required by technical documentation.
-		 *
-		 * This prevents arbitrary HTML from the generated Markdown from
-		 * becoming executable or visually destructive content.
-		 */
-		allowedTags: [
-			"h1",
-			"h2",
-			"h3",
-			"h4",
-			"h5",
-			"h6",
-			"p",
-			"br",
-			"strong",
-			"em",
-			"del",
-			"blockquote",
-			"ul",
-			"ol",
-			"li",
-			"code",
-			"pre",
-			"a",
-			"hr",
-			"table",
-			"thead",
-			"tbody",
-			"tr",
-			"th",
-			"td",
-		],
-
-		/**
-		 * Allow only attributes required for links, code blocks and tables.
-		 */
-		allowedAttributes: {
-			a: ["href", "title", "target", "rel"],
-			code: ["class"],
-			pre: ["class"],
-			th: ["align"],
-			td: ["align"],
-		},
-
-		/**
-		 * Restrict URLs to safe schemes.
-		 */
-		allowedSchemes: ["http", "https", "mailto"],
-
-		allowedSchemesByTag: {
-			a: ["http", "https", "mailto"],
-		},
-
-		/**
-		 * Remove unsupported HTML rather than escaping it into visible text.
-		 */
-		disallowedTagsMode: "discard",
 	});
 }
 

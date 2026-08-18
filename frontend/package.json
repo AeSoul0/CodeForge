@@ -24,13 +24,14 @@
     "marked": "^18.0.9",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "sanitize-html": "^2.17.7",
     "tailwindcss": "^4.3.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/sanitize-html": "^2.16.1",
     "eslint": "^10.8.1",
     "typescript-eslint": "^8.67.0"
+  },
+  "overrides": {
+    "path-to-regexp": "6.3.0"
   }
 }
