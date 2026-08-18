@@ -4,9 +4,6 @@
  * @description Dynamic project detail page.
  *
  * The page is rendered on-demand from the backend project collection.
- * Project data is fetched on every request so changes in MongoDB are
- * reflected without requiring a new frontend build.
- *
  * AI-generated documentation is rendered from Markdown into sanitized HTML
  * before being injected into the page.
  *
@@ -31,6 +28,8 @@ import "../../styles/global.css";
  * astro.config.mjs already uses:
  * output: "server"
  * adapter: vercel()
+ *
+ * Therefore project data can be fetched from the backend for every request.
  */
 export const prerender = false;
 
@@ -66,31 +65,35 @@ function slugify(value: string): string {
 /**
  * Backend API base URL.
  *
- * PUBLIC_API_URL can override the production fallback.
+ * PUBLIC_API_URL is used when configured.
+ * The Render backend is the production fallback.
  */
 const apiUrl =
-	import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") ||
+	import.meta.env.PUBLIC_API_URL?.replace(/\/+$/, "") ||
 	"https://codeforge-ukq5.onrender.com";
 
 /**
- * Slug coming from the current URL.
+ * Slug requested by the current URL.
  */
 const requestedSlug = slugify(Astro.params.slug ?? "");
 
 let project: Project | null = null;
+let projectFetchFailed = false;
 
 /**
- * Fetch the latest project data directly from the backend.
+ * Fetch the latest project collection at request time.
  *
- * This runs when the page is requested instead of during the build.
- * Therefore changes in MongoDB are reflected on the next page request.
+ * There is intentionally no getStaticPaths() here.
+ * This makes database changes visible on the next request without
+ * requiring a new frontend build.
  */
 try {
 	const response = await fetch(`${apiUrl}/api/projects`, {
+		cache: "no-store",
 		headers: {
 			Accept: "application/json",
+			"Cache-Control": "no-cache",
 		},
-		cache: "no-store",
 	});
 
 	if (!response.ok) {
@@ -101,38 +104,38 @@ try {
 
 	const responseBody = await response.json();
 
-	let projects: Project[] = [];
-
-	if (responseBody && Array.isArray(responseBody.data)) {
-		projects = responseBody.data;
-	} else if (Array.isArray(responseBody)) {
-		projects = responseBody;
-	}
+	const projects: Project[] = Array.isArray(responseBody?.data)
+		? responseBody.data
+		: Array.isArray(responseBody)
+			? responseBody
+			: [];
 
 	project =
 		projects.find(
 			(item) => slugify(item.titolo) === requestedSlug,
 		) ?? null;
 } catch (error) {
-	console.error(
-		"[Projects] Failed to fetch project:",
-		{
-			slug: Astro.params.slug,
-			requestedSlug,
-			apiUrl,
-		},
+	projectFetchFailed = true;
+
+	console.error("[Projects] Failed to fetch project", {
+		slug: Astro.params.slug,
+		requestedSlug,
+		apiUrl,
 		error,
-	);
+	});
 }
 
 /**
- * Keep the response a normal 404 when the project does not exist.
+ * Set a proper response status instead of crashing the SSR render.
  *
- * Do not throw an exception here: a missing project is not a server error.
+ * Backend unavailable -> 503
+ * Project does not exist -> 404
  */
 if (!project) {
-	Astro.response.status = 404;
-	Astro.response.statusText = "Not Found";
+	Astro.response.status = projectFetchFailed ? 503 : 404;
+	Astro.response.statusText = projectFetchFailed
+		? "Service Unavailable"
+		: "Not Found";
 }
 
 /**
@@ -149,8 +152,16 @@ const categories =
 /**
  * Resolve the most appropriate project image.
  */
-const displayImage =
+const rawDisplayImage =
 	project?.image || project?.experienceImage || null;
+
+const componentApiUrl =
+	import.meta.env.PUBLIC_API_URL?.replace(/\/+$/, "") ||
+	"https://codeforge-ukq5.onrender.com";
+
+const displayImage = rawDisplayImage?.startsWith("/")
+	? `${componentApiUrl}${rawDisplayImage}`
+	: rawDisplayImage;
 
 /**
  * Convert project Markdown into sanitized HTML.
@@ -242,8 +253,6 @@ const hasAiDescription =
 
 /**
  * Parse the AI documentation before rendering the page.
- *
- * Astro supports top-level await in the frontmatter section.
  */
 const renderedDescription =
 	hasAiDescription && project
@@ -255,7 +264,9 @@ const renderedDescription =
 	title={
 		project
 			? `${project.titolo} | CodeForge`
-			: "Project Not Found | CodeForge"
+			: projectFetchFailed
+				? "Project service unavailable | CodeForge"
+				: "Project not found | CodeForge"
 	}
 >
 	<!-- ==============================================================
@@ -426,7 +437,6 @@ const renderedDescription =
 
 						<aside>
 							<div class="sticky top-24 space-y-5">
-								<!-- Technology stack -->
 								<section
 									class="rounded-3xl border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl"
 								>
@@ -445,7 +455,6 @@ const renderedDescription =
 									</div>
 								</section>
 
-								<!-- Repository CTA -->
 								{
 									project.linkGithub && (
 										<a
@@ -489,11 +498,15 @@ const renderedDescription =
 			) : (
 				<section class="rounded-3xl border border-white/10 bg-white/[0.03] p-8 md:p-10">
 					<h1 class="text-3xl font-black tracking-[-0.03em] text-white">
-						Project not found
+						{projectFetchFailed
+							? "Project service unavailable"
+							: "Project not found"}
 					</h1>
 
 					<p class="mt-4 max-w-2xl text-base leading-7 text-white/50">
-						The requested project could not be found.
+						{projectFetchFailed
+							? "The backend project service could not be reached."
+							: "The requested project could not be found."}
 					</p>
 				</section>
 			)
