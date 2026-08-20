@@ -41,11 +41,11 @@ export async function createExperience(
 }
 
 export async function updateExperience(
-    request: FastifyRequest<{ Params: { id: string }; Body: UpdateExperienceDTO }>,
+    request: FastifyRequest<{ Params: { name: string }; Body: UpdateExperienceDTO }>,
     reply: FastifyReply
 ) {
-    const { id } = request.params;
-    const updatedExp = await experienceService.updateExperience(id, request.body);
+    const { name } = request.params;
+    const updatedExp = await experienceService.updateExperience(name, request.body);
 
     auditLogger.log({
         requestId: request.id as string,
@@ -63,11 +63,11 @@ export async function updateExperience(
 }
 
 export async function updateExperienceImage(
-    request: FastifyRequest<{ Params: { id: string }; Body: { image: string | null } }>,
+    request: FastifyRequest<{ Params: { name: string }; Body: { image: string | null } }>,
     reply: FastifyReply
 ) {
-    const { id } = request.params;
-    const updatedExp = await experienceService.updateExperience(id, { image: request.body.image });
+    const { name } = request.params;
+    const updatedExp = await experienceService.updateExperience(name, { image: request.body.image });
 
     auditLogger.log({
         requestId: request.id as string,
@@ -82,18 +82,18 @@ export async function updateExperienceImage(
 }
 
 export async function deleteExperience(
-    request: FastifyRequest<{ Params: { id: string } }>,
+    request: FastifyRequest<{ Params: { name: string } }>,
     reply: FastifyReply
 ) {
-    const { id } = request.params;
-    await experienceService.deleteExperience(id);
+    const { name } = request.params;
+    await experienceService.deleteExperience(name);
 
     // Audit Log
     auditLogger.log({
         requestId: request.id as string,
         action: 'DELETE_EXPERIENCE',
         resource: 'Experience',
-        resourceId: id,
+        resourceId: name,
         result: 'success',
         actor: request.user ? (request.user as any).username : 'admin'
     });

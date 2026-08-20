@@ -8,6 +8,7 @@
  */
 export interface CreateProjectDTO {
     titolo: string;
+    role?: string;
     descrizione: string;
     descrizioneLunga?: string;
     tecnologie: string[];
@@ -27,6 +28,7 @@ export interface CreateProjectDTO {
  */
 export interface UpdateProjectDTO {
     titolo?: string;
+    role?: string;
     descrizione?: string;
     descrizioneLunga?: string;
     tecnologie?: string[];
@@ -49,6 +51,7 @@ export interface UpdateProjectDTO {
 export interface ProjectResponse {
     id: string;
     titolo: string;
+    role?: string;
     descrizione: string;
     descrizioneLunga?: string;
     tecnologie: string[];

@@ -50,6 +50,7 @@ export class ProjectService {
                 ? project._id.toString()
                 : project.id,
             titolo: project.titolo,
+            role: project.role,
             descrizione: project.descrizione,
             descrizioneLunga: project.descrizioneLunga,
             tecnologie: project.tecnologie || [],

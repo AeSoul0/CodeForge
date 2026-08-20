@@ -48,7 +48,7 @@ export default async function projectRoutes(
     );
 
     // ============================================================
-    // POST /api/projects/:id/generate-ai
+    // POST /api/projects/:name/generate-ai
     // ============================================================
 
     /**
@@ -58,10 +58,10 @@ export default async function projectRoutes(
      */
     fastify.post<{
         Params: {
-            id: string;
+            name: string;
         };
     }>(
-        '/:id/generate-ai',
+        '/:name/generate-ai',
         {
             preHandler: [
                 authenticateAdmin,
@@ -91,6 +91,12 @@ export default async function projectRoutes(
 
             properties: {
                 titolo: {
+                    type: 'string',
+                    minLength: 3,
+                    maxLength: 100,
+                },
+
+                role: {
                     type: 'string',
                     minLength: 3,
                     maxLength: 100,
@@ -164,7 +170,7 @@ export default async function projectRoutes(
     );
 
     // ============================================================
-    // PATCH /api/projects/:id
+    // PATCH /api/projects/:name
     // ============================================================
 
     /**
@@ -178,6 +184,12 @@ export default async function projectRoutes(
 
             properties: {
                 titolo: {
+                    type: 'string',
+                    minLength: 3,
+                    maxLength: 100,
+                },
+
+                role: {
                     type: 'string',
                     minLength: 3,
                     maxLength: 100,
@@ -270,12 +282,12 @@ export default async function projectRoutes(
 
     fastify.patch<{
         Params: {
-            id: string;
+            name: string;
         };
 
         Body: UpdateProjectDTO;
     }>(
-        '/:id',
+        '/:name',
         {
             schema: updateProjectSchema,
 
@@ -287,7 +299,7 @@ export default async function projectRoutes(
     );
 
     // ============================================================
-    // DELETE /api/projects/:id
+    // DELETE /api/projects/:name
     // ============================================================
 
     /**
@@ -295,10 +307,10 @@ export default async function projectRoutes(
      */
     fastify.delete<{
         Params: {
-            id: string;
+            name: string;
         };
     }>(
-        '/:id',
+        '/:name',
         {
             preHandler: [
                 authenticateAdmin,

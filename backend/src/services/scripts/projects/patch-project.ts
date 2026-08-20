@@ -147,6 +147,11 @@ async function main(): Promise<void> {
                 "New title (leave empty to keep unchanged):",
             );
 
+        const role =
+            await ask(
+                "New role (leave empty to keep unchanged):",
+            );
+
         const description =
             await ask(
                 "New description (leave empty to keep unchanged):",
@@ -175,6 +180,11 @@ async function main(): Promise<void> {
         if (title.trim() !== "") {
             payload.titolo =
                 title.trim();
+        }
+
+        if (role.trim() !== "") {
+            payload.role =
+                role.trim();
         }
 
         if (description.trim() !== "") {

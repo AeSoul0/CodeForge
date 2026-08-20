@@ -171,7 +171,7 @@ export default async function experienceRoutes(
     );
 
     // ---------------------------------------------------------------------------
-    // [PATCH] /api/experiences/:id
+    // [PATCH] /api/experiences/:name
     // ---------------------------------------------------------------------------
 
     const updateExperienceSchema = {
@@ -243,10 +243,10 @@ export default async function experienceRoutes(
     };
 
     fastify.patch<{
-        Params: { id: string };
+        Params: { name: string };
         Body: UpdateExperienceDTO;
     }>(
-        "/:id",
+        "/:name",
         {
             schema: updateExperienceSchema,
             preHandler: [authenticateAdmin],
@@ -255,16 +255,16 @@ export default async function experienceRoutes(
     );
 
     // ---------------------------------------------------------------------------
-    // [PATCH] /api/experiences/:id/image
+    // [PATCH] /api/experiences/:name/image
     //
     // Stores the actual image bytes in MongoDB.
     // ---------------------------------------------------------------------------
 
     fastify.patch<{
-        Params: { id: string };
+        Params: { name: string };
         Body: { image: string | null };
     }>(
-        "/:id/image",
+        "/:name/image",
         {
             bodyLimit: 12 * 1024 * 1024,
             schema: {
@@ -290,17 +290,12 @@ export default async function experienceRoutes(
             preHandler: [authenticateAdmin],
         },
         async (request, reply) => {
-            const { id } = request.params;
+            const { name } = request.params;
             const { image } = request.body;
 
-            if (!mongoose.isValidObjectId(id)) {
-                return reply.code(400).send({
-                    success: false,
-                    message: "Invalid experience id.",
-                });
-            }
-
-            const experience = await Experience.findById(id);
+            const isValidId = mongoose.isValidObjectId(name);
+            const query = isValidId ? { _id: name } : { company: name };
+            const experience = await Experience.findOne(query);
 
             if (!experience) {
                 return reply.code(404).send({
@@ -407,26 +402,21 @@ export default async function experienceRoutes(
     );
 
     // ---------------------------------------------------------------------------
-    // [GET] /api/experiences/:id/image
+    // [GET] /api/experiences/:name/image
     //
     // Public endpoint consumed by the frontend <img> element.
     // ---------------------------------------------------------------------------
 
     fastify.get<{
-        Params: { id: string };
+        Params: { name: string };
     }>(
-        "/:id/image",
+        "/:name/image",
         async (request, reply) => {
-            const { id } = request.params;
+            const { name } = request.params;
 
-            if (!mongoose.isValidObjectId(id)) {
-                return reply.code(400).send({
-                    success: false,
-                    message: "Invalid experience id.",
-                });
-            }
-
-            const experience = await Experience.findById(id).select(
+            const isValidId = mongoose.isValidObjectId(name);
+            const query = isValidId ? { _id: name } : { company: name };
+            const experience = await Experience.findOne(query).select(
                 "+imageData +imageMimeType",
             );
 
@@ -455,13 +445,13 @@ export default async function experienceRoutes(
     );
 
     // ---------------------------------------------------------------------------
-    // [DELETE] /api/experiences/:id
+    // [DELETE] /api/experiences/:name
     // ---------------------------------------------------------------------------
 
     fastify.delete<{
-        Params: { id: string };
+        Params: { name: string };
     }>(
-        "/:id",
+        "/:name",
         {
             preHandler: [authenticateAdmin],
         },

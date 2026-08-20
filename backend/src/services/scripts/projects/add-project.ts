@@ -47,6 +47,7 @@ async function askQuestion(
  */
 interface ProjectPayload {
     titolo: string;
+    role?: string;
     descrizione: string;
     image: string;
     tecnologie: string[];
@@ -70,6 +71,9 @@ async function main(): Promise<void> {
     try {
         const title =
             await askQuestion("Project Title:");
+
+        const role =
+            await askQuestion("Role (leave empty for default):");
 
         const description =
             await askQuestion(
@@ -140,6 +144,8 @@ async function main(): Promise<void> {
 
         const payload: ProjectPayload = {
             titolo: title.trim(),
+
+            ...(role.trim() !== "" ? { role: role.trim() } : {}),
 
             descrizione:
                 description.trim(),

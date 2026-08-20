@@ -147,7 +147,7 @@ export async function createProject(
 export async function updateProject(
     request: FastifyRequest<{
         Params: {
-            id: string;
+            name: string;
         };
 
         Body: UpdateProjectDTO;
@@ -155,7 +155,7 @@ export async function updateProject(
     reply: FastifyReply,
 ) {
     const {
-        id,
+        name,
     } = request.params;
 
     /**
@@ -174,7 +174,7 @@ export async function updateProject(
      */
     const updatedProject =
         await projectService.updateProject(
-            id,
+            name,
             projectData,
         );
 
@@ -211,7 +211,7 @@ export async function updateProject(
          * - triggers the Vercel deployment after successful persistence.
          */
         void processProjectAI(
-            id,
+            updatedProject.id,
             true,
             true,
         );
@@ -257,17 +257,17 @@ export async function updateProject(
 export async function deleteProject(
     request: FastifyRequest<{
         Params: {
-            id: string;
+            name: string;
         };
     }>,
     reply: FastifyReply,
 ) {
     const {
-        id,
+        name,
     } = request.params;
 
     await projectService.deleteProject(
-        id,
+        name,
     );
 
     auditLogger.log({
@@ -277,7 +277,7 @@ export async function deleteProject(
 
         resource: 'Project',
 
-        resourceId: id,
+        resourceId: name,
 
         result: 'success',
 
@@ -309,18 +309,18 @@ export async function deleteProject(
 export async function generateAIForProject(
     request: FastifyRequest<{
         Params: {
-            id: string;
+            name: string;
         };
     }>,
     reply: FastifyReply,
 ) {
     const {
-        id,
+        name,
     } = request.params;
 
     const project =
         await projectService.getProjectById(
-            id,
+            name,
         );
 
     if (!project) {
@@ -336,7 +336,7 @@ export async function generateAIForProject(
      * Force regeneration even when descrizioneLunga already exists.
      */
     void processProjectAI(
-        id,
+        project.id,
         true,
         true,
     );
