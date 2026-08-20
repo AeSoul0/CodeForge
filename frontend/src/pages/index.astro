@@ -14,9 +14,12 @@ import Layout from "../layout/Layout.astro";
 import Navbar from "../components/Navbar.astro";
 import ParticleCanvas from "../components/ParticleCanvas.astro";
 import HeroBento from "../components/HeroBento.astro";
+import FeaturedProject from "../components/FeaturedProject.astro";
+import WhatIBring from "../components/WhatIBring.astro";
 import CoreCompetencies from "../components/CoreCompetencies.astro";
 import ProjectsGrid from "../components/ProjectsGrid.astro";
 import Experience from "../components/Experience.astro";
+import TechnicalProof from "../components/TechnicalProof.astro";
 import Footer from "../components/Footer.astro";
 
 import "../styles/global.css";
@@ -188,6 +191,22 @@ try {
 		<div class="section-divider" aria-hidden="true"></div>
 
 		<!-- ======================================================
+             FEATURED PROJECT
+             ====================================================== -->
+
+		<FeaturedProject />
+
+		<div class="section-divider" aria-hidden="true"></div>
+
+		<!-- ======================================================
+             WHAT I BRING
+             ====================================================== -->
+
+		<WhatIBring />
+
+		<div class="section-divider" aria-hidden="true"></div>
+
+		<!-- ======================================================
              RECENT PROJECTS
              ====================================================== -->
 
@@ -208,6 +227,13 @@ try {
              ====================================================== -->
 
 		<CoreCompetencies />
+
+		<div class="section-divider" aria-hidden="true"></div>
+		<!-- ======================================================
+             TECHNICAL PROOF / ENGINEERING STANDARDS
+             ====================================================== -->
+
+		<TechnicalProof />
 
 		<div class="section-divider" aria-hidden="true"></div>
 	</section>

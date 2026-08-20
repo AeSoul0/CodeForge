@@ -20,7 +20,9 @@ export class ExperienceRepository {
 
     async findById(id: string) {
         try {
-            return await Experience.findById(id).select('-__v').lean();
+            const isValidId = /^[0-9a-fA-F]{24}$/.test(id);
+            const query = isValidId ? { _id: id } : { company: id };
+            return await Experience.findOne(query).select('-__v').lean();
         } catch (error) {
             throw new DatabaseError('Failed to fetch experience from database');
         }
@@ -37,7 +39,9 @@ export class ExperienceRepository {
 
     async update(id: string, data: UpdateExperienceDTO) {
         try {
-            return await Experience.findByIdAndUpdate(id, data, { returnDocument: 'after', runValidators: true }).lean();
+            const isValidId = /^[0-9a-fA-F]{24}$/.test(id);
+            const query = isValidId ? { _id: id } : { company: id };
+            return await Experience.findOneAndUpdate(query, data, { returnDocument: 'after', runValidators: true }).lean();
         } catch (error) {
             throw new DatabaseError('Failed to update experience in database');
         }
@@ -45,7 +49,9 @@ export class ExperienceRepository {
 
     async delete(id: string) {
         try {
-            return await Experience.findByIdAndDelete(id).lean();
+            const isValidId = /^[0-9a-fA-F]{24}$/.test(id);
+            const query = isValidId ? { _id: id } : { company: id };
+            return await Experience.findOneAndDelete(query).lean();
         } catch (error) {
             throw new DatabaseError('Failed to delete experience from database');
         }

@@ -1,0 +1,72 @@
+---
+/**
+ * @file src/components/FeaturedProject.astro
+ * @description Featured project section highlighting CodeForge.
+ */
+---
+
+<section class="relative w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-16 sm:py-24">
+    <div class="mb-12">
+        <h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight">
+            Featured project
+            <span class="text-cyan-400 mx-3">—</span> CodeForge
+        </h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 relative">
+        <!-- Connecting line -->
+        <div class="hidden md:block absolute top-0 bottom-0 left-[25%] w-px bg-white/5" aria-hidden="true"></div>
+
+        <!-- Left Column: Details -->
+        <div class="md:col-span-3 space-y-10">
+            <!-- Role -->
+            <div>
+                <h3 class="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">Role</h3>
+                <p class="text-sm sm:text-base text-slate-300 font-medium">Full-stack Engineer / Product Designer</p>
+            </div>
+            
+            <!-- Stack (Optional but good) -->
+            <div>
+                <h3 class="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">Stack</h3>
+                <p class="text-sm sm:text-base text-slate-300">Astro · Fastify · MongoDB</p>
+            </div>
+        </div>
+
+        <!-- Right Column: Narrative -->
+        <div class="md:col-span-9 md:pl-8 space-y-10">
+            <!-- Problem -->
+            <div class="relative group">
+                <div class="absolute -left-[2.1rem] top-1.5 hidden md:block w-3 h-3 rounded-full bg-slate-800 border-2 border-slate-600 group-hover:border-cyan-400 transition-colors"></div>
+                <h3 class="text-xl font-bold text-white mb-3">Problem</h3>
+                <p class="text-slate-400 leading-relaxed max-w-3xl">
+                    Portfolio statici difficili da mantenere e poveri di contesto tecnico.
+                </p>
+            </div>
+
+            <!-- Solution -->
+            <div class="relative group">
+                <div class="absolute -left-[2.1rem] top-1.5 hidden md:block w-3 h-3 rounded-full bg-slate-800 border-2 border-slate-600 group-hover:border-cyan-400 transition-colors"></div>
+                <h3 class="text-xl font-bold text-white mb-3">Solution</h3>
+                <p class="text-slate-400 leading-relaxed max-w-3xl">
+                    Dynamic full-stack portfolio + automated technical documentation.
+                </p>
+            </div>
+
+
+            
+            <!-- Link to Case Study -->
+            <div class="pt-4">
+                <a
+                    href="/projects/codeforge"
+                    class="inline-flex items-center gap-2 text-sm font-semibold text-white hover:text-cyan-400 transition-colors"
+                >
+                    Read the case study
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

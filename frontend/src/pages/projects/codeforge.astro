@@ -1,0 +1,544 @@
+---
+/**
+ * @file frontend/src/pages/projects/codeforge.astro
+ * @description Dedicated case study page for CodeForge.
+ */
+
+import Layout from "../../layout/Layout.astro";
+import ParticleCanvas from "../../components/ParticleCanvas.astro";
+import "../../styles/global.css";
+
+const engineeringAreas = [
+    {
+        label: "Architecture",
+        value: "Controller → Service → Repository"
+    },
+    {
+        label: "Security",
+        value: "JWT · HTTP-only Cookies · CSP · Rate Limiting"
+    },
+    {
+        label: "Testing",
+        value: "Vitest · Supertest · V8 Coverage"
+    },
+    {
+        label: "Delivery",
+        value: "Docker · GitHub Actions · TypeScript"
+    }
+];
+
+const platformCapabilities = [
+    {
+        label: "Frontend",
+        value: "Astro + React + Tailwind CSS"
+    },
+    {
+        label: "Backend",
+        value: "Fastify + TypeScript"
+    },
+    {
+        label: "Persistence",
+        value: "MongoDB + Mongoose"
+    },
+    {
+        label: "AI Documentation",
+        value: "GitHub Context + OpenAI / Gemini"
+    }
+];
+
+const qualityChecks = [
+    "ESLint",
+    "TypeScript typechecking",
+    "Backend build verification",
+    "Vitest unit tests",
+    "Supertest HTTP integration tests",
+    "GitHub Actions CI"
+];
+---
+
+<Layout title="CodeForge Case Study | ÆSoul">
+    <ParticleCanvas />
+
+    <div class="pointer-events-none fixed inset-x-0 top-0 z-0 h-[420px] bg-gradient-to-b from-cyan-500/[0.07] via-transparent to-transparent"></div>
+
+    <main class="relative z-10 mx-auto w-full max-w-4xl px-6 pb-24 pt-28 md:pb-32 md:pt-32">
+        <nav class="mb-10 md:mb-14">
+            <a
+                href="/#projects&experiences"
+                class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/60 backdrop-blur-md transition-all duration-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                >
+                    <path d="m15 18-6-6 6-6"></path>
+                </svg>
+                Back to projects
+            </a>
+        </nav>
+
+        <header class="mb-16">
+            <div class="mb-5 flex flex-wrap gap-2">
+                <span class="rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300">
+                    Case Study
+                </span>
+            </div>
+
+            <h1 class="mb-6 text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl md:text-6xl">
+                CodeForge
+            </h1>
+
+            <div class="prose prose-invert max-w-none prose-p:text-xl prose-p:leading-relaxed prose-p:text-slate-300">
+                <p>
+                    <strong class="text-white">CodeForge</strong> is a full-stack portfolio platform built to
+                    separate portfolio presentation from content management while providing an
+                    <span class="text-cyan-400"> evidence-driven AI documentation workflow </span>
+                    grounded in public GitHub repository context.
+                </p>
+            </div>
+
+            <div class="mt-12 grid grid-cols-2 gap-6 border-y border-white/10 py-8 md:grid-cols-4">
+                <div>
+                    <h3 class="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-500">
+                        Role
+                    </h3>
+                    <p class="text-sm font-medium text-slate-300">
+                        Full-Stack Engineer
+                    </p>
+                </div>
+
+                <div>
+                    <h3 class="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-500">
+                        Timeline
+                    </h3>
+                    <p class="text-sm font-medium text-slate-300">
+                        May 2026 – Present
+                    </p>
+                </div>
+
+                <div class="col-span-2">
+                    <h3 class="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-500">
+                        Stack
+                    </h3>
+                    <p class="text-sm font-medium text-slate-300">
+                        Astro · React · Fastify · TypeScript · MongoDB · Mongoose · Docker
+                    </p>
+                </div>
+            </div>
+        </header>
+
+        <article
+            class="prose prose-invert prose-cyan max-w-none
+                prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-white
+                prose-h2:mt-16 prose-h2:mb-8 prose-h2:border-b prose-h2:border-white/10 prose-h2:pb-4 prose-h2:text-3xl
+                prose-h3:mb-4 prose-h3:mt-8 prose-h3:text-xl
+                prose-p:mb-6 prose-p:leading-relaxed prose-p:text-slate-400
+                prose-li:leading-relaxed prose-li:text-slate-400
+                prose-strong:text-slate-200"
+        >
+            <h2>01. The Problem</h2>
+
+            <div class="mb-8 rounded-2xl border border-white/5 bg-white/[0.02] p-6">
+                <p class="mb-4 text-lg text-slate-300">
+                    A personal portfolio has to solve two separate engineering problems:
+                    presenting technical work clearly and maintaining the content behind it.
+                    Hard-coded project pages make updates repetitive and couple content management
+                    too tightly to the frontend.
+                </p>
+
+                <p class="text-lg text-slate-300">
+                    At the same time, a GitHub repository alone rarely provides enough context for a
+                    technical reviewer to quickly understand the architecture, engineering decisions,
+                    security controls, testing strategy, and implementation details of a project.
+                </p>
+            </div>
+
+            <div class="h-10 md:h-14"></div>
+
+            <h2>02. Goals</h2>
+
+            <ul>
+                <li>
+                    <strong>Separate content from presentation:</strong>{" "}
+                    project and experience data should be managed independently from the frontend.
+                </li>
+                <li>
+                    <strong>Provide technical depth:</strong>{" "}
+                    projects should expose architecture, implementation decisions, and engineering evidence.
+                </li>
+                <li>
+                    <strong>Automate documentation:</strong>{" "}
+                    generating project documentation should rely on repository evidence rather than manually
+                    recreating technical context.
+                </li>
+                <li>
+                    <strong>Keep the platform production-oriented:</strong>{" "}
+                    authentication, validation, testing, CI, deployment, and observability should be treated
+                    as first-class concerns.
+                </li>
+            </ul>
+
+            <div class="h-10 md:h-14"></div>
+
+            <h2>03. Solution Overview</h2>
+
+            <p>
+                CodeForge uses a split frontend/backend architecture. The Astro frontend is responsible
+                for presentation and routing, while a Fastify API manages portfolio data, authentication,
+                business logic, persistence, and AI-assisted documentation.
+            </p>
+
+            <div class="not-prose my-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {
+                    engineeringAreas.map((item) => (
+                        <div class="rounded-2xl border border-white/5 bg-white/[0.02] p-6">
+                            <span class="mb-2 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                                {item.label}
+                            </span>
+                            <span class="text-sm font-medium text-slate-200">
+                                {item.value}
+                            </span>
+                        </div>
+                    ))
+                }
+            </div>
+
+            <div class="h-4 md:h-6"></div>
+
+            <h2>04. Architecture</h2>
+
+            <p>
+                The backend follows a
+                <strong> Controller → Service → Repository</strong>
+                architecture to keep HTTP concerns, business logic, and persistence responsibilities separate.
+                Fastify application configuration is also isolated from server bootstrap, which allows the
+                configured application to be imported directly by the test suite without starting a network listener.
+            </p>
+
+            <div class="not-prose my-8 rounded-2xl border border-white/10 bg-black/40 p-6">
+                <pre class="overflow-x-auto text-sm leading-relaxed text-slate-300"><code>{`Browser
+   │
+   ▼
+Astro + React Frontend
+   │
+   ▼
+Fastify API
+   │
+   ├── Authentication / Validation
+   │
+   ▼
+Controllers
+   │
+   ▼
+Services
+   │
+   ▼
+Repositories
+   │
+   ▼
+MongoDB / Mongoose
+
+AI Documentation
+   │
+   ├── Public GitHub Repository Context
+   ├── OpenAI / Gemini
+   ▼
+Persisted Markdown
+   │
+   ▼
+Project Case Study`}</code></pre>
+            </div>
+
+            <div class="h-4 md:h-6"></div>
+
+            <h2>05. Key Design Decisions</h2>
+
+            <div class="not-prose my-8 space-y-6">
+                <div class="rounded-2xl border border-white/5 bg-white/[0.02] p-6">
+                    <h3 class="mb-2 text-lg font-bold text-white">
+                        Frontend: Astro + React
+                    </h3>
+
+                    <p class="mb-4 text-sm text-slate-400">
+                        <strong class="text-slate-200">Decision:</strong>{" "}
+                        Use Astro for the application shell and content-heavy routes while retaining
+                        React integration where interactive UI behaviour is useful.
+                    </p>
+
+                    <p class="text-sm text-slate-400">
+                        <strong class="text-slate-200">Reasoning:</strong>{" "}
+                        The portfolio is primarily content-oriented, so the architecture prioritizes
+                        lightweight rendering while keeping component-level interactivity available when needed.
+                    </p>
+                </div>
+
+                <div class="rounded-2xl border border-white/5 bg-white/[0.02] p-6">
+                    <h3 class="mb-2 text-lg font-bold text-white">
+                        Backend: Controller → Service → Repository
+                    </h3>
+
+                    <p class="mb-4 text-sm text-slate-400">
+                        <strong class="text-slate-200">Decision:</strong>{" "}
+                        Keep transport handling, application logic, and persistence in separate layers.
+                    </p>
+
+                    <p class="text-sm text-slate-400">
+                        <strong class="text-slate-200">Reasoning:</strong>{" "}
+                        This makes the backend easier to test, reason about, and extend without coupling
+                        HTTP handlers directly to MongoDB operations.
+                    </p>
+                </div>
+
+                <div class="rounded-2xl border border-white/5 bg-white/[0.02] p-6">
+                    <h3 class="mb-2 text-lg font-bold text-white">
+                        Security: Protected Administrative API
+                    </h3>
+
+                    <p class="mb-4 text-sm text-slate-400">
+                        <strong class="text-slate-200">Decision:</strong>{" "}
+                        Administrative mutations require JWT authentication stored in an HTTP-only cookie.
+                    </p>
+
+                    <p class="text-sm text-slate-400">
+                        <strong class="text-slate-200">Implementation:</strong>{" "}
+                        Helmet-based protections, restricted CORS, CSP/HSTS configuration, bcrypt password hashing,
+                        request rate limiting, schema validation, and production-safe error responses.
+                    </p>
+                </div>
+
+                <div class="rounded-2xl border border-white/5 bg-white/[0.02] p-6">
+                    <h3 class="mb-2 text-lg font-bold text-white">
+                        AI Documentation: Evidence over Generation
+                    </h3>
+
+                    <p class="mb-4 text-sm text-slate-400">
+                        <strong class="text-slate-200">Decision:</strong>{" "}
+                        Generate documentation from public GitHub repository context rather than relying on
+                        unconstrained model output.
+                    </p>
+
+                    <p class="text-sm text-slate-400">
+                        <strong class="text-slate-200">Implementation:</strong>{" "}
+                        CodeForge collects repository metadata, README content, and available project metadata,
+                        then supplies that context to an OpenAI or Gemini provider. Generated Markdown is normalized,
+                        bounded, persisted, and rendered by the portfolio.
+                    </p>
+                </div>
+            </div>
+
+            <div class="h-4 md:h-6"></div>
+
+            <h2>06. Implementation Highlights</h2>
+
+            <p>
+                The implementation focuses on maintainability and explicit engineering boundaries rather than
+                treating the portfolio as a purely visual frontend.
+            </p>
+
+            <ul>
+                <li>
+                    <strong>Fastify API:</strong>{" "}
+                    typed REST endpoints with explicit request schemas and centralized error handling.
+                </li>
+                <li>
+                    <strong>Persistence:</strong>{" "}
+                    MongoDB with Mongoose models and repository-level data access.
+                </li>
+                <li>
+                    <strong>Authentication:</strong>{" "}
+                    JWT-based administrative authentication using HTTP-only cookies and secure production settings.
+                </li>
+                <li>
+                    <strong>AI workflow:</strong>{" "}
+                    asynchronous repository-aware documentation generation with persisted Markdown output.
+                </li>
+                <li>
+                    <strong>Observability:</strong>{" "}
+                    structured Fastify logging and in-process request metrics for runtime visibility.
+                </li>
+                <li>
+                    <strong>Deployment:</strong>{" "}
+                    Docker and Docker Compose definitions for reproducible multi-service environments.
+                </li>
+            </ul>
+
+            <div class="h-10 md:h-14"></div>
+
+            <h2>07. Testing & Engineering Quality</h2>
+
+            <p>
+                Instead of presenting unverified performance or coverage numbers, the project documents the
+                concrete verification mechanisms currently implemented in the repository.
+            </p>
+
+            <div class="not-prose my-10 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {
+                    qualityChecks.map((check) => (
+                        <div class="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-4">
+                            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cyan-400/10 text-cyan-300">
+                                ✓
+                            </span>
+                            <span class="text-sm text-slate-300">{check}</span>
+                        </div>
+                    ))
+                }
+            </div>
+
+            <p>
+                Backend verification combines unit-level tests with HTTP integration testing, while the CI
+                workflow provides automated checks for the repository before changes are considered complete.
+            </p>
+
+            <div class="h-4 md:h-6"></div>
+
+            <h2>08. Security Model</h2>
+
+            <div class="not-prose my-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div class="rounded-2xl border border-white/5 bg-white/[0.02] p-6">
+                    <span class="mb-3 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                        Authentication
+                    </span>
+
+                    <p class="text-sm leading-relaxed text-slate-300">
+                        JWT authentication, HTTP-only cookies, secure production configuration,
+                        and bcrypt password hashing.
+                    </p>
+                </div>
+
+                <div class="rounded-2xl border border-white/5 bg-white/[0.02] p-6">
+                    <span class="mb-3 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                        HTTP Protection
+                    </span>
+
+                    <p class="text-sm leading-relaxed text-slate-300">
+                        Helmet, CSP, HSTS, restricted CORS, frame protection, referrer policy,
+                        and cross-origin resource policy configuration.
+                    </p>
+                </div>
+
+                <div class="rounded-2xl border border-white/5 bg-white/[0.02] p-6">
+                    <span class="mb-3 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                        Abuse Prevention
+                    </span>
+
+                    <p class="text-sm leading-relaxed text-slate-300">
+                        Global request rate limiting together with stricter rate limiting around authentication.
+                    </p>
+                </div>
+
+                <div class="rounded-2xl border border-white/5 bg-white/[0.02] p-6">
+                    <span class="mb-3 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                        Input Safety
+                    </span>
+
+                    <p class="text-sm leading-relaxed text-slate-300">
+                        Fastify JSON schema validation with explicit request boundaries and
+                        production-safe error responses.
+                    </p>
+                </div>
+            </div>
+
+            <div class="h-4 md:h-6"></div>
+
+            <h2>09. Results</h2>
+
+            <p>
+                The final result is a portfolio platform that demonstrates full-stack engineering through the
+                system itself rather than relying only on project screenshots.
+            </p>
+
+            <div class="not-prose my-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {
+                    platformCapabilities.map((item) => (
+                        <div class="rounded-2xl border border-white/5 bg-white/[0.02] p-6">
+                            <span class="mb-2 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                                {item.label}
+                            </span>
+                            <span class="text-sm font-medium text-slate-200">
+                                {item.value}
+                            </span>
+                        </div>
+                    ))
+                }
+            </div>
+
+            <p>
+                More importantly, CodeForge became an engineering evidence platform: portfolio content is
+                stored as application data, the administrative workflow is protected, the backend is testable,
+                the system is containerized, CI validates changes, and technical documentation can be generated
+                from repository evidence.
+            </p>
+
+            <div class="h-14 md:h-20"></div>
+
+            <h2>10. What I Learned</h2>
+
+            <ul>
+                <li>
+                    <strong>Architecture matters at project scale:</strong>{" "}
+                    separating transport, business logic, and persistence makes the system substantially easier
+                    to evolve.
+                </li>
+                <li>
+                    <strong>Security must be designed into the application:</strong>{" "}
+                    authentication, validation, rate limiting, cookie policy, and HTTP protections cannot be
+                    treated as final-stage additions.
+                </li>
+                <li>
+                    <strong>AI output needs evidence:</strong>{" "}
+                    repository-grounded generation is more useful for technical documentation than unconstrained
+                    generation because it reduces unsupported claims.
+                </li>
+                <li>
+                    <strong>Engineering quality is broader than features:</strong>{" "}
+                    testing, CI, deployment, observability, and operational boundaries are part of the product.
+                </li>
+            </ul>
+
+            <div class="h-14 md:h-20"></div>
+
+            <h2>11. Future Improvements</h2>
+
+            <p>
+                The project is intentionally extensible. Potential future work includes deeper automated
+                repository analysis, richer documentation generation, stronger observability, expanded frontend
+                testing, and additional deployment automation.
+            </p>
+        </article>
+
+        <div class="mt-20 border-t border-white/10 pt-10 text-center">
+            <a
+                href="https://github.com/AeSoul0/CodeForge"
+                target="_blank"
+                rel="noreferrer"
+                class="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-black shadow-2xl transition-transform duration-300 hover:scale-[1.03]"
+            >
+                View Source on GitHub
+
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="17"
+                    height="17"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                >
+                    <path d="M7 17 17 7"></path>
+                    <path d="M7 7h10v10"></path>
+                </svg>
+            </a>
+        </div>
+    </main>
+</Layout>

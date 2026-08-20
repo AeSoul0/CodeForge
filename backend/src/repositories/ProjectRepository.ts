@@ -25,7 +25,9 @@ export class ProjectRepository {
 
     async findById(id: string) {
         try {
-            return await Project.findById(id).populate('experienceId').lean();
+            const isValidId = /^[0-9a-fA-F]{24}$/.test(id);
+            const query = isValidId ? { _id: id } : { titolo: id };
+            return await Project.findOne(query).populate('experienceId').lean();
         } catch (error) {
             throw new DatabaseError('Failed to fetch project from database');
         }
@@ -43,7 +45,9 @@ export class ProjectRepository {
 
     async update(id: string, data: UpdateProjectDTO) {
         try {
-            return await Project.findByIdAndUpdate(id, data, { returnDocument: 'after', runValidators: true }).populate('experienceId').lean();
+            const isValidId = /^[0-9a-fA-F]{24}$/.test(id);
+            const query = isValidId ? { _id: id } : { titolo: id };
+            return await Project.findOneAndUpdate(query, data, { returnDocument: 'after', runValidators: true }).populate('experienceId').lean();
         } catch (error) {
             throw new DatabaseError('Failed to update project in database');
         }
@@ -51,7 +55,9 @@ export class ProjectRepository {
 
     async delete(id: string) {
         try {
-            return await Project.findByIdAndDelete(id).lean();
+            const isValidId = /^[0-9a-fA-F]{24}$/.test(id);
+            const query = isValidId ? { _id: id } : { titolo: id };
+            return await Project.findOneAndDelete(query).lean();
         } catch (error) {
             throw new DatabaseError('Failed to delete project from database');
         }
