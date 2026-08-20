@@ -56,6 +56,7 @@ interface ExperienceItem {
 
 let projects: Project[] = [];
 let experiences: ExperienceItem[] = [];
+let apiError: boolean = false;
 
 /**
  * Backend API base URL.
@@ -104,6 +105,7 @@ try {
 	/**
 	 * Keep the page renderable even when the backend is unavailable.
 	 */
+	apiError = true;
 	console.error(
 		"[Backend Connection Error] Failed to fetch projects:",
 		error,
@@ -148,6 +150,7 @@ try {
 	 * The rest of the homepage remains available even if
 	 * the experience endpoint cannot be reached.
 	 */
+	apiError = true;
 	console.error(
 		"[Backend Connection Error] Failed to fetch experiences:",
 		error,
@@ -188,7 +191,7 @@ try {
              RECENT PROJECTS
              ====================================================== -->
 
-		<ProjectsGrid projects={projects} />
+		<ProjectsGrid projects={projects} apiError={apiError} />
 
 		<div class="section-divider" aria-hidden="true"></div>
 
@@ -196,7 +199,7 @@ try {
              PROFESSIONAL / ACADEMIC EXPERIENCE
              ====================================================== -->
 
-		<Experience experiences={experiences} />
+		<Experience experiences={experiences} apiError={apiError} />
 
 		<div class="section-divider" aria-hidden="true"></div>
 

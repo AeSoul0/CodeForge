@@ -19,9 +19,10 @@ export interface Project {
 
 interface Props {
 	projects: Project[];
+	apiError?: boolean;
 }
 
-const { projects = [] } = Astro.props;
+const { projects = [], apiError = false } = Astro.props;
 
 /* ======================================================
    HELPERS
@@ -140,7 +141,16 @@ const allCategories = [
 		class="grid grid-cols-1 md:grid-cols-2 gap-6"
 	>
 		{
-			projects.length === 0 ? (
+			apiError ? (
+				<div class="col-span-full py-12 text-center relative z-10 glass-card rounded-2xl border border-red-500/20 bg-red-500/5">
+					<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-4 text-red-400 opacity-80"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+					<h3 class="text-xl font-bold text-white mb-2">Backend Connection Failed</h3>
+					<p class="text-slate-400 max-w-md mx-auto">
+						The free-tier Render backend is currently waking up or unavailable. 
+						Please try refreshing the page in about 50 seconds.
+					</p>
+				</div>
+			) : projects.length === 0 ? (
 				<>
 					<!-- Skeleton shown when no project data is available yet. -->
 					<div class="project-skeleton" aria-hidden="true">
