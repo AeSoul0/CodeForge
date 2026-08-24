@@ -1,0 +1,220 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Experiences | Admin">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-white">Experiences</h1>
+        <button id="newExpBtn" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded font-medium transition-colors">
+            + New Experience
+        </button>
+    </div>
+    
+    <div class="bg-slate-900 border border-white/10 rounded-xl overflow-hidden">
+        <table class="w-full text-left text-sm text-slate-400">
+            <thead class="text-xs text-slate-300 uppercase bg-black/30 border-b border-white/10">
+                <tr>
+                    <th scope="col" class="px-6 py-4 font-medium">Role / Company</th>
+                    <th scope="col" class="px-6 py-4 font-medium">Dates</th>
+                    <th scope="col" class="px-6 py-4 font-medium text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="expTableBody">
+                <tr>
+                    <td colspan="3" class="px-6 py-4 text-center">Loading experiences...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal for Create/Edit -->
+    <div id="expModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm overflow-y-auto">
+        <div class="bg-slate-900 border border-white/10 rounded-xl w-full max-w-2xl my-8">
+            <div class="flex justify-between items-center p-6 border-b border-white/10">
+                <h2 id="modalTitle" class="text-xl font-bold text-white">New Experience</h2>
+                <button id="closeModalBtn" aria-label="Close Modal" class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+            
+            <form id="expForm" class="p-6 space-y-4">
+                <input type="hidden" id="expId" />
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1">Role</label>
+                        <input type="text" id="e-role" required class="w-full bg-black/50 border border-white/10 rounded px-3 py-2 text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1">Company</label>
+                        <input type="text" id="e-company" required class="w-full bg-black/50 border border-white/10 rounded px-3 py-2 text-white">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Description</label>
+                    <textarea id="e-description" required rows="4" class="w-full bg-black/50 border border-white/10 rounded px-3 py-2 text-white"></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Technologies (comma separated)</label>
+                    <input type="text" id="e-technologies" class="w-full bg-black/50 border border-white/10 rounded px-3 py-2 text-white">
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1">Start Date</label>
+                        <input type="text" id="e-startDate" required placeholder="MM/YYYY" class="w-full bg-black/50 border border-white/10 rounded px-3 py-2 text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1">End Date</label>
+                        <input type="text" id="e-endDate" placeholder="MM/YYYY or Present" class="w-full bg-black/50 border border-white/10 rounded px-3 py-2 text-white">
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="e-current" class="w-4 h-4 text-blue-600 bg-black/50 border-white/10 rounded focus:ring-blue-500 focus:ring-2">
+                    <label for="e-current" class="text-sm font-medium text-slate-300">I currently work here</label>
+                </div>
+                
+                <div id="modalError" class="text-red-400 text-sm hidden"></div>
+                
+                <div class="flex justify-end gap-3 pt-4 border-t border-white/10">
+                    <button type="button" id="cancelBtn" class="px-4 py-2 rounded text-slate-300 hover:bg-white/5 transition-colors">Cancel</button>
+                    <button type="submit" id="saveBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded font-medium transition-colors">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</AdminLayout>
+
+<script>
+    const baseUrl = 'http://localhost:3002'; // Change in production
+    
+    const tableBody = document.getElementById('expTableBody');
+    const modal = document.getElementById('expModal');
+    const expForm = document.getElementById('expForm') as HTMLFormElement;
+    let expData: any[] = [];
+    
+    async function loadExperiences() {
+        try {
+            const res = await fetch(`${baseUrl}/api/experiences`);
+            const json = await res.json();
+            expData = json.data || [];
+            renderTable();
+        } catch (e) {
+            tableBody!.innerHTML = `<tr><td colspan="3" class="px-6 py-4 text-center text-red-400">Failed to load experiences</td></tr>`;
+        }
+    }
+    
+    function renderTable() {
+        if (!expData.length) {
+            tableBody!.innerHTML = `<tr><td colspan="3" class="px-6 py-4 text-center">No experiences found</td></tr>`;
+            return;
+        }
+        
+        tableBody!.innerHTML = expData.map(e => `
+            <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                <td class="px-6 py-4">
+                    <div class="font-medium text-white">${e.role}</div>
+                    <div class="text-xs text-slate-500">${e.company}</div>
+                </td>
+                <td class="px-6 py-4">
+                    ${e.startDate} - ${e.current ? 'Present' : (e.endDate || '')}
+                </td>
+                <td class="px-6 py-4 text-right">
+                    <button class="text-emerald-400 hover:text-emerald-300 mr-3 preview-btn" data-id="${e._id}">Preview</button>
+                    <button class="text-blue-400 hover:text-blue-300 mr-3 edit-btn" data-id="${e._id}">Edit</button>
+                    <button class="text-red-400 hover:text-red-300 delete-btn" data-id="${e._id}">Delete</button>
+                </td>
+            </tr>
+        `).join('');
+        
+        document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', (e) => {
+            const id = (e.target as HTMLButtonElement).dataset.id;
+            const exp = expData.find(x => x._id === id);
+            if(exp) openModal(exp);
+        }));
+        
+        document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', async (e) => {
+            const id = (e.target as HTMLButtonElement).dataset.id;
+            if(confirm('Are you sure you want to delete this experience?')) {
+                try {
+                    await fetch(`${baseUrl}/api/experiences/${id}`, { method: 'DELETE' });
+                    loadExperiences();
+                } catch(err) {
+                    alert('Error deleting experience');
+                }
+            }
+        }));
+    }
+    
+    function openModal(exp: any = null) {
+        expForm.reset();
+        document.getElementById('modalError')!.classList.add('hidden');
+        
+        if (exp) {
+            document.getElementById('modalTitle')!.textContent = 'Edit Experience';
+            (document.getElementById('expId') as HTMLInputElement).value = exp._id;
+            (document.getElementById('e-role') as HTMLInputElement).value = exp.role || '';
+            (document.getElementById('e-company') as HTMLInputElement).value = exp.company || '';
+            (document.getElementById('e-description') as HTMLTextAreaElement).value = exp.description || '';
+            (document.getElementById('e-technologies') as HTMLInputElement).value = (exp.technologies || []).join(', ');
+            (document.getElementById('e-startDate') as HTMLInputElement).value = exp.startDate || '';
+            (document.getElementById('e-endDate') as HTMLInputElement).value = exp.endDate || '';
+            (document.getElementById('e-current') as HTMLInputElement).checked = !!exp.current;
+        } else {
+            document.getElementById('modalTitle')!.textContent = 'New Experience';
+            (document.getElementById('expId') as HTMLInputElement).value = '';
+        }
+        
+        modal!.classList.remove('hidden');
+    }
+    
+    document.getElementById('newExpBtn')?.addEventListener('click', () => openModal());
+    document.getElementById('closeModalBtn')?.addEventListener('click', () => modal!.classList.add('hidden'));
+    document.getElementById('cancelBtn')?.addEventListener('click', () => modal!.classList.add('hidden'));
+    
+    expForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const id = (document.getElementById('expId') as HTMLInputElement).value;
+        const current = (document.getElementById('e-current') as HTMLInputElement).checked;
+        const endDateVal = (document.getElementById('e-endDate') as HTMLInputElement).value;
+
+        const payload = {
+            role: (document.getElementById('e-role') as HTMLInputElement).value,
+            company: (document.getElementById('e-company') as HTMLInputElement).value,
+            description: (document.getElementById('e-description') as HTMLInputElement).value,
+            technologies: (document.getElementById('e-technologies') as HTMLInputElement).value.split(',').map(s=>s.trim()).filter(Boolean),
+            startDate: (document.getElementById('e-startDate') as HTMLInputElement).value,
+            endDate: current ? null : (endDateVal || null),
+            current
+        };
+        
+        const method = id ? 'PATCH' : 'POST';
+        const url = id ? `${baseUrl}/api/experiences/${id}` : `${baseUrl}/api/experiences`;
+        
+        try {
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            
+            if (result.success) {
+                modal!.classList.add('hidden');
+                loadExperiences();
+            } else {
+                const err = document.getElementById('modalError')!;
+                err.textContent = result.message || 'Error saving experience';
+                err.classList.remove('hidden');
+            }
+        } catch (err) {
+            const errEl = document.getElementById('modalError')!;
+            errEl.textContent = 'Network error.';
+            errEl.classList.remove('hidden');
+        }
+    });
+
+    loadExperiences();
+</script>

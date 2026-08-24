@@ -47,15 +47,13 @@ export class ExperienceService {
     }
 
     async updateExperience(id: string, data: UpdateExperienceDTO): Promise<ExperienceResponse> {
-        await this.getExperienceById(id);
-        
-        const updatedExperience = await this.repository.update(id, data);
-        if (!updatedExperience) throw new NotFoundError('Experience');
-        return this.mapToDTO(updatedExperience);
+        const updated = await this.repository.update(id, data);
+        if (!updated) throw new NotFoundError('Experience');
+        return this.mapToDTO(updated);
     }
 
     async deleteExperience(id: string): Promise<void> {
-        await this.getExperienceById(id);
-        await this.repository.delete(id);
+        const deleted = await this.repository.delete(id);
+        if (!deleted) throw new NotFoundError('Experience');
     }
 }

@@ -66,7 +66,16 @@ jobs:
           MONGODB_URI: 'mongodb://localhost:27017/codeforge_test'
           JWT_SECRET: 'testsecret123'
           ADMIN_API_KEY: 'test-admin-api-key'
-        run: npm run test
+        run: npm run test:cov
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage/
+          
+      - name: Backend Security Audit
+        run: npm audit
 
   frontend-checks:
     name: Frontend Build & Lint
@@ -101,5 +110,13 @@ jobs:
         run: npm run typecheck
 
       - name: Test Build (Astro)
-        # Verifies that the frontend compiles successfully for production
         run: npm run build
+        
+      - name: Frontend Security Audit
+        run: npm audit
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        run: npx playwright test

@@ -13,6 +13,7 @@ const experienceService = new ExperienceService();
 export async function getExperiences(request: FastifyRequest<{ Querystring: { page?: number; limit?: number } }>, reply: FastifyReply) {
     const { page = 1, limit = 10 } = request.query;
     const experiences = await experienceService.getAllExperiences(Number(page), Number(limit));
+    reply.header('Cache-Control', 'public, max-age=300, stale-while-revalidate=86400');
     return reply.send({ success: true, data: experiences });
 }
 

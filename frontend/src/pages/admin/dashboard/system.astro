@@ -1,0 +1,117 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="System Status | Admin">
+    <h1 class="text-3xl font-bold text-white mb-8">System Status</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Status Overview -->
+        <div class="bg-slate-900 border border-white/10 rounded-xl p-6">
+            <h2 class="text-xl font-semibold text-white mb-6">Overview</h2>
+            
+            <div class="space-y-4">
+                <div class="flex justify-between items-center pb-4 border-b border-white/5">
+                    <span class="text-slate-400">Backend API</span>
+                    <div class="flex items-center gap-2">
+                        <div id="status-live" class="w-2 h-2 rounded-full bg-slate-500"></div>
+                        <span id="text-live" class="text-sm font-medium text-slate-300">Checking...</span>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between items-center pb-4 border-b border-white/5">
+                    <span class="text-slate-400">Database & Services</span>
+                    <div class="flex items-center gap-2">
+                        <div id="status-ready" class="w-2 h-2 rounded-full bg-slate-500"></div>
+                        <span id="text-ready" class="text-sm font-medium text-slate-300">Checking...</span>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Environment</span>
+                    <span class="text-sm font-mono text-blue-400">Production</span>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-4 border-t border-white/10 flex justify-end">
+                <button id="refreshBtn" class="text-sm bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded text-white transition-colors">
+                    Refresh Status
+                </button>
+            </div>
+        </div>
+        
+        <!-- Metrics (Optional) -->
+        <div class="bg-slate-900 border border-white/10 rounded-xl p-6">
+            <h2 class="text-xl font-semibold text-white mb-6">Metrics</h2>
+            <div id="metricsContent" class="text-slate-400 text-sm font-mono whitespace-pre-wrap overflow-auto h-64 bg-black/50 p-4 rounded border border-white/5">
+Loading metrics...
+            </div>
+        </div>
+    </div>
+</AdminLayout>
+
+<script>
+    const baseUrl = 'http://localhost:3002'; // Change in production
+
+    async function checkStatus() {
+        const liveDot = document.getElementById('status-live');
+        const liveText = document.getElementById('text-live');
+        const readyDot = document.getElementById('status-ready');
+        const readyText = document.getElementById('text-ready');
+        const metricsContent = document.getElementById('metricsContent');
+        const refreshBtn = document.getElementById('refreshBtn') as HTMLButtonElement;
+        
+        if(refreshBtn) {
+            refreshBtn.disabled = true;
+            refreshBtn.textContent = 'Refreshing...';
+        }
+
+        try {
+            // Liveness
+            const liveRes = await fetch(`${baseUrl}/live`);
+            if (liveRes.ok) {
+                liveDot!.className = 'w-2 h-2 rounded-full bg-green-500';
+                liveText!.textContent = 'Online';
+            } else {
+                liveDot!.className = 'w-2 h-2 rounded-full bg-red-500';
+                liveText!.textContent = 'Offline';
+            }
+            
+            // Readiness
+            const readyRes = await fetch(`${baseUrl}/ready`);
+            if (readyRes.ok) {
+                readyDot!.className = 'w-2 h-2 rounded-full bg-green-500';
+                readyText!.textContent = 'Connected';
+            } else {
+                readyDot!.className = 'w-2 h-2 rounded-full bg-red-500';
+                readyText!.textContent = 'Degraded';
+            }
+            
+            // Metrics
+            const metricsRes = await fetch(`${baseUrl}/metrics`);
+            if (metricsRes.ok) {
+                const metrics = await metricsRes.json();
+                metricsContent!.textContent = JSON.stringify(metrics, null, 2);
+            } else {
+                metricsContent!.textContent = 'Failed to load metrics.';
+            }
+
+        } catch (e) {
+            liveDot!.className = 'w-2 h-2 rounded-full bg-red-500';
+            liveText!.textContent = 'Unreachable';
+            readyDot!.className = 'w-2 h-2 rounded-full bg-red-500';
+            readyText!.textContent = 'Unreachable';
+            metricsContent!.textContent = 'Network error.';
+        } finally {
+            if(refreshBtn) {
+                refreshBtn.disabled = false;
+                refreshBtn.textContent = 'Refresh Status';
+            }
+        }
+    }
+    
+    document.getElementById('refreshBtn')?.addEventListener('click', checkStatus);
+    
+    // Initial check
+    checkStatus();
+</script>

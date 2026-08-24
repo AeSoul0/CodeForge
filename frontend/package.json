@@ -1,6 +1,9 @@
 {
   "name": "codeforge",
   "version": "0.0.1",
+  "author": "ÆSoul",
+  "license": "UNLICENSED",
+  "private": true,
   "engines": {
     "node": ">=22.12.0"
   },
@@ -28,6 +31,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.62.1",
     "eslint": "^10.8.1",
     "typescript-eslint": "^8.67.0"
   },

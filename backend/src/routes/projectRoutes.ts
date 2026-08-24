@@ -63,6 +63,12 @@ export default async function projectRoutes(
     }>(
         '/:name/generate-ai',
         {
+            config: {
+                rateLimit: {
+                    max: 10,
+                    timeWindow: '1 hour',
+                },
+            },
             preHandler: [
                 authenticateAdmin,
             ],
@@ -160,6 +166,12 @@ export default async function projectRoutes(
     }>(
         '/',
         {
+            config: {
+                rateLimit: {
+                    max: 20,
+                    timeWindow: '1 minute',
+                },
+            },
             schema: createProjectSchema,
 
             preHandler: [
@@ -289,6 +301,12 @@ export default async function projectRoutes(
     }>(
         '/:name',
         {
+            config: {
+                rateLimit: {
+                    max: 20,
+                    timeWindow: '1 minute',
+                },
+            },
             schema: updateProjectSchema,
 
             preHandler: [
@@ -312,6 +330,12 @@ export default async function projectRoutes(
     }>(
         '/:name',
         {
+            config: {
+                rateLimit: {
+                    max: 20,
+                    timeWindow: '1 minute',
+                },
+            },
             preHandler: [
                 authenticateAdmin,
             ],

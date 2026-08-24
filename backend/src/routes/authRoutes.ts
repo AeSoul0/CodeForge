@@ -7,8 +7,8 @@ import { FastifyInstance } from 'fastify';
 import { adminService } from '../services/AdminService';
 
 export default async function authRoutes(fastify: FastifyInstance) {
-    fastify.post('/login', { config: { rateLimit: { max: 5, timeWindow: '1 minute' } } }, async (request, reply) => {
-        const { username, password } = request.body as any;
+    fastify.post<{ Body: { username?: string; password?: string } }>('/login', { config: { rateLimit: { max: 5, timeWindow: '1 minute' } } }, async (request, reply) => {
+        const { username, password } = request.body;
         
         if (!username || !password) {
             return reply.status(400).send({ success: false, message: 'Username and password are required' });

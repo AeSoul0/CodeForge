@@ -69,14 +69,17 @@ async function configureApp(
         },
     });
 
-    await app.register(swaggerUi, {
-        routePrefix: '/api-docs',
+    const isProduction = process.env.NODE_ENV === 'production';
+    if (!isProduction) {
+        await app.register(swaggerUi, {
+            routePrefix: '/api-docs',
 
-        uiConfig: {
-            docExpansion: 'full',
-            deepLinking: false,
-        },
-    });
+            uiConfig: {
+                docExpansion: 'full',
+                deepLinking: false,
+            },
+        });
+    }
 
     // ============================================================
     // 2. SECURITY AND INFRASTRUCTURE
@@ -112,6 +115,10 @@ async function configureApp(
                     process.env.FRONTEND_URL ||
                     'http://localhost:2003',
                 ],
+                objectSrc: ["'none'"],
+                baseUri: ["'self'"],
+                formAction: ["'self'"],
+                frameAncestors: ["'none'"],
             },
         },
 
@@ -159,6 +166,19 @@ async function configureApp(
         {
             secret: jwtSecret,
 
+            sign: {
+                algorithm: 'HS256',
+                issuer: 'codeforge',
+                audience: 'admin',
+                expiresIn: '24h',
+            },
+
+            verify: {
+                algorithms: ['HS256'],
+                allowedIss: 'codeforge',
+                allowedAud: 'admin',
+            },
+
             cookie: {
                 cookieName: 'token',
                 signed: false,
@@ -182,205 +202,100 @@ async function configureApp(
         },
     );
 
-    const frontendUrl =
-        process.env.FRONTEND_URL ||
-        'http://localhost:2003';
+    const isStaging = process.env.NODE_ENV === 'staging';
 
-    const allowedOrigins = [
-        frontendUrl,
+    const allowedOrigins = [];
 
-        'http://localhost:2003',
-        'http://127.0.0.1:2003',
+    if (isProduction) {
+        allowedOrigins.push(process.env.FRONTEND_URL || 'https://your-production-url.com');
+    } else if (isStaging) {
+        allowedOrigins.push(process.env.FRONTEND_URL || 'https://your-staging-url.com');
+    } else {
+        // Development
+        allowedOrigins.push(
+            'http://localhost:2003',
+            'http://127.0.0.1:2003',
+            'http://localhost:4321',
+            'http://127.0.0.1:4321'
+        );
+    }
 
-        'http://localhost:4321',
-        'http://127.0.0.1:4321',
-    ].filter(
-        (
-            origin,
-            index,
-            origins,
-        ) =>
-            origins.indexOf(origin) ===
-            index,
-    );
-
-    await app.register(
-        cors,
-        {
-            origin: allowedOrigins,
-
-            methods: [
-                'GET',
-                'POST',
-                'PUT',
-                'PATCH',
-                'DELETE',
-                'OPTIONS',
-            ],
-
-            credentials: true,
-        },
-    );
+    await app.register(cors, {
+        origin: allowedOrigins,
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+        credentials: true,
+    });
 
     // ============================================================
     // 3. GLOBAL ERROR HANDLER
     // ============================================================
 
-    app.setErrorHandler(
-        (error: any, request, reply) => {
-            const isProduction =
-                process.env.NODE_ENV ===
-                'production';
+    app.setErrorHandler((error: any, request, reply) => {
+        const isProd = process.env.NODE_ENV === 'production';
 
-            if (
-                error.name ===
-                'MongoServerError' &&
-                error.code === 11000
-            ) {
-                return reply
-                    .status(409)
-                    .send({
-                        success: false,
+        if (error.name === 'MongoServerError' && error.code === 11000) {
+            return reply.status(409).send({
+                success: false,
+                error: {
+                    code: 'CONFLICT',
+                    message: 'Duplicate key error.',
+                    details: isProd ? undefined : error.keyValue,
+                },
+            });
+        }
 
-                        error: {
-                            code: 'CONFLICT',
+        if (error.name === 'ValidationError' && error.errors) {
+            return reply.status(400).send({
+                success: false,
+                error: {
+                    code: 'VALIDATION_ERROR',
+                    message: 'Database validation failed.',
+                },
+            });
+        }
 
-                            message:
-                                'Duplicate key error. A resource with these unique values already exists.',
+        if (error.name === 'CastError') {
+            return reply.status(400).send({
+                success: false,
+                error: {
+                    code: 'INVALID_ID',
+                    message: 'Invalid identifier format.',
+                },
+            });
+        }
 
-                            details:
-                                isProduction
-                                    ? undefined
-                                    : error.keyValue,
-                        },
-                    });
-            }
+        if (error.validation) {
+            return reply.status(400).send({
+                success: false,
+                error: {
+                    code: 'VALIDATION_ERROR',
+                    message: error.message,
+                    details: error.validation,
+                },
+            });
+        }
 
-            if (
-                error.name ===
-                'ValidationError' &&
-                error.errors
-            ) {
-                return reply
-                    .status(400)
-                    .send({
-                        success: false,
+        if (error.statusCode && error.statusCode >= 400 && error.statusCode < 500) {
+            return reply.status(error.statusCode).send({
+                success: false,
+                error: {
+                    code: error.code || 'BAD_REQUEST',
+                    message: error.message,
+                },
+            });
+        }
 
-                        error: {
-                            code: 'VALIDATION_ERROR',
+        request.log.error(error);
 
-                            message:
-                                'Database validation failed.',
-
-                            details:
-                                Object.keys(
-                                    error.errors,
-                                ).map(
-                                    (key) =>
-                                        error
-                                            .errors[
-                                            key
-                                        ].message,
-                                ),
-                        },
-                    });
-            }
-
-            if (
-                error.name ===
-                'CastError'
-            ) {
-                return reply
-                    .status(400)
-                    .send({
-                        success: false,
-
-                        error: {
-                            code: 'INVALID_ID',
-
-                            message:
-                                'Invalid identifier format.',
-                        },
-                    });
-            }
-
-            if (
-                error.statusCode &&
-                error.code
-            ) {
-                if (
-                    error.statusCode >=
-                    500
-                ) {
-                    request.log.error(
-                        error,
-                    );
-                } else {
-                    request.log.warn(
-                        error,
-                    );
-                }
-
-                return reply
-                    .status(
-                        error.statusCode,
-                    )
-                    .send({
-                        success: false,
-
-                        error: {
-                            code: error.code,
-                            message:
-                                error.message,
-                        },
-                    });
-            }
-
-            if (
-                error.validation
-            ) {
-                return reply
-                    .status(400)
-                    .send({
-                        success: false,
-
-                        error: {
-                            code: 'VALIDATION_ERROR',
-                            message:
-                                error.message,
-                            details:
-                                error.validation,
-                        },
-                    });
-            }
-
-            request.log.error(
-                error,
-            );
-
-            return reply
-                .status(500)
-                .send({
-                    success: false,
-
-                    error: {
-                        code: 'INTERNAL_SERVER_ERROR',
-
-                        message:
-                            isProduction
-                                ? 'An unexpected error occurred.'
-                                : error.message,
-
-                        ...(isProduction
-                            ? {}
-                            : {
-                                stack:
-                                    error.stack,
-                            }),
-                    },
-                });
-        },
-    );
+        return reply.status(500).send({
+            success: false,
+            error: {
+                code: 'INTERNAL_SERVER_ERROR',
+                message: isProd ? 'An unexpected error occurred.' : error.message,
+                stack: isProd ? undefined : error.stack,
+            },
+        });
+    });
 
     // ============================================================
     // 4. API ROUTES
@@ -430,7 +345,20 @@ async function configureApp(
  * Create the Fastify application instance.
  */
 const app = fastify({
-    logger: true,
+    logger: {
+        redact: ['req.headers.authorization', 'req.headers.cookie'],
+        serializers: {
+            req: (request) => ({
+                id: request.id,
+                method: request.method,
+                url: request.url,
+            }),
+            res: (reply) => ({
+                statusCode: reply.statusCode,
+                time: reply.getResponseTime ? reply.getResponseTime() : undefined,
+            })
+        }
+    },
     connectionTimeout: 10000,
     keepAliveTimeout: 5000,
 });

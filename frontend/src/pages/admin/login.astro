@@ -1,0 +1,79 @@
+---
+import Layout from '../../layout/Layout.astro';
+---
+<Layout title="Admin Login | CodeForge">
+    <div class="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-slate-900 border border-white/10 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent pointer-events-none"></div>
+            
+            <h1 class="text-3xl font-bold text-white mb-2 relative z-10">Admin Access</h1>
+            <p class="text-slate-400 mb-8 relative z-10">Sign in to manage portfolio content.</p>
+            
+            <form id="loginForm" class="relative z-10 flex flex-col gap-5">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-slate-300 mb-1">Username</label>
+                    <input type="text" id="username" name="username" required 
+                           class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors">
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-slate-300 mb-1">Password</label>
+                    <input type="password" id="password" name="password" required 
+                           class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors">
+                </div>
+                
+                <div id="errorMsg" class="hidden text-red-400 text-sm mt-2"></div>
+                
+                <button type="submit" 
+                        class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 rounded-lg mt-2 transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]">
+                    Sign In
+                </button>
+            </form>
+        </div>
+    </div>
+</Layout>
+
+<script>
+    const form = document.getElementById('loginForm');
+    const errorMsg = document.getElementById('errorMsg');
+
+    form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const username = (document.getElementById('username') as HTMLInputElement).value;
+        const password = (document.getElementById('password') as HTMLInputElement).value;
+        const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+        
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Authenticating...';
+        if(errorMsg) errorMsg.classList.add('hidden');
+
+        try {
+            // Adjust the URL if the API is hosted elsewhere. 
+            // The Fastify backend expects credentials=include for cookies.
+            const response = await fetch('http://localhost:3002/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                window.location.href = '/admin/dashboard';
+            } else {
+                if(errorMsg) {
+                    errorMsg.textContent = result.message || 'Authentication failed';
+                    errorMsg.classList.remove('hidden');
+                }
+            }
+        } catch (err) {
+            if(errorMsg) {
+                errorMsg.textContent = 'Network error. Backend might be unreachable.';
+                errorMsg.classList.remove('hidden');
+            }
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Sign In';
+        }
+    });
+</script>

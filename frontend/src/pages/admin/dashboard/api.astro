@@ -1,0 +1,155 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="API Playground | Admin">
+    <div class="flex flex-col h-[calc(100vh-120px)]">
+        <h1 class="text-3xl font-bold text-white mb-6">API Playground</h1>
+        
+        <div class="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
+            <!-- Request Panel -->
+            <div class="w-full lg:w-1/2 flex flex-col bg-slate-900 border border-white/10 rounded-xl p-4">
+                <div class="flex gap-2 mb-4">
+                    <select id="apiMethod" class="bg-black/50 border border-white/10 rounded px-3 py-2 text-white outline-none w-32 focus:border-blue-500">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PATCH">PATCH</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                    <input type="text" id="apiEndpoint" value="/api/projects" placeholder="/api/endpoint" class="flex-1 bg-black/50 border border-white/10 rounded px-4 py-2 text-white outline-none focus:border-blue-500 font-mono text-sm">
+                    <button id="sendBtn" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded font-medium transition-colors">SEND</button>
+                </div>
+                
+                <div class="flex-1 flex flex-col min-h-0">
+                    <label class="text-sm font-medium text-slate-400 mb-2">Request Body (JSON)</label>
+                    <textarea id="apiBody" class="flex-1 bg-black/50 border border-white/10 rounded p-4 text-white font-mono text-sm outline-none focus:border-blue-500 resize-none" placeholder="{}"></textarea>
+                </div>
+
+                <div class="h-32 mt-4 flex flex-col border-t border-white/10 pt-4">
+                    <label class="text-sm font-medium text-slate-400 mb-2">Request History</label>
+                    <div id="historyList" class="flex-1 overflow-auto space-y-1"></div>
+                </div>
+            </div>
+            
+            <!-- Response Panel -->
+            <div class="w-full lg:w-1/2 flex flex-col bg-slate-900 border border-white/10 rounded-xl p-4">
+                <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-4">
+                    <h2 class="text-sm font-medium text-slate-400">Response</h2>
+                    <div class="flex gap-4 text-sm font-mono">
+                        <span id="resStatus" class="text-slate-500">Status: -</span>
+                        <span id="resTime" class="text-slate-500">Time: -</span>
+                    </div>
+                </div>
+                
+                <div class="flex-1 overflow-auto bg-black/50 border border-white/10 rounded relative">
+                    <pre id="apiResponse" class="p-4 text-sm font-mono text-slate-300 w-full h-full overflow-auto">Ready to send request...</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</AdminLayout>
+
+<script>
+    const methodSelect = document.getElementById('apiMethod') as HTMLSelectElement;
+    const endpointInput = document.getElementById('apiEndpoint') as HTMLInputElement;
+    const bodyInput = document.getElementById('apiBody') as HTMLTextAreaElement;
+    const sendBtn = document.getElementById('sendBtn') as HTMLButtonElement;
+    const responseOutput = document.getElementById('apiResponse') as HTMLPreElement;
+    const statusOutput = document.getElementById('resStatus') as HTMLSpanElement;
+    const timeOutput = document.getElementById('resTime') as HTMLSpanElement;
+    
+    const baseUrl = 'http://localhost:3002'; // Change in production if needed
+
+    sendBtn.addEventListener('click', async () => {
+        const method = methodSelect.value;
+        const endpoint = endpointInput.value;
+        const bodyText = bodyInput.value;
+        
+        sendBtn.disabled = true;
+        sendBtn.textContent = '...';
+        responseOutput.textContent = 'Loading...';
+        
+        let body = undefined;
+        if (method !== 'GET' && method !== 'DELETE') {
+            try {
+                body = bodyText ? JSON.stringify(JSON.parse(bodyText)) : undefined;
+                bodyStr = bodyText ? JSON.stringify(JSON.parse(bodyText)) : undefined;
+            } catch (e) {
+                responseOutput.textContent = 'Invalid JSON in request body.';
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'SEND';
+                return;
+            }
+        }
+        
+        try {
+            const start = performance.now();
+            
+            const reqInit: RequestInit = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            };
+            
+            if (method !== 'GET' && bodyStr) {
+                reqInit.body = bodyStr;
+            }
+            
+            const history = JSON.parse(localStorage.getItem('apiHistory') || '[]');
+            history.unshift({ method, endpoint, time: new Date().toLocaleTimeString() });
+            localStorage.setItem('apiHistory', JSON.stringify(history.slice(0, 10)));
+            renderHistory();
+
+            const res = await fetch(`${baseUrl}${endpoint}`, reqInit);
+            const end = performance.now();
+            const timeStr = Math.round(end - start) + 'ms';
+            
+            statusOutput.textContent = `Status: ${res.status} ${res.statusText}`;
+            timeOutput.textContent = `Time: ${timeStr}`;
+            
+            if (res.status >= 200 && res.status < 300) {
+                statusOutput.className = 'text-green-400';
+            } else if (res.status >= 400) {
+                statusOutput.className = 'text-red-400';
+            } else {
+                statusOutput.className = 'text-yellow-400';
+            }
+            
+            const data = await res.json().catch(() => res.text());
+            responseOutput.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+            
+            if (res.status === 401) {
+                // If unauthorized, maybe prompt them to login
+                alert('Unauthorized. Please ensure you are logged in.');
+            }
+            
+        } catch (err: any) {
+            statusOutput.textContent = 'Status: Error';
+            statusOutput.className = 'text-red-400';
+            timeOutput.textContent = 'Time: -';
+            responseOutput.textContent = err.toString();
+        } finally {
+            sendBtn.disabled = false;
+            sendBtn.textContent = 'SEND';
+        }
+    });
+
+    function renderHistory() {
+        const list = document.getElementById('historyList')!;
+        const history = JSON.parse(localStorage.getItem('apiHistory') || '[]');
+        if (!history.length) {
+            list.innerHTML = '<div class="text-xs text-slate-500">No requests yet</div>';
+            return;
+        }
+        list.innerHTML = history.map((h: any) => 
+            `<div class="flex items-center gap-2 text-xs font-mono cursor-pointer hover:bg-white/5 p-1 rounded" onclick="document.getElementById('apiMethod').value='${h.method}'; document.getElementById('apiEndpoint').value='${h.endpoint}';">
+                <span class="text-blue-400 w-12">${h.method}</span>
+                <span class="text-slate-300 flex-1 truncate">${h.endpoint}</span>
+                <span class="text-slate-500">${h.time}</span>
+            </div>`
+        ).join('');
+    }
+    renderHistory();
+</script>

@@ -108,19 +108,28 @@
         // Initial setup
         resize();
 
+        // Lower FPS on low-end devices
+        const isLowEnd = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) || /Mobi|Android/i.test(navigator.userAgent);
+        const targetFPS = isLowEnd ? 30 : 60;
+        const frameDelay = 1000 / targetFPS;
+        let lastTime = 0;
+
         // Main execution rendering loop running inside the native animation thread
-        function animate() {
+        function animate(time) {
             // Performance optimization: Pause computation when canvas is off-screen
             if (!isVisible || particles.length === 0) {
                 if (animationFrameId) {
                     cancelAnimationFrame(animationFrameId);
                     animationFrameId = null;
                 }
-                // If particles exist but offscreen, we just return.
-                // If no particles, we also don't animate.
                 if (particles.length === 0) return;
                 return;
             }
+
+            animationFrameId = requestAnimationFrame(animate);
+
+            if (time - lastTime < frameDelay) return;
+            lastTime = time;
 
             ctx.clearRect(0, 0, w, h);
 
@@ -160,7 +169,6 @@
                     }
                 }
             }
-            animationFrameId = requestAnimationFrame(animate);
         }
 
         // Intersection Observer to monitor viewport visibility and preserve hardware resources
@@ -178,6 +186,14 @@
         );
 
         observer.observe(canvas);
+        
+        // Pause when tab hidden
+        document.addEventListener("visibilitychange", () => {
+            isVisible = !document.hidden && observer.takeRecords().length === 0;
+            if (isVisible && !animationFrameId && particles.length > 0) {
+                animate();
+            }
+        });
 
         // Trigger initial animation
         if (particles.length > 0) {

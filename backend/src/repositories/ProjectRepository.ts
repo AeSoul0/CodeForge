@@ -14,7 +14,7 @@ export class ProjectRepository {
         try {
             return await Project.find()
                 .populate('experienceId')
-                .sort({ createdAt: -1 })
+                .sort({ createdAt: -1, _id: -1 })
                 .skip(skip)
                 .limit(maxLimit)
                 .lean();

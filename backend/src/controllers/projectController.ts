@@ -61,6 +61,8 @@ export async function getProjects(
             Number(limit),
         );
 
+    reply.header('Cache-Control', 'public, max-age=300, stale-while-revalidate=86400');
+
     return reply.send({
         success: true,
         data: projects,

@@ -9,6 +9,9 @@ import {
     beforeAll,
 } from 'vitest';
 
+import * as dotenv from 'dotenv';
+dotenv.config({ path: '.env.test' });
+
 const mongoUri = process.env.MONGODB_URI?.trim();
 
 if (!mongoUri) {
