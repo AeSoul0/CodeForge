@@ -168,8 +168,8 @@ async function configureApp(
 
             sign: {
                 algorithm: 'HS256',
-                issuer: 'codeforge',
-                audience: 'admin',
+                iss: 'codeforge',
+                aud: 'admin',
                 expiresIn: '24h',
             },
 
@@ -355,7 +355,6 @@ const app = fastify({
             }),
             res: (reply) => ({
                 statusCode: reply.statusCode,
-                time: reply.getResponseTime ? reply.getResponseTime() : undefined,
             })
         }
     },
