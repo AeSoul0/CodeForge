@@ -4,44 +4,44 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 
 <AdminLayout title="API Playground | Admin">
     <div class="flex flex-col h-[calc(100vh-120px)]">
-        <h1 class="text-3xl font-bold text-white mb-6">API Playground</h1>
+        <h1 class="text-3xl font-black tracking-tight text-white mb-6">API Playground</h1>
         
         <div class="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
             <!-- Request Panel -->
-            <div class="w-full lg:w-1/2 flex flex-col bg-slate-900 border border-white/10 rounded-xl p-4">
+            <div class="w-full lg:w-1/2 flex flex-col glass-card p-4">
                 <div class="flex gap-2 mb-4">
-                    <select id="apiMethod" class="bg-black/50 border border-white/10 rounded px-3 py-2 text-white outline-none w-32 focus:border-blue-500">
+                    <select id="apiMethod" class="bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white outline-none w-32 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition-all">
                         <option value="GET">GET</option>
                         <option value="POST">POST</option>
                         <option value="PATCH">PATCH</option>
                         <option value="DELETE">DELETE</option>
                     </select>
-                    <input type="text" id="apiEndpoint" value="/api/projects" placeholder="/api/endpoint" class="flex-1 bg-black/50 border border-white/10 rounded px-4 py-2 text-white outline-none focus:border-blue-500 font-mono text-sm">
-                    <button id="sendBtn" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded font-medium transition-colors">SEND</button>
+                    <input type="text" id="apiEndpoint" value="/api/projects" placeholder="/api/endpoint" class="flex-1 bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition-all font-mono text-sm">
+                    <button id="sendBtn" class="bg-cyan-500/20 hover:bg-cyan-500/40 border border-cyan-500/50 text-cyan-50 px-6 py-2 rounded-full font-medium transition-all shadow-[0_0_15px_rgba(34,211,238,0.2)]">SEND</button>
                 </div>
                 
                 <div class="flex-1 flex flex-col min-h-0">
-                    <label class="text-sm font-medium text-slate-400 mb-2">Request Body (JSON)</label>
-                    <textarea id="apiBody" class="flex-1 bg-black/50 border border-white/10 rounded p-4 text-white font-mono text-sm outline-none focus:border-blue-500 resize-none" placeholder="{}"></textarea>
+                    <label class="text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-2">Request Body (JSON)</label>
+                    <textarea id="apiBody" class="flex-1 bg-black/30 border border-white/10 rounded-xl p-4 text-white font-mono text-sm outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition-all resize-none" placeholder="{}"></textarea>
                 </div>
 
                 <div class="h-32 mt-4 flex flex-col border-t border-white/10 pt-4">
-                    <label class="text-sm font-medium text-slate-400 mb-2">Request History</label>
+                    <label class="text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-2">Request History</label>
                     <div id="historyList" class="flex-1 overflow-auto space-y-1"></div>
                 </div>
             </div>
             
             <!-- Response Panel -->
-            <div class="w-full lg:w-1/2 flex flex-col bg-slate-900 border border-white/10 rounded-xl p-4">
+            <div class="w-full lg:w-1/2 flex flex-col glass-card p-4">
                 <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-4">
-                    <h2 class="text-sm font-medium text-slate-400">Response</h2>
+                    <h2 class="text-[10px] uppercase tracking-widest text-white/50 font-semibold">Response</h2>
                     <div class="flex gap-4 text-sm font-mono">
                         <span id="resStatus" class="text-slate-500">Status: -</span>
                         <span id="resTime" class="text-slate-500">Time: -</span>
                     </div>
                 </div>
                 
-                <div class="flex-1 overflow-auto bg-black/50 border border-white/10 rounded relative">
+                <div class="flex-1 overflow-auto bg-black/30 border border-white/10 rounded-xl relative">
                     <pre id="apiResponse" class="p-4 text-sm font-mono text-slate-300 w-full h-full overflow-auto">Ready to send request...</pre>
                 </div>
             </div>
@@ -58,7 +58,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     const statusOutput = document.getElementById('resStatus') as HTMLSpanElement;
     const timeOutput = document.getElementById('resTime') as HTMLSpanElement;
     
-    const baseUrl = 'http://localhost:3002'; // Change in production if needed
+    const baseUrl = import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") || 'https://codeforge-ukq5.onrender.com';
 
     sendBtn.addEventListener('click', async () => {
         const method = methodSelect.value;

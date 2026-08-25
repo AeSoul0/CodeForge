@@ -22,6 +22,6 @@ export default defineConfig({
 
   server: {
     port: 2003,
-    host: true,
+    host: "0.0.0.0",
   },
 });

@@ -4,7 +4,7 @@
 CodeForge leverages a split frontend-backend architecture for maximum separation of concerns, scalability, and security.
 
 ## Frontend
-- **Framework:** Astro (Static Site Generation for maximal performance and SEO)
+- **Framework:** Astro (Server-Side Rendering using Vercel adapter for dynamic API endpoints and admin dashboard)
 - **Styling:** Tailwind CSS
 - **Interactivity:** Vanilla JS and HTML5 Canvas (Particle System)
 

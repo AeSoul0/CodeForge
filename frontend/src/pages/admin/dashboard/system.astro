@@ -3,47 +3,47 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 ---
 
 <AdminLayout title="System Status | Admin">
-    <h1 class="text-3xl font-bold text-white mb-8">System Status</h1>
+    <h1 class="text-3xl font-black tracking-tight text-white mb-8">System Status</h1>
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- Status Overview -->
-        <div class="bg-slate-900 border border-white/10 rounded-xl p-6">
-            <h2 class="text-xl font-semibold text-white mb-6">Overview</h2>
+        <div class="glass-card p-6">
+            <h2 class="text-xl font-bold text-white mb-6 tracking-tight">Overview</h2>
             
             <div class="space-y-4">
                 <div class="flex justify-between items-center pb-4 border-b border-white/5">
-                    <span class="text-slate-400">Backend API</span>
+                    <span class="text-slate-400 text-sm">Backend API</span>
                     <div class="flex items-center gap-2">
-                        <div id="status-live" class="w-2 h-2 rounded-full bg-slate-500"></div>
-                        <span id="text-live" class="text-sm font-medium text-slate-300">Checking...</span>
+                        <div id="status-live" class="w-2 h-2 rounded-full bg-slate-500 shadow-[0_0_10px_rgba(100,116,139,0.8)]"></div>
+                        <span id="text-live" class="text-xs font-semibold uppercase tracking-wider text-slate-300">Checking...</span>
                     </div>
                 </div>
                 
                 <div class="flex justify-between items-center pb-4 border-b border-white/5">
-                    <span class="text-slate-400">Database & Services</span>
+                    <span class="text-slate-400 text-sm">Database & Services</span>
                     <div class="flex items-center gap-2">
-                        <div id="status-ready" class="w-2 h-2 rounded-full bg-slate-500"></div>
-                        <span id="text-ready" class="text-sm font-medium text-slate-300">Checking...</span>
+                        <div id="status-ready" class="w-2 h-2 rounded-full bg-slate-500 shadow-[0_0_10px_rgba(100,116,139,0.8)]"></div>
+                        <span id="text-ready" class="text-xs font-semibold uppercase tracking-wider text-slate-300">Checking...</span>
                     </div>
                 </div>
                 
                 <div class="flex justify-between items-center">
-                    <span class="text-slate-400">Environment</span>
-                    <span class="text-sm font-mono text-blue-400">Production</span>
+                    <span class="text-slate-400 text-sm">Environment</span>
+                    <span class="text-xs font-mono text-cyan-400 font-medium px-2 py-1 bg-cyan-400/10 rounded">Production</span>
                 </div>
             </div>
             
             <div class="mt-8 pt-4 border-t border-white/10 flex justify-end">
-                <button id="refreshBtn" class="text-sm bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded text-white transition-colors">
+                <button id="refreshBtn" class="bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 px-4 py-2 rounded-full text-xs uppercase tracking-wider font-semibold transition-all shadow-[0_0_15px_rgba(34,211,238,0.1)]">
                     Refresh Status
                 </button>
             </div>
         </div>
         
         <!-- Metrics (Optional) -->
-        <div class="bg-slate-900 border border-white/10 rounded-xl p-6">
-            <h2 class="text-xl font-semibold text-white mb-6">Metrics</h2>
-            <div id="metricsContent" class="text-slate-400 text-sm font-mono whitespace-pre-wrap overflow-auto h-64 bg-black/50 p-4 rounded border border-white/5">
+        <div class="glass-card p-6">
+            <h2 class="text-xl font-bold text-white mb-6 tracking-tight">Metrics</h2>
+            <div id="metricsContent" class="text-slate-300 text-xs font-mono whitespace-pre-wrap overflow-auto h-64 bg-black/30 p-4 rounded-xl border border-white/5">
 Loading metrics...
             </div>
         </div>
@@ -51,7 +51,7 @@ Loading metrics...
 </AdminLayout>
 
 <script>
-    const baseUrl = 'http://localhost:3002'; // Change in production
+    const baseUrl = import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") || 'https://codeforge-ukq5.onrender.com';
 
     async function checkStatus() {
         const liveDot = document.getElementById('status-live');

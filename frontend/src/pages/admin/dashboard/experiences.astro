@@ -4,14 +4,14 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 
 <AdminLayout title="Experiences | Admin">
     <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold text-white">Experiences</h1>
-        <button id="newExpBtn" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded font-medium transition-colors">
+        <h1 class="text-3xl font-black tracking-tight text-white">Experiences</h1>
+        <button id="newExpBtn" class="bg-cyan-500/20 hover:bg-cyan-500/40 border border-cyan-500/50 text-cyan-50 px-5 py-2 rounded-full font-medium transition-all hover-glow shadow-[0_0_15px_rgba(34,211,238,0.2)]">
             + New Experience
         </button>
     </div>
     
-    <div class="bg-slate-900 border border-white/10 rounded-xl overflow-hidden">
-        <table class="w-full text-left text-sm text-slate-400">
+    <div class="glass-card overflow-hidden">
+        <table class="w-full text-left text-sm text-slate-300">
             <thead class="text-xs text-slate-300 uppercase bg-black/30 border-b border-white/10">
                 <tr>
                     <th scope="col" class="px-6 py-4 font-medium">Role / Company</th>
@@ -28,58 +28,60 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     </div>
 
     <!-- Modal for Create/Edit -->
-    <div id="expModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm overflow-y-auto">
-        <div class="bg-slate-900 border border-white/10 rounded-xl w-full max-w-2xl my-8">
-            <div class="flex justify-between items-center p-6 border-b border-white/10">
-                <h2 id="modalTitle" class="text-xl font-bold text-white">New Experience</h2>
-                <button id="closeModalBtn" aria-label="Close Modal" class="text-slate-400 hover:text-white">&times;</button>
+    <div id="expModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" class="fixed inset-0 bg-black/60 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-md overflow-y-auto">
+        <div class="glass-card w-full max-w-2xl my-8 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-transparent pointer-events-none"></div>
+            
+            <div class="flex justify-between items-center p-6 border-b border-white/10 relative z-10">
+                <h2 id="modalTitle" class="text-xl font-bold text-white tracking-tight">New Experience</h2>
+                <button id="closeModalBtn" aria-label="Close Modal" class="text-slate-400 hover:text-white transition-colors">&times;</button>
             </div>
             
-            <form id="expForm" class="p-6 space-y-4">
+            <form id="expForm" class="p-6 space-y-4 relative z-10">
                 <input type="hidden" id="expId" />
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-slate-300 mb-1">Role</label>
-                        <input type="text" id="e-role" required class="w-full bg-black/50 border border-white/10 rounded px-3 py-2 text-white">
+                        <label class="block text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-1">Role</label>
+                        <input type="text" id="e-role" required class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition-all outline-none">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-300 mb-1">Company</label>
-                        <input type="text" id="e-company" required class="w-full bg-black/50 border border-white/10 rounded px-3 py-2 text-white">
+                        <label class="block text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-1">Company</label>
+                        <input type="text" id="e-company" required class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition-all outline-none">
                     </div>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Description</label>
-                    <textarea id="e-description" required rows="4" class="w-full bg-black/50 border border-white/10 rounded px-3 py-2 text-white"></textarea>
+                    <label class="block text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-1">Description</label>
+                    <textarea id="e-description" required rows="4" class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition-all outline-none"></textarea>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Technologies (comma separated)</label>
-                    <input type="text" id="e-technologies" class="w-full bg-black/50 border border-white/10 rounded px-3 py-2 text-white">
+                    <label class="block text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-1">Technologies (comma separated)</label>
+                    <input type="text" id="e-technologies" class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition-all outline-none">
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-slate-300 mb-1">Start Date</label>
-                        <input type="text" id="e-startDate" required placeholder="MM/YYYY" class="w-full bg-black/50 border border-white/10 rounded px-3 py-2 text-white">
+                        <label class="block text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-1">Start Date</label>
+                        <input type="text" id="e-startDate" required placeholder="MM/YYYY" class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition-all outline-none">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-300 mb-1">End Date</label>
-                        <input type="text" id="e-endDate" placeholder="MM/YYYY or Present" class="w-full bg-black/50 border border-white/10 rounded px-3 py-2 text-white">
+                        <label class="block text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-1">End Date</label>
+                        <input type="text" id="e-endDate" placeholder="MM/YYYY or Present" class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition-all outline-none">
                     </div>
                 </div>
                 
-                <div class="flex items-center gap-2">
-                    <input type="checkbox" id="e-current" class="w-4 h-4 text-blue-600 bg-black/50 border-white/10 rounded focus:ring-blue-500 focus:ring-2">
+                <div class="flex items-center gap-2 mt-2">
+                    <input type="checkbox" id="e-current" class="w-4 h-4 text-cyan-400 bg-black/50 border-white/10 rounded focus:ring-cyan-400 focus:ring-2">
                     <label for="e-current" class="text-sm font-medium text-slate-300">I currently work here</label>
                 </div>
                 
-                <div id="modalError" class="text-red-400 text-sm hidden"></div>
+                <div id="modalError" class="text-red-400 text-sm hidden bg-red-500/10 border border-red-500/20 p-3 rounded-lg"></div>
                 
                 <div class="flex justify-end gap-3 pt-4 border-t border-white/10">
-                    <button type="button" id="cancelBtn" class="px-4 py-2 rounded text-slate-300 hover:bg-white/5 transition-colors">Cancel</button>
-                    <button type="submit" id="saveBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded font-medium transition-colors">Save</button>
+                    <button type="button" id="cancelBtn" class="px-5 py-2 rounded-full text-slate-300 hover:bg-white/5 transition-colors text-sm font-medium">Cancel</button>
+                    <button type="submit" id="saveBtn" class="bg-cyan-500/20 hover:bg-cyan-500/40 border border-cyan-500/50 text-cyan-50 px-6 py-2 rounded-full text-sm font-medium transition-all shadow-[0_0_15px_rgba(34,211,238,0.2)]">Save</button>
                 </div>
             </form>
         </div>
@@ -87,7 +89,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 </AdminLayout>
 
 <script>
-    const baseUrl = 'http://localhost:3002'; // Change in production
+    const baseUrl = import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") || 'https://codeforge-ukq5.onrender.com';
     
     const tableBody = document.getElementById('expTableBody');
     const modal = document.getElementById('expModal');
