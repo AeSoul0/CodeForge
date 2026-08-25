@@ -11,7 +11,6 @@
  * configured Fastify instance without opening a network port.
  */
 
-
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import fastify, {
@@ -29,6 +28,43 @@ import experienceRoutes from './routes/experienceRoutes';
 import healthRoutes from './routes/healthRoutes';
 
 import { metricsHook } from './middlewares/metrics';
+
+type FastifyApplicationError = {
+    name?: unknown;
+    code?: unknown;
+    message?: unknown;
+    statusCode?: unknown;
+    validation?: unknown;
+    errors?: unknown;
+    keyValue?: unknown;
+    stack?: unknown;
+};
+
+function normalizeError(
+    error: unknown,
+): FastifyApplicationError {
+    if (
+        typeof error === 'object' &&
+        error !== null
+    ) {
+        return error as FastifyApplicationError;
+    }
+
+    if (error instanceof Error) {
+        return {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+        };
+    }
+
+    return {
+        message:
+            typeof error === 'string'
+                ? error
+                : 'Unknown error',
+    };
+}
 
 /**
  * Configure the Fastify application.
@@ -69,16 +105,26 @@ async function configureApp(
         },
     });
 
-    const isProduction = process.env.NODE_ENV === 'production';
-    if (!isProduction) {
-        await app.register(swaggerUi, {
-            routePrefix: '/api-docs',
+    const isProduction =
+        process.env.NODE_ENV ===
+        'production';
 
-            uiConfig: {
-                docExpansion: 'full',
-                deepLinking: false,
+    if (!isProduction) {
+        await app.register(
+            swaggerUi,
+            {
+                routePrefix:
+                    '/api-docs',
+
+                uiConfig: {
+                    docExpansion:
+                        'full',
+
+                    deepLinking:
+                        false,
+                },
             },
-        });
+        );
     }
 
     // ============================================================
@@ -99,37 +145,63 @@ async function configureApp(
 
         contentSecurityPolicy: {
             directives: {
-                defaultSrc: ["'self'"],
-                scriptSrc: ["'self'"],
+                defaultSrc: [
+                    "'self'",
+                ],
+
+                scriptSrc: [
+                    "'self'",
+                ],
+
                 styleSrc: [
                     "'self'",
                     "'unsafe-inline'",
                 ],
+
                 imgSrc: [
                     "'self'",
                     'data:',
                     'https:',
                 ],
+
                 connectSrc: [
                     "'self'",
                     process.env.FRONTEND_URL ||
-                    'http://localhost:2003',
+                        'http://localhost:2003',
                 ],
-                objectSrc: ["'none'"],
-                baseUri: ["'self'"],
-                formAction: ["'self'"],
-                frameAncestors: ["'none'"],
+
+                objectSrc: [
+                    "'none'",
+                ],
+
+                baseUri: [
+                    "'self'",
+                ],
+
+                formAction: [
+                    "'self'",
+                ],
+
+                frameAncestors: [
+                    "'none'",
+                ],
             },
         },
 
         crossOriginResourcePolicy: {
-            policy: 'cross-origin',
+            policy:
+                'cross-origin',
         },
 
         hsts: {
-            maxAge: 31536000,
-            includeSubDomains: true,
-            preload: true,
+            maxAge:
+                31536000,
+
+            includeSubDomains:
+                true,
+
+            preload:
+                true,
         },
 
         referrerPolicy: {
@@ -138,13 +210,17 @@ async function configureApp(
         },
 
         frameguard: {
-            action: 'deny',
+            action:
+                'deny',
         },
     });
 
     app.addHook(
         'onRequest',
-        async (_request, reply) => {
+        async (
+            _request,
+            reply,
+        ) => {
             reply.header(
                 'Permissions-Policy',
                 'geolocation=(), microphone=(), camera=(), payment=()',
@@ -164,24 +240,41 @@ async function configureApp(
     await app.register(
         fastifyJwt,
         {
-            secret: jwtSecret,
+            secret:
+                jwtSecret,
 
             sign: {
-                algorithm: 'HS256',
-                iss: 'codeforge',
-                aud: 'admin',
-                expiresIn: '24h',
+                algorithm:
+                    'HS256',
+
+                iss:
+                    'codeforge',
+
+                aud:
+                    'admin',
+
+                expiresIn:
+                    '24h',
             },
 
             verify: {
-                algorithms: ['HS256'],
-                allowedIss: 'codeforge',
-                allowedAud: 'admin',
+                algorithms: [
+                    'HS256',
+                ],
+
+                allowedIss:
+                    'codeforge',
+
+                allowedAud:
+                    'admin',
             },
 
             cookie: {
-                cookieName: 'token',
-                signed: false,
+                cookieName:
+                    'token',
+
+                signed:
+                    false,
             },
         },
     );
@@ -189,125 +282,259 @@ async function configureApp(
     await app.register(
         rateLimit,
         {
-            max: 100,
+            max:
+                100,
 
-            timeWindow: '1 minute',
+            timeWindow:
+                '1 minute',
 
-            errorResponseBuilder: () => ({
-                statusCode: 429,
-                error: 'Too Many Requests',
-                message:
-                    'Rate limit exceeded. Please try again later.',
-            }),
+            errorResponseBuilder:
+                () => ({
+                    statusCode:
+                        429,
+
+                    error:
+                        'Too Many Requests',
+
+                    message:
+                        'Rate limit exceeded. Please try again later.',
+                }),
         },
     );
 
-    const allowedOrigins = [
+    const allowedOrigins: string[] = [
         'http://localhost:2003',
         'http://127.0.0.1:2003',
         'http://localhost:4321',
         'http://127.0.0.1:4321',
         'https://www.aesoul0.com',
-        'https://aesoul0.com'
+        'https://aesoul0.com',
     ];
-    
+
     if (process.env.FRONTEND_URL) {
-        allowedOrigins.push(process.env.FRONTEND_URL.replace(/\/$/, ''));
+        allowedOrigins.push(
+            process.env.FRONTEND_URL.replace(
+                /\/$/,
+                '',
+            ),
+        );
     }
 
-    await app.register(cors, {
-        origin: allowedOrigins,
-        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-        credentials: true,
-    });
+    await app.register(
+        cors,
+        {
+            origin:
+                allowedOrigins,
+
+            methods: [
+                'GET',
+                'POST',
+                'PUT',
+                'PATCH',
+                'DELETE',
+                'OPTIONS',
+            ],
+
+            credentials:
+                true,
+        },
+    );
 
     // ============================================================
     // 3. GLOBAL ERROR HANDLER
     // ============================================================
 
-    app.setErrorHandler((error: unknown, request, reply) => {
-        const isProd = process.env.NODE_ENV === 'production';
-        const err = error as any;
+    app.setErrorHandler(
+        (
+            error: unknown,
+            request,
+            reply,
+        ) => {
+            const isProd =
+                process.env.NODE_ENV ===
+                'production';
 
-        if (err.name === 'MongoServerError' && err.code === 11000) {
-            return reply.status(409).send({
-                success: false,
-                error: {
-                    code: 'CONFLICT',
-                    message: 'Duplicate key error.',
-                    details: isProd ? undefined : err.keyValue,
-                },
-            });
-        }
+            const err =
+                normalizeError(error);
 
-        if (err.name === 'ValidationError' && err.errors) {
-            return reply.status(400).send({
-                success: false,
-                error: {
-                    code: 'VALIDATION_ERROR',
-                    message: 'Database validation failed.',
-                },
-            });
-        }
+            const errorName =
+                typeof err.name ===
+                'string'
+                    ? err.name
+                    : undefined;
 
-        if (err.name === 'CastError') {
-            return reply.status(400).send({
-                success: false,
-                error: {
-                    code: 'INVALID_ID',
-                    message: 'Invalid identifier format.',
-                },
-            });
-        }
+            const errorCode =
+                typeof err.code ===
+                'number' ||
+                typeof err.code ===
+                'string'
+                    ? err.code
+                    : undefined;
 
-        if (err.validation) {
-            return reply.status(400).send({
-                success: false,
-                error: {
-                    code: 'VALIDATION_ERROR',
-                    message: err.message,
-                    details: err.validation,
-                },
-            });
-        }
+            const errorStatus =
+                typeof err.statusCode ===
+                'number'
+                    ? err.statusCode
+                    : undefined;
 
-        if (err.statusCode && err.statusCode >= 400 && err.statusCode < 500) {
-            return reply.status(err.statusCode).send({
-                success: false,
-                error: {
-                    code: err.code || 'BAD_REQUEST',
-                    message: err.message,
-                },
-            });
-        }
+            const errorMessage =
+                typeof err.message ===
+                'string'
+                    ? err.message
+                    : 'An unexpected error occurred.';
 
-        request.log.error(err);
+            if (
+                errorName ===
+                    'MongoServerError' &&
+                errorCode ===
+                    11000
+            ) {
+                return reply
+                    .status(409)
+                    .send({
+                        success:
+                            false,
 
-        return reply.status(500).send({
-            success: false,
-            error: {
-                code: 'INTERNAL_SERVER_ERROR',
-                message: isProd ? 'An unexpected error occurred.' : err.message,
-                stack: isProd ? undefined : err.stack,
-            },
-        });
-    });
+                        error: {
+                            code:
+                                'CONFLICT',
+
+                            message:
+                                'Duplicate key error.',
+
+                            details:
+                                isProd
+                                    ? undefined
+                                    : err.keyValue,
+                        },
+                    });
+            }
+
+            if (
+                errorName ===
+                    'ValidationError' &&
+                err.errors
+            ) {
+                return reply
+                    .status(400)
+                    .send({
+                        success:
+                            false,
+
+                        error: {
+                            code:
+                                'VALIDATION_ERROR',
+
+                            message:
+                                'Database validation failed.',
+                        },
+                    });
+            }
+
+            if (
+                errorName ===
+                'CastError'
+            ) {
+                return reply
+                    .status(400)
+                    .send({
+                        success:
+                            false,
+
+                        error: {
+                            code:
+                                'INVALID_ID',
+
+                            message:
+                                'Invalid identifier format.',
+                        },
+                    });
+            }
+
+            if (
+                err.validation
+            ) {
+                return reply
+                    .status(400)
+                    .send({
+                        success:
+                            false,
+
+                        error: {
+                            code:
+                                'VALIDATION_ERROR',
+
+                            message:
+                                errorMessage,
+
+                            details:
+                                err.validation,
+                        },
+                    });
+            }
+
+            if (
+                errorStatus !==
+                    undefined &&
+                errorStatus >= 400 &&
+                errorStatus < 500
+            ) {
+                return reply
+                    .status(errorStatus)
+                    .send({
+                        success:
+                            false,
+
+                        error: {
+                            code:
+                                typeof err.code ===
+                                'string'
+                                    ? err.code
+                                    : 'BAD_REQUEST',
+
+                            message:
+                                errorMessage,
+                        },
+                    });
+            }
+
+            request.log.error(
+                error,
+            );
+
+            return reply
+                .status(500)
+                .send({
+                    success:
+                        false,
+
+                    error: {
+                        code:
+                            'INTERNAL_SERVER_ERROR',
+
+                        message:
+                            isProd
+                                ? 'An unexpected error occurred.'
+                                : errorMessage,
+
+                        stack:
+                            isProd
+                                ? undefined
+                                : err.stack,
+                    },
+                });
+        },
+    );
 
     // ============================================================
     // 4. API ROUTES
     // ============================================================
 
-    /**
-     * Authentication routes.
-     *
-     * The login endpoint is registered under /api/auth/login and is
-     * intentionally part of the configured test application as well as
-     * the production application.
-     */
     await app.register(
         authRoutes,
         {
-            prefix: '/api/auth',
+            prefix:
+                '/api/auth',
         },
     );
 
@@ -330,7 +557,8 @@ async function configureApp(
     await app.register(
         healthRoutes,
         {
-            prefix: '/',
+            prefix:
+                '/',
         },
     );
 
@@ -342,20 +570,39 @@ async function configureApp(
  */
 const app = fastify({
     logger: {
-        redact: ['req.headers.authorization', 'req.headers.cookie'],
+        redact: [
+            'req.headers.authorization',
+            'req.headers.cookie',
+        ],
+
         serializers: {
-            req: (request) => ({
-                id: request.id,
-                method: request.method,
-                url: request.url,
+            req: (
+                request,
+            ) => ({
+                id:
+                    request.id,
+
+                method:
+                    request.method,
+
+                url:
+                    request.url,
             }),
-            res: (reply) => ({
-                statusCode: reply.statusCode,
-            })
-        }
+
+            res: (
+                reply,
+            ) => ({
+                statusCode:
+                    reply.statusCode,
+            }),
+        },
     },
-    connectionTimeout: 10000,
-    keepAliveTimeout: 5000,
+
+    connectionTimeout:
+        10000,
+
+    keepAliveTimeout:
+        5000,
 });
 
 /**

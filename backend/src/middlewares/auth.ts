@@ -27,10 +27,12 @@ export async function authenticateAdmin(
     reply: FastifyReply,
 ) {
     const isDevelopment =
-        process.env.NODE_ENV === 'development';
+        process.env.NODE_ENV ===
+        'development';
 
     const bypassAuth =
-        process.env.DEV_BYPASS_AUTH === 'true';
+        process.env.DEV_BYPASS_AUTH ===
+        'true';
 
     /**
      * Development-only bypass.
@@ -38,7 +40,10 @@ export async function authenticateAdmin(
      * This is intentionally impossible in production because both conditions
      * must be satisfied.
      */
-    if (isDevelopment && bypassAuth) {
+    if (
+        isDevelopment &&
+        bypassAuth
+    ) {
         request.log.warn(
             '[AUTH] DEV_BYPASS_AUTH is enabled. JWT verification is skipped.',
         );
@@ -47,22 +52,42 @@ export async function authenticateAdmin(
     }
 
     try {
-        const decoded = await request.jwtVerify() as { role?: string };
-        if (decoded.role !== 'admin') {
-            request.log.warn('[AUTH] Token valid but missing admin role.');
-            return reply.status(403).send({
-                success: false,
-                error: 'Forbidden: Admin access required',
-            });
+        const decoded =
+            await request.jwtVerify() as {
+                role?: string;
+            };
+
+        if (
+            decoded.role !==
+            'admin'
+        ) {
+            request.log.warn(
+                '[AUTH] Token valid but missing admin role.',
+            );
+
+            return reply
+                .status(403)
+                .send({
+                    success:
+                        false,
+
+                    error:
+                        'Forbidden: Admin access required',
+                });
         }
-    } catch (error) {
+    } catch {
         request.log.warn(
             '[AUTH] JWT verification failed.',
         );
 
-        return reply.status(401).send({
-            success: false,
-            error: 'Unauthorized: Invalid or missing token',
-        });
+        return reply
+            .status(401)
+            .send({
+                success:
+                    false,
+
+                error:
+                    'Unauthorized: Invalid or missing token',
+            });
     }
 }

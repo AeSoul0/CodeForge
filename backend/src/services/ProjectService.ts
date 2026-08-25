@@ -3,61 +3,182 @@
  * @description Service layer implementing core project business logic.
  */
 
-import { ProjectRepository } from '../repositories/ProjectRepository.ts';
-import type { CreateProjectDTO, UpdateProjectDTO, ProjectResponse } from '../dtos/ProjectDTO.ts';
+import {
+    ProjectRepository,
+} from '../repositories/ProjectRepository';
+
+import type {
+    CreateProjectDTO,
+    UpdateProjectDTO,
+    ProjectResponse,
+} from '../dtos/ProjectDTO';
+
 import {
     AppError,
     NotFoundError,
-} from '../errors/AppError.ts';
+} from '../errors/AppError';
 
-export class ProjectService {
-    private repository: ProjectRepository;
+type PopulatedExperienceReference = {
+    _id?: {
+        toString(): string;
+    };
 
-    constructor() {
-        this.repository = new ProjectRepository();
+    image?: string | null;
+
+    toString(): string;
+};
+
+type ProjectPersistenceModel = {
+    _id?: {
+        toString(): string;
+    };
+
+    id?: string;
+
+    titolo: string;
+
+    role?: string;
+
+    descrizione: string;
+
+    descrizioneLunga?: string;
+
+    tecnologie: string[];
+
+    categoria?: string;
+
+    categorie: string[];
+
+    linkGithub?: string;
+
+    image?: string;
+
+    experienceId?:
+        | PopulatedExperienceReference
+        | string
+        | null;
+
+    createdAt?: Date;
+
+    updatedAt?: Date;
+};
+
+function requireDate(
+    value: Date | undefined,
+    fieldName: string,
+): Date {
+    if (!value) {
+        throw new Error(
+            `Project document is missing ${fieldName}.`,
+        );
     }
 
-    /**
-     * Maps a persistence-layer project document into the public API DTO.
-     *
-     * The mapper keeps database-specific fields such as ObjectId instances
-     * out of the HTTP layer and normalizes populated experience references.
-     */
-    private mapToDTO(project: any): ProjectResponse {
-        let expId = null;
-        let expImg = null;
+    return value;
+}
 
-        if (project.experienceId) {
-            // Handle populated experience documents.
+export class ProjectService {
+    constructor(
+        private readonly repository:
+            ProjectRepository =
+            new ProjectRepository(),
+    ) {}
+
+    /**
+     * Maps a persistence-layer project document into
+     * the public API DTO.
+     */
+    private mapToDTO(
+        project: ProjectPersistenceModel,
+    ): ProjectResponse {
+        let experienceId:
+            string | null = null;
+
+        let experienceImage:
+            string | null = null;
+
+        const experience =
+            project.experienceId;
+
+        if (experience) {
             if (
-                typeof project.experienceId === 'object' &&
-                project.experienceId._id
+                typeof experience ===
+                    'object' &&
+                experience._id
             ) {
-                expId = project.experienceId._id.toString();
-                expImg = project.experienceId.image || null;
+                experienceId =
+                    experience._id.toString();
+
+                experienceImage =
+                    experience.image ??
+                    null;
+            } else if (
+                typeof experience ===
+                'string'
+            ) {
+                experienceId =
+                    experience;
             } else {
-                // Handle unpopulated ObjectId references.
-                expId = project.experienceId.toString();
+                experienceId =
+                    experience.toString();
             }
         }
 
+        const id =
+            project._id
+                ?.toString() ??
+            project.id;
+
+        if (!id) {
+            throw new Error(
+                'Project document is missing an identifier.',
+            );
+        }
+
         return {
-            id: project._id
-                ? project._id.toString()
-                : project.id,
-            titolo: project.titolo,
-            role: project.role,
-            descrizione: project.descrizione,
-            descrizioneLunga: project.descrizioneLunga,
-            tecnologie: project.tecnologie || [],
-            categoria: project.categoria,
-            categorie: project.categorie || [],
-            linkGithub: project.linkGithub,
-            image: project.image,
-            experienceId: expId,
-            experienceImage: expImg,
-            createdAt: project.createdAt,
-            updatedAt: project.updatedAt,
+            id,
+
+            titolo:
+                project.titolo,
+
+            role:
+                project.role,
+
+            descrizione:
+                project.descrizione,
+
+            descrizioneLunga:
+                project.descrizioneLunga,
+
+            tecnologie:
+                project.tecnologie,
+
+            categoria:
+                project.categoria,
+
+            categorie:
+                project.categorie,
+
+            linkGithub:
+                project.linkGithub,
+
+            image:
+                project.image,
+
+            experienceId,
+
+            experienceImage,
+
+            createdAt:
+                requireDate(
+                    project.createdAt,
+                    'createdAt',
+                ),
+
+            updatedAt:
+                requireDate(
+                    project.updatedAt,
+                    'updatedAt',
+                ),
         };
     }
 
@@ -67,45 +188,55 @@ export class ProjectService {
     async getAllProjects(
         page: number = 1,
         limit: number = 10,
-    ): Promise<ProjectResponse[]> {
-        const projects = await this.repository.findAll(
-            page,
-            limit,
-        );
+    ): Promise<
+        ProjectResponse[]
+    > {
+        const projects =
+            await this.repository.findAll(
+                page,
+                limit,
+            );
 
-        return projects.map((project) =>
-            this.mapToDTO(project),
+        return projects.map(
+            (project) =>
+                this.mapToDTO(
+                    project,
+                ),
         );
     }
 
     /**
      * Retrieves a single project by its identifier.
-     *
-     * A dedicated NotFoundError is used so callers and the global
-     * error handler can distinguish a missing resource from an
-     * unexpected application failure.
      */
     async getProjectById(
         id: string,
     ): Promise<ProjectResponse> {
         const project =
-            await this.repository.findById(id);
+            await this.repository.findById(
+                id,
+            );
 
         if (!project) {
-            throw new NotFoundError('Project');
+            throw new NotFoundError(
+                'Project',
+            );
         }
 
-        return this.mapToDTO(project);
+        return this.mapToDTO(
+            project,
+        );
     }
 
     /**
-     * Creates a new project and returns the normalized API representation.
+     * Creates a new project.
      */
     async createProject(
         data: CreateProjectDTO,
     ): Promise<ProjectResponse> {
         const newProject =
-            await this.repository.create(data);
+            await this.repository.create(
+                data,
+            );
 
         if (!newProject) {
             throw new AppError(
@@ -114,14 +245,13 @@ export class ProjectService {
             );
         }
 
-        return this.mapToDTO(newProject);
+        return this.mapToDTO(
+            newProject,
+        );
     }
 
     /**
      * Updates an existing project.
-     *
-     * Missing resources are represented with NotFoundError rather than
-     * a generic 404 AppError, keeping the domain semantics explicit.
      */
     async updateProject(
         id: string,
@@ -134,25 +264,31 @@ export class ProjectService {
             );
 
         if (!updatedProject) {
-            throw new NotFoundError('Project');
+            throw new NotFoundError(
+                'Project',
+            );
         }
 
-        return this.mapToDTO(updatedProject);
+        return this.mapToDTO(
+            updatedProject,
+        );
     }
 
     /**
      * Deletes an existing project.
-     *
-     * A missing project is treated as a domain-level not-found condition.
      */
     async deleteProject(
         id: string,
     ): Promise<void> {
         const deleted =
-            await this.repository.delete(id);
+            await this.repository.delete(
+                id,
+            );
 
         if (!deleted) {
-            throw new NotFoundError('Project');
+            throw new NotFoundError(
+                'Project',
+            );
         }
     }
 }
