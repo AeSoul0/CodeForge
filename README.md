@@ -74,7 +74,7 @@ Automated GitHub Actions pipeline acting as a rigorous Quality Gate:
 See `.env.example` and `.env.test.example` in the `backend/` directory for configuring environments.
 
 ## Deployment
-See [Deployment Strategy](docs/general/deployment.md).
+See [Deployment Strategy](docs/deployment.md).
 - **Frontend**: Vercel (Server-Side Rendering)
 - **Backend**: Render (Node.js)
 - **Database**: MongoDB Atlas
