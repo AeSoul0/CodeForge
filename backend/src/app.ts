@@ -202,22 +202,17 @@ async function configureApp(
         },
     );
 
-    const isStaging = process.env.NODE_ENV === 'staging';
-
-    const allowedOrigins = [];
-
-    if (isProduction) {
-        allowedOrigins.push(process.env.FRONTEND_URL || 'https://your-production-url.com');
-    } else if (isStaging) {
-        allowedOrigins.push(process.env.FRONTEND_URL || 'https://your-staging-url.com');
-    } else {
-        // Development
-        allowedOrigins.push(
-            'http://localhost:2003',
-            'http://127.0.0.1:2003',
-            'http://localhost:4321',
-            'http://127.0.0.1:4321'
-        );
+    const allowedOrigins = [
+        'http://localhost:2003',
+        'http://127.0.0.1:2003',
+        'http://localhost:4321',
+        'http://127.0.0.1:4321',
+        'https://www.aesoul0.com',
+        'https://aesoul0.com'
+    ];
+    
+    if (process.env.FRONTEND_URL) {
+        allowedOrigins.push(process.env.FRONTEND_URL.replace(/\/$/, ''));
     }
 
     await app.register(cors, {
