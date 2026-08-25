@@ -98,7 +98,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     
     async function loadExperiences() {
         try {
-            const res = await fetch(`${baseUrl}/api/experiences`);
+            const res = await fetch(`${baseUrl}/api/experiences`, { credentials: 'include' });
             const json = await res.json();
             expData = json.data || [];
             renderTable();
@@ -140,7 +140,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
             const id = (e.target as HTMLButtonElement).dataset.id;
             if(confirm('Are you sure you want to delete this experience?')) {
                 try {
-                    await fetch(`${baseUrl}/api/experiences/${id}`, { method: 'DELETE' });
+                    await fetch(`${baseUrl}/api/experiences/${id}`, { method: 'DELETE', credentials: 'include' });
                     loadExperiences();
                 } catch(err) {
                     alert('Error deleting experience');
@@ -199,6 +199,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
             const res = await fetch(url, {
                 method,
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify(payload)
             });
             const result = await res.json();

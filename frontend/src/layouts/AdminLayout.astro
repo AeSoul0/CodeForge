@@ -26,7 +26,7 @@ const { title = "CodeForge Admin" } = Astro.props;
     document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         try {
             const apiUrl = import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") || 'https://codeforge-ukq5.onrender.com';
-            await fetch(`${apiUrl}/api/auth/logout`, { method: 'POST' });
+            await fetch(`${apiUrl}/api/auth/logout`, { method: 'POST', credentials: 'include' });
             window.location.href = '/admin/login';
         } catch (e) {
             console.error(e);

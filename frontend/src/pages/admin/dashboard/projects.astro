@@ -100,7 +100,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     
     async function loadProjects() {
         try {
-            const res = await fetch(`${baseUrl}/api/projects?limit=50`);
+            const res = await fetch(`${baseUrl}/api/projects?limit=50`, { credentials: 'include' });
             const json = await res.json();
             projectsData = json.data || [];
             renderTable();
@@ -137,7 +137,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
             const id = (e.target as HTMLButtonElement).dataset.id;
             if(confirm('Are you sure you want to delete this project?')) {
                 try {
-                    await fetch(`${baseUrl}/api/projects/${id}`, { method: 'DELETE' });
+                    await fetch(`${baseUrl}/api/projects/${id}`, { method: 'DELETE', credentials: 'include' });
                     loadProjects();
                 } catch(err) {
                     alert('Error deleting project');
@@ -166,7 +166,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
             aiBtn.onclick = async () => {
                 aiBtn.textContent = 'Generating...';
                 try {
-                    await fetch(`${baseUrl}/api/projects/${project._id}/generate-ai`, { method: 'POST' });
+                    await fetch(`${baseUrl}/api/projects/${project._id}/generate-ai`, { method: 'POST', credentials: 'include' });
                     alert('AI Generation triggered!');
                     loadProjects();
                     modal!.classList.add('hidden');
@@ -210,6 +210,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
             const res = await fetch(url, {
                 method,
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify(payload)
             });
             const result = await res.json();
