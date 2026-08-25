@@ -4,7 +4,7 @@
  */
 
 import { adminRepository } from '../repositories/AdminRepository';
-import { UnauthorizedError } from '../errors/AppError';
+import { UnauthorizedError } from '../errors/AppError.ts';
 import bcrypt from 'bcrypt';
 
 export class AdminService {

@@ -15,10 +15,7 @@ import {
 
 import Experience from "../models/Experiences";
 import { authenticateAdmin } from "../middlewares/auth";
-import {
-    CreateExperienceDTO,
-    UpdateExperienceDTO,
-} from "../dtos/ExperienceDTO";
+import type { CreateExperienceDTO, UpdateExperienceDTO } from '../dtos/ExperienceDTO.ts';
 
 /**
  * Maximum accepted image payload.

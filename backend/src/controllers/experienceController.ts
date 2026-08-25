@@ -4,26 +4,37 @@
  */
 
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { ExperienceService } from '../services/ExperienceService';
-import { CreateExperienceDTO, UpdateExperienceDTO } from '../dtos/ExperienceDTO';
+import type { CreateExperienceDTO, UpdateExperienceDTO } from '../dtos/ExperienceDTO.ts';
+import type { ExperienceService } from '../services/ExperienceService.ts';
 import { auditLogger } from '../utils/auditLogger';
+import { triggerVercelDeploy } from '../utils/vercel';
 
-const experienceService = new ExperienceService();
+let experienceServiceInstance: ExperienceService | null = null;
+async function getExperienceService(): Promise<ExperienceService> {
+  if (!experienceServiceInstance) {
+    const mod = await import('../services/ExperienceService.ts');
+    experienceServiceInstance = new mod.ExperienceService();
+  }
+  return experienceServiceInstance;
+}
+
 
 export async function getExperiences(request: FastifyRequest<{ Querystring: { page?: number; limit?: number } }>, reply: FastifyReply) {
     const { page = 1, limit = 10 } = request.query;
-    const experiences = await experienceService.getAllExperiences(Number(page), Number(limit));
+    const service = await getExperienceService();
+    const experiences = await service.getAllExperiences(Number(page), Number(limit));
     reply.header('Cache-Control', 'public, max-age=300, stale-while-revalidate=86400');
     return reply.send({ success: true, data: experiences });
 }
 
-import { triggerVercelDeploy } from '../utils/vercel';
+// removed duplicate import
+
 
 export async function createExperience(
     request: FastifyRequest<{ Body: CreateExperienceDTO }>,
     reply: FastifyReply
 ) {
-    const newExperience = await experienceService.createExperience(request.body);
+    const newExperience = await getExperienceService().createExperience(request.body);
     
     // Audit Log
     auditLogger.log({
@@ -46,7 +57,7 @@ export async function updateExperience(
     reply: FastifyReply
 ) {
     const { name } = request.params;
-    const updatedExp = await experienceService.updateExperience(name, request.body);
+    const updatedExp = await getExperienceService().updateExperience(name, request.body);
 
     auditLogger.log({
         requestId: request.id as string,
@@ -68,7 +79,7 @@ export async function updateExperienceImage(
     reply: FastifyReply
 ) {
     const { name } = request.params;
-    const updatedExp = await experienceService.updateExperience(name, { image: request.body.image });
+    const updatedExp = await getExperienceService().updateExperience(name, { image: request.body.image });
 
     auditLogger.log({
         requestId: request.id as string,
@@ -87,7 +98,7 @@ export async function deleteExperience(
     reply: FastifyReply
 ) {
     const { name } = request.params;
-    await experienceService.deleteExperience(name);
+    await getExperienceService().deleteExperience(name);
 
     // Audit Log
     auditLogger.log({

@@ -479,6 +479,7 @@ const ogImageUrl = new URL("/og-image.png", Astro.url).href;
     <body
         class="min-h-screen flex flex-col relative selection:bg-cyan-500 selection:text-white overflow-x-hidden bg-[#020617]"
     >
+        <a href="#main-content" class="absolute left-0 top-0 p-3 m-3 -translate-y-16 bg-blue-600 text-white z-[999999] transition focus:translate-y-0" aria-label="Skip to main content">Skip to main content</a>
         <!-- ======================================================
              INITIAL GLOBAL LOADER
              ====================================================== -->
@@ -523,7 +524,7 @@ const ogImageUrl = new URL("/og-image.png", Astro.url).href;
              MAIN CONTENT
              ====================================================== -->
 
-        <main class="relative z-10 flex-1 w-full flex flex-col">
+        <main id="main-content" class="relative z-10 flex-1 w-full flex flex-col">
             <slot />
         </main>
 

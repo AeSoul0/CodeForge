@@ -3,9 +3,9 @@
  * @description Database repository for interacting with MongoDB.
  */
 
-import Experience from '../models/Experiences';
-import { CreateExperienceDTO, UpdateExperienceDTO } from '../dtos/ExperienceDTO';
-import { DatabaseError } from '../errors/AppError';
+import Experience from '../models/Experiences.ts';
+import type { CreateExperienceDTO, UpdateExperienceDTO } from '../dtos/ExperienceDTO.ts';
+import { DatabaseError } from '../errors/AppError.ts';
 
 export class ExperienceRepository {
     async findAll(page: number = 1, limit: number = 10) {

@@ -11,28 +11,20 @@ import {
     FastifyRequest,
 } from 'fastify';
 
-import {
-    CreateProjectDTO,
-    UpdateProjectDTO,
-} from '../dtos/ProjectDTO';
-
-import { ProjectService } from '../services/ProjectService';
-
+import type { CreateProjectDTO, UpdateProjectDTO } from '../dtos/ProjectDTO.ts';
+import type { ProjectService } from '../services/ProjectService.ts';
 import { auditLogger } from '../utils/auditLogger';
+import { processProjectAI } from '../utils/ai';
+import { triggerVercelDeploy } from '../utils/vercel';
 
-import {
-    processProjectAI,
-} from '../utils/ai';
-
-import {
-    triggerVercelDeploy,
-} from '../utils/vercel';
-
-/**
- * Shared project service instance.
- */
-const projectService =
-    new ProjectService();
+let projectServiceInstance: ProjectService | null = null;
+function getProjectService(): ProjectService {
+  if (!projectServiceInstance) {
+    const { ProjectService } = require('../services/ProjectService.ts');
+    projectServiceInstance = new ProjectService();
+  }
+  return projectServiceInstance;
+}
 
 // ============================================================
 // GET PROJECTS
@@ -55,8 +47,9 @@ export async function getProjects(
         limit = 10,
     } = request.query;
 
+    const service = getProjectService();
     const projects =
-        await projectService.getAllProjects(
+        await service.getAllProjects(
             Number(page),
             Number(limit),
         );
@@ -86,8 +79,9 @@ export async function createProject(
     }>,
     reply: FastifyReply,
 ) {
+    const service = getProjectService();
     const newProject =
-        await projectService.createProject(
+        await service.createProject(
             request.body,
         );
 
@@ -174,8 +168,9 @@ export async function updateProject(
     /**
      * Persist the actual project changes.
      */
+    const service = getProjectService();
     const updatedProject =
-        await projectService.updateProject(
+        await service.updateProject(
             name,
             projectData,
         );
@@ -268,7 +263,8 @@ export async function deleteProject(
         name,
     } = request.params;
 
-    await projectService.deleteProject(
+    const service = getProjectService();
+    await service.deleteProject(
         name,
     );
 
@@ -320,8 +316,9 @@ export async function generateAIForProject(
         name,
     } = request.params;
 
+    const service = getProjectService();
     const project =
-        await projectService.getProjectById(
+        await service.getProjectById(
             name,
         );
 

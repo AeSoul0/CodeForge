@@ -3,16 +3,12 @@
  * @description Service layer implementing core project business logic.
  */
 
-import { ProjectRepository } from '../repositories/ProjectRepository';
-import {
-    CreateProjectDTO,
-    UpdateProjectDTO,
-    ProjectResponse,
-} from '../dtos/ProjectDTO';
+import { ProjectRepository } from '../repositories/ProjectRepository.ts';
+import type { CreateProjectDTO, UpdateProjectDTO, ProjectResponse } from '../dtos/ProjectDTO.ts';
 import {
     AppError,
     NotFoundError,
-} from '../errors/AppError';
+} from '../errors/AppError.ts';
 
 export class ProjectService {
     private repository: ProjectRepository;

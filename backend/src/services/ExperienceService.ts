@@ -3,9 +3,9 @@
  * @description Service layer implementing core business logic.
  */
 
-import { ExperienceRepository } from '../repositories/ExperienceRepository';
-import { CreateExperienceDTO, UpdateExperienceDTO, ExperienceResponse } from '../dtos/ExperienceDTO';
-import { NotFoundError } from '../errors/AppError';
+import { ExperienceRepository } from '../repositories/ExperienceRepository.ts';
+import type { CreateExperienceDTO, UpdateExperienceDTO, ExperienceResponse } from '../dtos/ExperienceDTO.ts';
+import { NotFoundError } from '../errors/AppError.ts';
 
 export class ExperienceService {
     private repository: ExperienceRepository;

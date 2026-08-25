@@ -3,9 +3,9 @@
  * @description Database repository for interacting with MongoDB.
  */
 
-import Project, { IProject } from '../models/Projects';
-import { CreateProjectDTO, UpdateProjectDTO } from '../dtos/ProjectDTO';
-import { DatabaseError } from '../errors/AppError';
+import Project, { IProject } from '../models/Projects.ts';
+import { CreateProjectDTO, UpdateProjectDTO } from '../dtos/ProjectDTO.ts';
+import { DatabaseError } from '../errors/AppError.ts';
 
 export class ProjectRepository {
     async findAll(page: number = 1, limit: number = 10) {
