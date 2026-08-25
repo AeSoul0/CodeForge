@@ -130,6 +130,10 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
             </tr>
         `).join('');
         
+        document.querySelectorAll('.preview-btn').forEach(btn => btn.addEventListener('click', () => {
+            window.open('/#experience', '_blank');
+        }));
+
         document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', (e) => {
             const id = (e.target as HTMLButtonElement).dataset.id;
             const exp = expData.find(x => x._id === id);

@@ -9,15 +9,28 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
         <div class="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
             <!-- Request Panel -->
             <div class="w-full lg:w-1/2 flex flex-col glass-card p-4">
-                <div class="flex gap-2 mb-4">
-                    <select id="apiMethod" class="bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white outline-none w-32 focus:border-cyan-400/50 focus:bg-white/5 transition-all">
-                        <option value="GET">GET</option>
-                        <option value="POST">POST</option>
-                        <option value="PATCH">PATCH</option>
-                        <option value="DELETE">DELETE</option>
-                    </select>
-                    <input type="text" id="apiEndpoint" value="/api/projects" placeholder="/api/endpoint" class="flex-1 bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-cyan-400/50 focus:bg-white/5 transition-all font-mono text-sm">
-                    <button id="sendBtn" class="bg-cyan-500/20 hover:bg-cyan-500/40 border border-cyan-500/50 text-cyan-50 px-6 py-2 rounded-full font-medium transition-all shadow-[0_0_15px_rgba(34,211,238,0.2)]">SEND</button>
+                <div class="flex flex-col gap-4 mb-4">
+                    <div class="flex gap-2">
+                        <select id="apiPreset" class="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-cyan-400/50 focus:bg-white/5 transition-all text-sm font-mono">
+                            <option value="">-- Select API Preset to Test --</option>
+                            <option value='{"m":"GET","e":"/api/projects","b":""}'>GET All Projects</option>
+                            <option value='{"m":"GET","e":"/api/projects?limit=50","b":""}'>GET Projects (Limit 50)</option>
+                            <option value='{"m":"POST","e":"/api/projects","b":"{\\n  \\"titolo\\": \\"Test Project\\",\\n  \\"descrizione\\": \\"Test desc\\",\\n  \\"tecnologie\\": [\\"React\\"]\\n}"}'>POST New Project</option>
+                            <option value='{"m":"GET","e":"/api/experiences","b":""}'>GET All Experiences</option>
+                            <option value='{"m":"POST","e":"/api/experiences","b":"{\\n  \\"role\\": \\"Test Role\\",\\n  \\"company\\": \\"Test Company\\",\\n  \\"description\\": \\"Test desc\\",\\n  \\"technologies\\": [\\"Node\\"],\\n  \\"startDate\\": \\"01/2026\\",\\n  \\"current\\": true\\n}"}'>POST New Experience</option>
+                            <option value='{"m":"GET","e":"/api/system/health","b":""}'>GET System Health</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="apiMethod" class="bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-white outline-none w-32 focus:border-cyan-400/50 focus:bg-white/5 transition-all">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PATCH">PATCH</option>
+                            <option value="DELETE">DELETE</option>
+                        </select>
+                        <input type="text" id="apiEndpoint" value="/api/projects" placeholder="/api/endpoint" class="flex-1 bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-cyan-400/50 focus:bg-white/5 transition-all font-mono text-sm">
+                        <button id="sendBtn" class="bg-cyan-500/20 hover:bg-cyan-500/40 border border-cyan-500/50 text-cyan-50 px-6 py-2 rounded-full font-medium transition-all shadow-[0_0_15px_rgba(34,211,238,0.2)]">SEND</button>
+                    </div>
                 </div>
                 
                 <div class="flex-1 flex flex-col min-h-0">
@@ -57,6 +70,15 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     const responseOutput = document.getElementById('apiResponse') as HTMLPreElement;
     const statusOutput = document.getElementById('resStatus') as HTMLSpanElement;
     const timeOutput = document.getElementById('resTime') as HTMLSpanElement;
+    const presetSelect = document.getElementById('apiPreset') as HTMLSelectElement;
+    
+    presetSelect.addEventListener('change', () => {
+        if (!presetSelect.value) return;
+        const preset = JSON.parse(presetSelect.value);
+        methodSelect.value = preset.m;
+        endpointInput.value = preset.e;
+        bodyInput.value = preset.b;
+    });
     
     const baseUrl = import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") || 'https://codeforge-ukq5.onrender.com';
 
@@ -87,6 +109,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
             
             const reqInit: RequestInit = {
                 method,
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
