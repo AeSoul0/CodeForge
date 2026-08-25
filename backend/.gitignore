@@ -15,4 +15,4 @@ pnpm-debug.log*
 # Eventuali build future o file temporanei
 dist/
 build/
-.cache/
+.cache/coverage/

@@ -64,4 +64,9 @@ const ProjectSchema: Schema = new Schema(
     }
 );
 
+// Indexes for performance
+ProjectSchema.index({ createdAt: -1 });
+ProjectSchema.index({ categorie: 1 });
+ProjectSchema.index({ experienceId: 1 });
+
 export default mongoose.model<IProject>('Project', ProjectSchema);
