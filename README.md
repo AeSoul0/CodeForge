@@ -1,16 +1,16 @@
-# ÆSoul / CodeForge
+# CodeForge
 
 A full-stack, production-ready portfolio and administrative platform designed to demonstrate modern software engineering practices.
 
 > **Target:** A cohesive showcase of architecture, security, performance, and automation.
 
-## 🚀 Live Demo
-https://www.aesoul0.com
+## Live Demo
+[https://www.aesoul0.com](https://www.aesoul0.com)
 
-## 📸 Screenshots
-*(Insert Screenshots of Homepage, Project Page, Admin Dashboard, API Playground)*
+## Screenshots
+*(Insert Screenshots of Homepage, Project detail, Admin dashboard, Login, API playground, Mobile layout)*
 
-## 🏗️ Architecture
+## Architecture
 
 ```mermaid
 graph TD
@@ -24,63 +24,78 @@ graph TD
         Services --> Repositories
     end
     
-    Backend -->|Mongoose| MongoDB[(MongoDB)]
+    Backend -->|Mongoose| MongoDB[(MongoDB Atlas)]
     Services -->|Generative AI| VertexAI[Google AI]
 ```
 
-## ✨ Features
-- **Highly Optimized UI**: Built with Astro and Tailwind CSS.
-- **Admin Dashboard**: Full CRUD management of projects and experiences.
-- **API Playground**: Test all endpoints directly within the authenticated dashboard.
-- **AI Content Enrichment**: Automatically generates rich project descriptions.
+## Key Engineering Decisions
+See our Architecture Decision Records in `docs/adr/`:
+- [001: Astro for Frontend](docs/adr/001-astro.md)
+- [002: Fastify Backend](docs/adr/002-fastify.md)
+- [003: JWT & Cookie Auth](docs/adr/003-jwt-cookie-auth.md)
+- [004: AI Enrichment](docs/adr/004-ai-enrichment.md)
 
-## 🛠️ Tech Stack
+## Tech Stack
 - **Frontend**: Astro, React, Tailwind CSS, TypeScript
 - **Backend**: Node.js, Fastify, TypeScript, Mongoose
 - **Database**: MongoDB Atlas
-- **Testing**: Vitest, Supertest
+- **Testing**: Vitest, Supertest, Playwright
 
-## 🔐 Security
+## Security
+See [Security Architecture](docs/security.md).
 - Fully configured CSP, Helmet, and CORS.
 - Route-specific and global rate limiting.
-- JWT authentication with secure, HttpOnly, SameSite cookies.
+- JWT authentication with secure, HttpOnly, SameSite=Strict cookies.
 - No sensitive data exposed in the frontend or unauthenticated routes.
 
-## 🧪 Testing
+## Testing
 - Backend unit and integration tests built with Vitest.
 - E2E testing strategy using Playwright.
-- Test coverage targeting >85%.
+- Enforced coverage threshold via CI/CD (Target: >85%).
 
-## ⚡ Performance
+## Performance
 - Dynamic Particle Canvas heavily optimized with `IntersectionObserver`, `requestAnimationFrame`, and `prefers-reduced-motion` adaptations.
 - Zero-JS Astro islands wherever possible.
+- Expected Lighthouse Scores: Performance ≥ 90, Accessibility 100, Best Practices 100, SEO 100.
 
-## 🤖 CI/CD
-Automated pipeline ensuring:
+## CI/CD
+Automated GitHub Actions pipeline acting as a rigorous Quality Gate:
 - Code linting and TypeScript typechecking
-- Unit and integration tests
+- Unit and integration tests (Vitest)
+- E2E Tests (Playwright)
 - CodeQL and Dependency audits
 
-## 🏃 Local Development
+## API
+- Fully documented via Swagger (`/docs` in dev).
+- Secure API Playground available in the Admin Dashboard.
+- Strict schema validation for all incoming DTOs.
 
-```bash
-# Clone the repository
-git clone https://github.com/Aesoul/CodeForge.git
+## Environment Setup
+See `.env.example` and `.env.test.example` in the `backend/` directory for configuring environments.
 
-# Install dependencies
-cd CodeForge
-cd frontend && npm install
-cd ../backend && npm install
+## Deployment
+See [Deployment Strategy](docs/general/deployment.md).
+- **Frontend**: Vercel (Server-Side Rendering)
+- **Backend**: Render (Node.js)
+- **Database**: MongoDB Atlas
 
-# Start Backend
-cd backend
-npm run dev
+## Observability
+- Centralized `auditLogger` for critical domain events (e.g. `CREATE_PROJECT`, `LOGIN_ATTEMPT`).
+- Environment-aware error handling (no stack traces in production).
 
-# Start Frontend
-cd frontend
-npm run dev
+## Project Structure
+```text
+CodeForge/
+├── backend/       # Fastify REST API
+├── frontend/      # Astro UI
+├── docs/          # ADRs, Scorecards, Guidelines
+├── scripts/       # Operational scripts
+└── .github/       # CI/CD Workflows
 ```
 
-## 📜 License
+## Roadmap
+See [Professional 90/100 Roadmap](docs/roadmap.md).
+
+## License
 &copy; 2026 ÆSoul. All rights reserved.
 This project and its source code are proprietary and belong exclusively to ÆSoul. Unauthorized copying, modification, or distribution is strictly prohibited.

@@ -142,52 +142,13 @@ function formatPeriod(
                 </p>
             </div>
         ) : experiences.length === 0 ? (
-            <>
-                <div class="experience-timeline-item">
-                    <article class="experience-card experience-skeleton p-7 sm:p-9 relative overflow-hidden flex flex-col md:flex-row md:items-stretch gap-6 md:gap-10" aria-hidden="true">
-                        <div class="md:w-1/4 flex-shrink-0">
-                            <div class="experience-meta">
-                                <div class="skeleton-date"></div>
-                                <div class="skeleton-logo"></div>
-                            </div>
-                        </div>
-                        <div class="md:w-3/4 flex flex-col">
-                            <div class="skeleton-role"></div>
-                            <div class="skeleton-company"></div>
-                            <div class="skeleton-desc"></div>
-                            <div class="skeleton-desc short"></div>
-                            <div class="skeleton-badges-flex mt-auto">
-                                <span></span><span></span><span></span>
-                            </div>
-                        </div>
-                    </article>
-                    <div class="experience-timeline-connector" aria-hidden="true">
-                        <div class="experience-energy-rail">
-                            <span class="experience-energy-runner"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="experience-timeline-item">
-                    <article class="experience-card experience-skeleton p-7 sm:p-9 relative overflow-hidden flex flex-col md:flex-row md:items-stretch gap-6 md:gap-10" aria-hidden="true">
-                        <div class="md:w-1/4 flex-shrink-0">
-                            <div class="experience-meta">
-                                <div class="skeleton-date" style="width: 140px;"></div>
-                                <div class="skeleton-logo"></div>
-                            </div>
-                        </div>
-                        <div class="md:w-3/4 flex flex-col">
-                            <div class="skeleton-role" style="width: 50%;"></div>
-                            <div class="skeleton-company" style="width: 40%;"></div>
-                            <div class="skeleton-desc"></div>
-                            <div class="skeleton-desc short" style="width: 85%;"></div>
-                            <div class="skeleton-badges-flex mt-auto">
-                                <span></span><span></span>
-                            </div>
-                        </div>
-                    </article>
-                </div>
-            </>
+            <div class="col-span-full py-12 text-center relative z-10 glass-card rounded-2xl border border-cyan-500/20 bg-cyan-500/5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-4 text-cyan-400 opacity-80"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+                <h3 class="text-xl font-bold text-white mb-2">No Experience Records Found</h3>
+                <p class="text-slate-400 max-w-md mx-auto">
+                    Experience history is currently being updated. Check back soon.
+                </p>
+            </div>
         ) : (
             experiences.map((exp, index) => (
             <div class="experience-timeline-item">

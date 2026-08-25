@@ -225,21 +225,22 @@ async function configureApp(
     // 3. GLOBAL ERROR HANDLER
     // ============================================================
 
-    app.setErrorHandler((error: any, request, reply) => {
+    app.setErrorHandler((error: unknown, request, reply) => {
         const isProd = process.env.NODE_ENV === 'production';
+        const err = error as any;
 
-        if (error.name === 'MongoServerError' && error.code === 11000) {
+        if (err.name === 'MongoServerError' && err.code === 11000) {
             return reply.status(409).send({
                 success: false,
                 error: {
                     code: 'CONFLICT',
                     message: 'Duplicate key error.',
-                    details: isProd ? undefined : error.keyValue,
+                    details: isProd ? undefined : err.keyValue,
                 },
             });
         }
 
-        if (error.name === 'ValidationError' && error.errors) {
+        if (err.name === 'ValidationError' && err.errors) {
             return reply.status(400).send({
                 success: false,
                 error: {
@@ -249,7 +250,7 @@ async function configureApp(
             });
         }
 
-        if (error.name === 'CastError') {
+        if (err.name === 'CastError') {
             return reply.status(400).send({
                 success: false,
                 error: {
@@ -259,35 +260,35 @@ async function configureApp(
             });
         }
 
-        if (error.validation) {
+        if (err.validation) {
             return reply.status(400).send({
                 success: false,
                 error: {
                     code: 'VALIDATION_ERROR',
-                    message: error.message,
-                    details: error.validation,
+                    message: err.message,
+                    details: err.validation,
                 },
             });
         }
 
-        if (error.statusCode && error.statusCode >= 400 && error.statusCode < 500) {
-            return reply.status(error.statusCode).send({
+        if (err.statusCode && err.statusCode >= 400 && err.statusCode < 500) {
+            return reply.status(err.statusCode).send({
                 success: false,
                 error: {
-                    code: error.code || 'BAD_REQUEST',
-                    message: error.message,
+                    code: err.code || 'BAD_REQUEST',
+                    message: err.message,
                 },
             });
         }
 
-        request.log.error(error);
+        request.log.error(err);
 
         return reply.status(500).send({
             success: false,
             error: {
                 code: 'INTERNAL_SERVER_ERROR',
-                message: isProd ? 'An unexpected error occurred.' : error.message,
-                stack: isProd ? undefined : error.stack,
+                message: isProd ? 'An unexpected error occurred.' : err.message,
+                stack: isProd ? undefined : err.stack,
             },
         });
     });

@@ -58,9 +58,20 @@ describe('Security API Tests', () => {
         expect(response.statusCode).toBe(400);
     });
 
+    it('should set expected security headers (Helmet)', async () => {
+        const response = await app.inject({
+            method: 'GET',
+            url: '/'
+        });
+        
+        expect(response.headers).toHaveProperty('content-security-policy');
+        expect(response.headers).toHaveProperty('strict-transport-security');
+        expect(response.headers).toHaveProperty('x-frame-options');
+        expect(response.headers).toHaveProperty('referrer-policy');
+    });
+
     it('should reject extra properties if configured in schema', async () => {
-        // Note: depends on additionalProperties: false in schema
-        const token = app.jwt.sign({ id: 'test', username: 'admin' });
+        const token = app.jwt.sign({ id: 'test', username: 'admin', role: 'admin' });
         const response = await app.inject({
             method: 'POST',
             url: '/api/experiences',
@@ -73,8 +84,6 @@ describe('Security API Tests', () => {
                 hacked_field: 'should_fail'
             }
         });
-        // Fastify validation should return 400 if strictly configured
-        // We just ensure it doesn't crash 500
         expect([201, 400]).toContain(response.statusCode);
     });
 });

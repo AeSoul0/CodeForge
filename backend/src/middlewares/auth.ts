@@ -47,7 +47,14 @@ export async function authenticateAdmin(
     }
 
     try {
-        await request.jwtVerify();
+        const decoded = await request.jwtVerify() as { role?: string };
+        if (decoded.role !== 'admin') {
+            request.log.warn('[AUTH] Token valid but missing admin role.');
+            return reply.status(403).send({
+                success: false,
+                error: 'Forbidden: Admin access required',
+            });
+        }
     } catch (error) {
         request.log.warn(
             '[AUTH] JWT verification failed.',

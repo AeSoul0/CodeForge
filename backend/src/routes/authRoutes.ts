@@ -15,17 +15,20 @@ export default async function authRoutes(fastify: FastifyInstance) {
         }
 
         const admin = await adminService.validateCredentials(username, password);
-        const token = fastify.jwt.sign({ id: admin._id, username: admin.username });
+        const token = fastify.jwt.sign({ id: admin._id, username: admin.username, role: 'admin' });
 
         reply.setCookie('token', token, {
             path: '/',
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: true,
             sameSite: 'strict',
             maxAge: 60 * 60 * 24, // 1 day
         });
 
-        return reply.send({ success: true, message: 'Logged in successfully' });
+        return reply.status(200).send({
+            success: true,
+            message: 'Authentication successful',
+        });
     });
 
     fastify.post('/logout', async (request, reply) => {

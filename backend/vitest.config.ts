@@ -21,10 +21,16 @@ export default defineConfig({
       include: ['src/**/*.ts'],
       exclude: [
         'src/index.ts',
-        'src/utils/scripts/**',
         'src/models/**',
         'src/**/__test__/**',
+        'src/utils/ai.ts',
       ],
+      thresholds: {
+        statements: 85,
+        branches: 80,
+        functions: 85,
+        lines: 85,
+      },
     },
 
     setupFiles: ['./tests/setup.ts'],
