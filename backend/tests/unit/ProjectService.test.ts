@@ -19,311 +19,624 @@ import {
     AppError,
 } from '../../src/errors/AppError';
 
-describe('ProjectService', () => {
-    let service: ProjectService;
-
-    let repository: {
-        findAll: ReturnType<typeof vi.fn>;
-        findById: ReturnType<typeof vi.fn>;
-        create: ReturnType<typeof vi.fn>;
-        update: ReturnType<typeof vi.fn>;
-        delete: ReturnType<typeof vi.fn>;
+function createProject(
+    overrides: Record<string, unknown> = {},
+) {
+    return {
+        _id: 'project-1',
+        titolo: 'Project',
+        role: 'Developer',
+        descrizione: 'Description',
+        descrizioneLunga:
+            'Long description',
+        tecnologie: [
+            'TypeScript',
+        ],
+        categoria: 'Backend',
+        categorie: [
+            'Web',
+        ],
+        linkGithub:
+            'https://github.com/example',
+        image: '/project.png',
+        createdAt:
+            new Date(
+                '2026-01-01T00:00:00.000Z',
+            ),
+        updatedAt:
+            new Date(
+                '2026-02-01T00:00:00.000Z',
+            ),
+        ...overrides,
     };
+}
 
-    beforeEach(() => {
-        vi.clearAllMocks();
+describe(
+    'ProjectService',
+    () => {
+        let service: ProjectService;
 
-        repository = {
-            findAll: vi.fn(),
-            findById: vi.fn(),
-            create: vi.fn(),
-            update: vi.fn(),
-            delete: vi.fn(),
+        let repository: {
+            findAll: ReturnType<
+                typeof vi.fn
+            >;
+
+            findById: ReturnType<
+                typeof vi.fn
+            >;
+
+            create: ReturnType<
+                typeof vi.fn
+            >;
+
+            update: ReturnType<
+                typeof vi.fn
+            >;
+
+            delete: ReturnType<
+                typeof vi.fn
+            >;
         };
 
-        service =
-            new ProjectService(
-                repository as unknown as ProjectRepository,
-            );
-    });
+        beforeEach(() => {
+            vi.clearAllMocks();
 
-    it(
-        'getAllProjects returns mapped DTOs',
-        async () => {
-            const createdAt =
-                new Date();
+            repository = {
+                findAll:
+                    vi.fn(),
 
-            const updatedAt =
-                new Date();
+                findById:
+                    vi.fn(),
 
-            const fake = [
-                {
-                    _id: 'id1',
-                    titolo: 't',
-                    role: 'r',
-                    descrizione: 'd',
-                    descrizioneLunga: 'dl',
-                    tecnologie: [],
-                    categoria: 'c',
-                    categorie: [],
-                    linkGithub: '',
-                    image: '',
-                    createdAt,
-                    updatedAt,
-                },
-            ];
+                create:
+                    vi.fn(),
 
-            repository.findAll
-                .mockResolvedValue(fake);
+                update:
+                    vi.fn(),
 
-            const result =
-                await service.getAllProjects(
+                delete:
+                    vi.fn(),
+            };
+
+            service =
+                new ProjectService(
+                    repository as unknown as ProjectRepository,
+                );
+        });
+
+        it(
+            'getAllProjects returns mapped DTOs',
+            async () => {
+                const project =
+                    createProject();
+
+                repository.findAll
+                    .mockResolvedValue([
+                        project,
+                    ]);
+
+                const result =
+                    await service.getAllProjects(
+                        1,
+                        10,
+                    );
+
+                expect(
+                    repository.findAll,
+                ).toHaveBeenCalledWith(
                     1,
                     10,
                 );
 
-            expect(
-                repository.findAll,
-            ).toHaveBeenCalledWith(
-                1,
-                10,
-            );
-
-            expect(result).toHaveLength(1);
-            expect(result[0]?.id)
-                .toBe('id1');
-            expect(result[0]?.titolo)
-                .toBe('t');
-        },
-    );
-
-    it(
-        'getProjectById returns DTO when found',
-        async () => {
-            const project = {
-                _id: 'p1',
-                titolo: 'x',
-                role: 'y',
-                descrizione: 'z',
-                descrizioneLunga: '',
-                tecnologie: [],
-                categoria: '',
-                categorie: [],
-                linkGithub: '',
-                image: '',
-                createdAt:
-                    new Date(),
-                updatedAt:
-                    new Date(),
-            };
-
-            repository.findById
-                .mockResolvedValue(
-                    project,
+                expect(result).toHaveLength(
+                    1,
                 );
 
-            const result =
-                await service.getProjectById(
-                    'p1',
+                expect(result[0])
+                    .toMatchObject({
+                        id:
+                            'project-1',
+
+                        titolo:
+                            'Project',
+
+                        role:
+                            'Developer',
+
+                        experienceId:
+                            null,
+
+                        experienceImage:
+                            null,
+                    });
+            },
+        );
+
+        it(
+            'getAllProjects uses default pagination',
+            async () => {
+                repository.findAll
+                    .mockResolvedValue([]);
+
+                const result =
+                    await service.getAllProjects();
+
+                expect(
+                    repository.findAll,
+                ).toHaveBeenCalledWith(
+                    1,
+                    10,
                 );
 
-            expect(
-                repository.findById,
-            ).toHaveBeenCalledWith(
-                'p1',
-            );
+                expect(result)
+                    .toEqual([]);
+            },
+        );
 
-            expect(result.id)
-                .toBe('p1');
-        },
-    );
+        it(
+            'maps populated experience with id and image',
+            async () => {
+                const project =
+                    createProject({
+                        experienceId: {
+                            _id: {
+                                toString:
+                                    () =>
+                                        'experience-1',
+                            },
 
-    it(
-        'getProjectById throws NotFoundError when missing',
-        async () => {
-            repository.findById
-                .mockResolvedValue(
-                    null,
+                            image:
+                                '/experience.png',
+                        },
+                    });
+
+                repository.findById
+                    .mockResolvedValue(
+                        project,
+                    );
+
+                const result =
+                    await service.getProjectById(
+                        'project-1',
+                    );
+
+                expect(
+                    result.experienceId,
+                ).toBe(
+                    'experience-1',
                 );
 
-            await expect(
-                service.getProjectById(
-                    'missing',
-                ),
-            ).rejects.toThrow(
-                NotFoundError,
-            );
-        },
-    );
+                expect(
+                    result.experienceImage,
+                ).toBe(
+                    '/experience.png',
+                );
+            },
+        );
 
-    it(
-        'createProject returns DTO on success',
-        async () => {
-            const created = {
-                _id: 'new',
-                titolo: 'n',
-                role: '',
-                descrizione: '',
-                descrizioneLunga: '',
-                tecnologie: [],
-                categoria: '',
-                categorie: [],
-                linkGithub: '',
-                image: '',
-                createdAt:
-                    new Date(),
-                updatedAt:
-                    new Date(),
-            };
+        it(
+            'maps populated experience with null image',
+            async () => {
+                const project =
+                    createProject({
+                        experienceId: {
+                            _id: {
+                                toString:
+                                    () =>
+                                        'experience-2',
+                            },
 
-            const input = {
-                titolo: 'n',
-                descrizione: '',
-                tecnologie: [],
-            };
+                            image:
+                                null,
+                        },
+                    });
 
-            repository.create
-                .mockResolvedValue(
-                    created,
+                repository.findById
+                    .mockResolvedValue(
+                        project,
+                    );
+
+                const result =
+                    await service.getProjectById(
+                        'project-1',
+                    );
+
+                expect(
+                    result.experienceId,
+                ).toBe(
+                    'experience-2',
                 );
 
-            const result =
-                await service.createProject(
+                expect(
+                    result.experienceImage,
+                ).toBeNull();
+            },
+        );
+
+        it(
+            'maps string experienceId',
+            async () => {
+                const project =
+                    createProject({
+                        experienceId:
+                            'experience-string',
+                    });
+
+                repository.findById
+                    .mockResolvedValue(
+                        project,
+                    );
+
+                const result =
+                    await service.getProjectById(
+                        'project-1',
+                    );
+
+                expect(
+                    result.experienceId,
+                ).toBe(
+                    'experience-string',
+                );
+
+                expect(
+                    result.experienceImage,
+                ).toBeNull();
+            },
+        );
+
+        it(
+            'maps non-populated experience reference using toString',
+            async () => {
+                const project =
+                    createProject({
+                        experienceId: {
+                            toString:
+                                () =>
+                                    'experience-reference',
+                        },
+                    });
+
+                repository.findById
+                    .mockResolvedValue(
+                        project,
+                    );
+
+                const result =
+                    await service.getProjectById(
+                        'project-1',
+                    );
+
+                expect(
+                    result.experienceId,
+                ).toBe(
+                    'experience-reference',
+                );
+
+                expect(
+                    result.experienceImage,
+                ).toBeNull();
+            },
+        );
+
+        it(
+            'maps project id fallback when _id is absent',
+            async () => {
+                const project =
+                    createProject({
+                        _id:
+                            undefined,
+
+                        id:
+                            'fallback-id',
+                    });
+
+                repository.findById
+                    .mockResolvedValue(
+                        project,
+                    );
+
+                const result =
+                    await service.getProjectById(
+                        'fallback-id',
+                    );
+
+                expect(result.id)
+                    .toBe(
+                        'fallback-id',
+                    );
+            },
+        );
+
+        it(
+            'throws when project has no identifier',
+            async () => {
+                const project =
+                    createProject({
+                        _id:
+                            undefined,
+
+                        id:
+                            undefined,
+                    });
+
+                repository.findById
+                    .mockResolvedValue(
+                        project,
+                    );
+
+                await expect(
+                    service.getProjectById(
+                        'invalid',
+                    ),
+                ).rejects.toThrow(
+                    'Project document is missing an identifier.',
+                );
+            },
+        );
+
+        it(
+            'throws when createdAt is missing',
+            async () => {
+                const project =
+                    createProject({
+                        createdAt:
+                            undefined,
+                    });
+
+                repository.findById
+                    .mockResolvedValue(
+                        project,
+                    );
+
+                await expect(
+                    service.getProjectById(
+                        'project-1',
+                    ),
+                ).rejects.toThrow(
+                    'Project document is missing createdAt.',
+                );
+            },
+        );
+
+        it(
+            'throws when updatedAt is missing',
+            async () => {
+                const project =
+                    createProject({
+                        updatedAt:
+                            undefined,
+                    });
+
+                repository.findById
+                    .mockResolvedValue(
+                        project,
+                    );
+
+                await expect(
+                    service.getProjectById(
+                        'project-1',
+                    ),
+                ).rejects.toThrow(
+                    'Project document is missing updatedAt.',
+                );
+            },
+        );
+
+        it(
+            'getProjectById returns DTO when found',
+            async () => {
+                const project =
+                    createProject();
+
+                repository.findById
+                    .mockResolvedValue(
+                        project,
+                    );
+
+                const result =
+                    await service.getProjectById(
+                        'project-1',
+                    );
+
+                expect(
+                    repository.findById,
+                ).toHaveBeenCalledWith(
+                    'project-1',
+                );
+
+                expect(result.id)
+                    .toBe(
+                        'project-1',
+                    );
+            },
+        );
+
+        it(
+            'getProjectById throws NotFoundError when missing',
+            async () => {
+                repository.findById
+                    .mockResolvedValue(
+                        null,
+                    );
+
+                await expect(
+                    service.getProjectById(
+                        'missing',
+                    ),
+                ).rejects.toThrow(
+                    NotFoundError,
+                );
+            },
+        );
+
+        it(
+            'createProject returns DTO on success',
+            async () => {
+                const created =
+                    createProject({
+                        _id:
+                            'new-project',
+                        titolo:
+                            'New Project',
+                    });
+
+                const input = {
+                    titolo:
+                        'New Project',
+
+                    descrizione:
+                        'Description',
+
+                    tecnologie:
+                        [],
+                };
+
+                repository.create
+                    .mockResolvedValue(
+                        created,
+                    );
+
+                const result =
+                    await service.createProject(
+                        input,
+                    );
+
+                expect(
+                    repository.create,
+                ).toHaveBeenCalledWith(
                     input,
                 );
 
-            expect(
-                repository.create,
-            ).toHaveBeenCalledWith(
-                input,
-            );
+                expect(result.id)
+                    .toBe(
+                        'new-project',
+                    );
+            },
+        );
 
-            expect(result.id)
-                .toBe('new');
-        },
-    );
+        it(
+            'createProject throws AppError when repository returns null',
+            async () => {
+                repository.create
+                    .mockResolvedValue(
+                        null,
+                    );
 
-    it(
-        'createProject throws AppError on failure',
-        async () => {
-            const input = {
-                titolo: 'n',
-                descrizione: '',
-                tecnologie: [],
-            };
+                await expect(
+                    service.createProject({
+                        titolo:
+                            'Project',
 
-            repository.create
-                .mockResolvedValue(
-                    null,
+                        descrizione:
+                            'Description',
+
+                        tecnologie:
+                            [],
+                    }),
+                ).rejects.toThrow(
+                    AppError,
                 );
+            },
+        );
 
-            await expect(
-                service.createProject(
+        it(
+            'updateProject returns DTO when updated',
+            async () => {
+                const updated =
+                    createProject({
+                        _id:
+                            'updated-project',
+                        titolo:
+                            'Updated',
+                    });
+
+                const input = {
+                    titolo:
+                        'Updated',
+                };
+
+                repository.update
+                    .mockResolvedValue(
+                        updated,
+                    );
+
+                const result =
+                    await service.updateProject(
+                        'updated-project',
+                        input,
+                    );
+
+                expect(
+                    repository.update,
+                ).toHaveBeenCalledWith(
+                    'updated-project',
                     input,
-                ),
-            ).rejects.toThrow(
-                AppError,
-            );
-        },
-    );
-
-    it(
-        'updateProject returns DTO when updated',
-        async () => {
-            const updated = {
-                _id: 'u',
-                titolo: 'u',
-                tecnologie: [],
-                categorie: [],
-                createdAt:
-                    new Date(),
-                updatedAt:
-                    new Date(),
-            };
-
-            const input = {
-                titolo: 'u',
-            };
-
-            repository.update
-                .mockResolvedValue(
-                    updated,
                 );
 
-            const result =
-                await service.updateProject(
-                    'u',
-                    input,
+                expect(result.id)
+                    .toBe(
+                        'updated-project',
+                    );
+            },
+        );
+
+        it(
+            'updateProject throws NotFoundError when not found',
+            async () => {
+                repository.update
+                    .mockResolvedValue(
+                        null,
+                    );
+
+                await expect(
+                    service.updateProject(
+                        'missing',
+                        {},
+                    ),
+                ).rejects.toThrow(
+                    NotFoundError,
                 );
+            },
+        );
 
-            expect(
-                repository.update,
-            ).toHaveBeenCalledWith(
-                'u',
-                input,
-            );
+        it(
+            'deleteProject succeeds when repository returns truthy',
+            async () => {
+                repository.delete
+                    .mockResolvedValue(
+                        true,
+                    );
 
-            expect(result.id)
-                .toBe('u');
-        },
-    );
+                await expect(
+                    service.deleteProject(
+                        'project-1',
+                    ),
+                ).resolves.toBeUndefined();
 
-    it(
-        'updateProject throws NotFoundError when not found',
-        async () => {
-            repository.update
-                .mockResolvedValue(
-                    null,
+                expect(
+                    repository.delete,
+                ).toHaveBeenCalledWith(
+                    'project-1',
                 );
+            },
+        );
 
-            await expect(
-                service.updateProject(
-                    'missing',
-                    {},
-                ),
-            ).rejects.toThrow(
-                NotFoundError,
-            );
-        },
-    );
+        it(
+            'deleteProject throws NotFoundError when repository returns falsy',
+            async () => {
+                repository.delete
+                    .mockResolvedValue(
+                        false,
+                    );
 
-    it(
-        'deleteProject succeeds when repo returns truthy',
-        async () => {
-            repository.delete
-                .mockResolvedValue(
-                    true,
+                await expect(
+                    service.deleteProject(
+                        'missing',
+                    ),
+                ).rejects.toThrow(
+                    NotFoundError,
                 );
-
-            await expect(
-                service.deleteProject(
-                    'del',
-                ),
-            ).resolves.toBeUndefined();
-
-            expect(
-                repository.delete,
-            ).toHaveBeenCalledWith(
-                'del',
-            );
-        },
-    );
-
-    it(
-        'deleteProject throws NotFoundError when repo returns falsy',
-        async () => {
-            repository.delete
-                .mockResolvedValue(
-                    false,
-                );
-
-            await expect(
-                service.deleteProject(
-                    'missing',
-                ),
-            ).rejects.toThrow(
-                NotFoundError,
-            );
-        },
-    );
-});
+            },
+        );
+    },
+);
