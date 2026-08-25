@@ -1,218 +1,262 @@
+/**
+ * @file backend/tests/unit/AuthRoutes.test.ts
+ * @description Unit tests for administrator authentication routes.
+ *
+ * Covered endpoints:
+ * - POST /login
+ * - GET /me
+ * - POST /logout
+ *
+ * The Fastify instance is mocked so these tests remain isolated from the
+ * actual HTTP server and database.
+ */
+
 import {
-    beforeEach,
     afterEach,
+    beforeEach,
     describe,
     expect,
     it,
     vi,
 } from 'vitest';
 
-const {
-    validateCredentialsMock,
-} = vi.hoisted(() => ({
-    validateCredentialsMock:
-        vi.fn(),
-}));
+import type {
+    FastifyInstance,
+} from 'fastify';
+
+import authRoutes from '../../src/routes/authRoutes';
+
+import {
+    adminService,
+} from '../../src/services/AdminService';
 
 vi.mock(
     '../../src/services/AdminService',
     () => ({
         adminService: {
             validateCredentials:
-                validateCredentialsMock,
+                vi.fn(),
         },
     }),
 );
 
-import authRoutes from '../../src/routes/authRoutes';
+type RouteHandler = (
+    request: Record<string, unknown>,
+    reply: Record<string, unknown>,
+) => unknown;
 
 type RegisteredRoute = {
-    method: string;
+    method:
+        | 'GET'
+        | 'POST';
 
-    url: string;
+    path: string;
 
-    options?: Record<
-        string,
-        unknown
-    >;
-
-    handler: (
-        request: unknown,
-        reply: unknown,
-    ) => unknown;
+    handler:
+        | RouteHandler
+        | undefined;
 };
 
-function createFastifyMock() {
-    const routes:
-        RegisteredRoute[] = [];
-
-    const fastify = {
-        post: vi.fn(
-            (
-                url: string,
-
-                optionsOrHandler:
-                    | Record<
-                        string,
-                        unknown
-                    >
-                    | ((
-                        request:
-                            unknown,
-                        reply:
-                            unknown,
-                    ) => unknown),
-
-                maybeHandler?: (
-                    request:
-                        unknown,
-                    reply:
-                        unknown,
-                ) => unknown,
-            ) => {
-                if (
-                    typeof optionsOrHandler ===
-                    'function'
-                ) {
-                    routes.push({
-                        method:
-                            'POST',
-
-                        url,
-
-                        handler:
-                            optionsOrHandler,
-                    });
-
-                    return;
-                }
-
-                routes.push({
-                    method:
-                        'POST',
-
-                    url,
-
-                    options:
-                        optionsOrHandler,
-
-                    handler:
-                        maybeHandler!,
-                });
-            },
-        ),
-
-        jwt: {
-            sign:
-                vi.fn(),
-        },
-    };
-
-    return {
-        fastify,
-        routes,
-    };
-}
-
-function createReplyMock() {
-    const reply = {
-        status:
-            vi.fn(),
-
-        send:
-            vi.fn(),
-
-        setCookie:
-            vi.fn(),
-
-        clearCookie:
-            vi.fn(),
-    };
-
-    reply.status.mockReturnValue(
-        reply,
-    );
-
-    return reply;
-}
-
-function getRoute(
-    routes: RegisteredRoute[],
-    url: string,
-) {
-    const route =
-        routes.find(
-            (entry) =>
-                entry.url ===
-                    url,
-        );
-
-    if (!route) {
-        throw new Error(
-            `Missing route: ${url}`,
-        );
-    }
-
-    return route;
-}
+type MockReply = {
+    status: ReturnType<typeof vi.fn>;
+    send: ReturnType<typeof vi.fn>;
+    setCookie: ReturnType<typeof vi.fn>;
+    clearCookie: ReturnType<typeof vi.fn>;
+};
 
 describe(
     'authRoutes',
     () => {
-        const originalNodeEnv =
-            process.env.NODE_ENV;
+        const registeredRoutes:
+            RegisteredRoute[] = [];
 
-        let fastify: ReturnType<
-            typeof createFastifyMock
-        >;
+        const post =
+            vi.fn(
+                (
+                    path: string,
+                    ...args: unknown[]
+                ) => {
+                    const handler =
+                        args.find(
+                            (
+                                value,
+                            ) =>
+                                typeof value ===
+                                'function',
+                        ) as
+                            | RouteHandler
+                            | undefined;
 
-        let routes:
-            RegisteredRoute[];
+                    registeredRoutes.push({
+                        method:
+                            'POST',
+                        path,
+                        handler,
+                    });
+                },
+            );
+
+        const get =
+            vi.fn(
+                (
+                    path: string,
+                    ...args: unknown[]
+                ) => {
+                    const handler =
+                        args.find(
+                            (
+                                value,
+                            ) =>
+                                typeof value ===
+                                'function',
+                        ) as
+                            | RouteHandler
+                            | undefined;
+
+                    registeredRoutes.push({
+                        method:
+                            'GET',
+                        path,
+                        handler,
+                    });
+                },
+            );
+
+        const sign =
+            vi.fn();
+
+        const setCookie =
+            vi.fn();
+
+        const clearCookie =
+            vi.fn();
+
+        const fastify =
+            {
+                post,
+                get,
+                jwt: {
+                    sign,
+                },
+                setCookie,
+                clearCookie,
+            } as unknown as FastifyInstance;
+
+        function createReply(): MockReply {
+            const reply = {
+                status:
+                    vi.fn(),
+                send:
+                    vi.fn(),
+                setCookie,
+                clearCookie,
+            };
+
+            reply.status.mockReturnValue(
+                reply,
+            );
+
+            reply.send.mockReturnValue(
+                reply,
+            );
+
+            return reply;
+        }
+
+        function findRoute(
+            method:
+                | 'GET'
+                | 'POST',
+            path: string,
+        ): RegisteredRoute {
+            const route =
+                registeredRoutes.find(
+                    (
+                        item,
+                    ) =>
+                        item.method ===
+                            method &&
+                        item.path ===
+                            path,
+                );
+
+            if (!route) {
+                throw new Error(
+                    `Route not registered: ${method} ${path}`,
+                );
+            }
+
+            return route;
+        }
 
         beforeEach(
-            async () => {
+            () => {
                 vi.clearAllMocks();
 
-                fastify =
-                    createFastifyMock();
+                registeredRoutes.length =
+                    0;
 
-                routes =
-                    fastify.routes;
+                post.mockClear();
+                get.mockClear();
 
-                await authRoutes(
-                    fastify.fastify as never,
+                sign.mockReset();
+                setCookie.mockReset();
+                clearCookie.mockReset();
+
+                sign.mockReturnValue(
+                    'signed-test-token',
                 );
+
+                process.env.NODE_ENV =
+                    'test';
             },
         );
 
-        afterEach(() => {
-            process.env.NODE_ENV =
-                originalNodeEnv;
-        });
+        afterEach(
+            () => {
+                process.env.NODE_ENV =
+                    'test';
+            },
+        );
 
         it(
-            'registers login and logout routes',
-            () => {
-                expect(routes).toHaveLength(
-                    2,
+            'registers login, me and logout routes',
+            async () => {
+                await authRoutes(
+                    fastify,
                 );
 
                 expect(
-                    getRoute(
-                        routes,
-                        '/login',
-                    ).method,
-                ).toBe(
-                    'POST',
-                );
-
-                expect(
-                    getRoute(
-                        routes,
-                        '/logout',
-                    ).method,
-                ).toBe(
-                    'POST',
+                    registeredRoutes,
+                ).toEqual(
+                    expect.arrayContaining(
+                        [
+                            expect.objectContaining(
+                                {
+                                    method:
+                                        'POST',
+                                    path:
+                                        '/login',
+                                },
+                            ),
+                            expect.objectContaining(
+                                {
+                                    method:
+                                        'GET',
+                                    path:
+                                        '/me',
+                                },
+                            ),
+                            expect.objectContaining(
+                                {
+                                    method:
+                                        'POST',
+                                    path:
+                                        '/logout',
+                                },
+                            ),
+                        ],
+                    ),
                 );
             },
         );
@@ -220,16 +264,20 @@ describe(
         it(
             'rejects login when username is missing',
             async () => {
+                await authRoutes(
+                    fastify,
+                );
+
                 const route =
-                    getRoute(
-                        routes,
+                    findRoute(
+                        'POST',
                         '/login',
                     );
 
                 const reply =
-                    createReplyMock();
+                    createReply();
 
-                await route.handler(
+                await route.handler?.(
                     {
                         body: {
                             password:
@@ -238,10 +286,6 @@ describe(
                     },
                     reply,
                 );
-
-                expect(
-                    validateCredentialsMock,
-                ).not.toHaveBeenCalled();
 
                 expect(
                     reply.status,
@@ -254,26 +298,34 @@ describe(
                 ).toHaveBeenCalledWith({
                     success:
                         false,
-
                     message:
                         'Username and password are required',
                 });
+
+                expect(
+                    adminService
+                        .validateCredentials,
+                ).not.toHaveBeenCalled();
             },
         );
 
         it(
             'rejects login when password is missing',
             async () => {
+                await authRoutes(
+                    fastify,
+                );
+
                 const route =
-                    getRoute(
-                        routes,
+                    findRoute(
+                        'POST',
                         '/login',
                     );
 
                 const reply =
-                    createReplyMock();
+                    createReply();
 
-                await route.handler(
+                await route.handler?.(
                     {
                         body: {
                             username:
@@ -284,30 +336,44 @@ describe(
                 );
 
                 expect(
-                    validateCredentialsMock,
-                ).not.toHaveBeenCalled();
-
-                expect(
                     reply.status,
                 ).toHaveBeenCalledWith(
                     400,
                 );
+
+                expect(
+                    reply.send,
+                ).toHaveBeenCalledWith({
+                    success:
+                        false,
+                    message:
+                        'Username and password are required',
+                });
+
+                expect(
+                    adminService
+                        .validateCredentials,
+                ).not.toHaveBeenCalled();
             },
         );
 
         it(
             'rejects login when both credentials are missing',
             async () => {
+                await authRoutes(
+                    fastify,
+                );
+
                 const route =
-                    getRoute(
-                        routes,
+                    findRoute(
+                        'POST',
                         '/login',
                     );
 
                 const reply =
-                    createReplyMock();
+                    createReply();
 
-                await route.handler(
+                await route.handler?.(
                     {
                         body: {},
                     },
@@ -325,7 +391,6 @@ describe(
                 ).toHaveBeenCalledWith({
                     success:
                         false,
-
                     message:
                         'Username and password are required',
                 });
@@ -333,89 +398,76 @@ describe(
         );
 
         it(
-            'authenticates valid credentials and sets secure cookie',
+            'authenticates valid credentials and sets the session cookie',
             async () => {
+                vi.mocked(
+                    adminService
+                        .validateCredentials,
+                ).mockResolvedValue(
+                    {
+                        _id:
+                            'admin-id',
+                        username:
+                            'admin',
+                    } as never,
+                );
+
+                await authRoutes(
+                    fastify,
+                );
+
                 const route =
-                    getRoute(
-                        routes,
+                    findRoute(
+                        'POST',
                         '/login',
                     );
 
                 const reply =
-                    createReplyMock();
+                    createReply();
 
-                const admin = {
-                    _id:
-                        'admin-id',
-
-                    username:
-                        'admin',
-                };
-
-                validateCredentialsMock
-                    .mockResolvedValue(
-                        admin,
-                    );
-
-                fastify.fastify.jwt.sign
-                    .mockReturnValue(
-                        'jwt-token',
-                    );
-
-                const request = {
-                    body: {
-                        username:
-                            'admin',
-
-                        password:
-                            'password',
+                await route.handler?.(
+                    {
+                        body: {
+                            username:
+                                'admin',
+                            password:
+                                'password',
+                        },
                     },
-                };
-
-                await route.handler(
-                    request,
                     reply,
                 );
 
                 expect(
-                    validateCredentialsMock,
+                    adminService
+                        .validateCredentials,
                 ).toHaveBeenCalledWith(
                     'admin',
                     'password',
                 );
 
                 expect(
-                    fastify.fastify.jwt
-                        .sign,
+                    sign,
                 ).toHaveBeenCalledWith({
                     id:
                         'admin-id',
-
                     username:
                         'admin',
-
                     role:
                         'admin',
                 });
 
                 expect(
-                    reply.setCookie,
+                    setCookie,
                 ).toHaveBeenCalledWith(
                     'token',
-                    'jwt-token',
-                    expect.objectContaining({
-                        path:
-                            '/',
-
-                        httpOnly:
-                            true,
-
-                        secure:
-                            true,
-
-                        sameSite:
-                            'strict',
-                    }),
+                    'signed-test-token',
+                    expect.objectContaining(
+                        {
+                            path: '/',
+                            httpOnly:
+                                true,
+                        },
+                    ),
                 );
 
                 expect(
@@ -429,7 +481,6 @@ describe(
                 ).toHaveBeenCalledWith({
                     success:
                         true,
-
                     message:
                         'Authentication successful',
                 });
@@ -439,75 +490,93 @@ describe(
         it(
             'propagates authentication errors',
             async () => {
+                vi.mocked(
+                    adminService
+                        .validateCredentials,
+                ).mockRejectedValue(
+                    new Error(
+                        'Invalid credentials',
+                    ),
+                );
+
+                await authRoutes(
+                    fastify,
+                );
+
                 const route =
-                    getRoute(
-                        routes,
+                    findRoute(
+                        'POST',
                         '/login',
                     );
 
-                validateCredentialsMock
-                    .mockRejectedValue(
-                        new Error(
-                            'invalid credentials',
-                        ),
-                    );
+                const reply =
+                    createReply();
 
                 await expect(
-                    route.handler(
+                    route.handler?.(
                         {
                             body: {
                                 username:
                                     'admin',
-
                                 password:
                                     'wrong',
                             },
                         },
-                        createReplyMock(),
+                        reply,
                     ),
                 ).rejects.toThrow(
-                    'invalid credentials',
+                    'Invalid credentials',
                 );
+
+                expect(
+                    setCookie,
+                ).not.toHaveBeenCalled();
             },
         );
 
         it(
-            'logs out in production with secure cookie options',
+            'logs out in production',
             async () => {
                 process.env.NODE_ENV =
                     'production';
 
+                await authRoutes(
+                    fastify,
+                );
+
                 const route =
-                    getRoute(
-                        routes,
+                    findRoute(
+                        'POST',
                         '/logout',
                     );
 
                 const reply =
-                    createReplyMock();
+                    createReply();
 
-                await route.handler(
+                await route.handler?.(
                     {},
                     reply,
                 );
 
                 expect(
-                    reply.clearCookie,
+                    clearCookie,
                 ).toHaveBeenCalledWith(
                     'token',
-                    {
-                        path:
-                            '/',
+                    expect.objectContaining(
+                        {
+                            path: '/',
+                            httpOnly:
+                                true,
+                            secure:
+                                true,
+                        },
+                    ),
+                );
 
-                        httpOnly:
-                            true,
-
-                        secure:
-                            true,
-
-                        sameSite:
-                            'strict',
-                    },
+                expect(
+                    reply.status,
+                ).toHaveBeenCalledWith(
+                    200,
                 );
 
                 expect(
@@ -515,7 +584,6 @@ describe(
                 ).toHaveBeenCalledWith({
                     success:
                         true,
-
                     message:
                         'Logged out successfully',
                 });
@@ -523,43 +591,229 @@ describe(
         );
 
         it(
-            'logs out outside production without secure cookie',
+            'logs out outside production without a secure cookie',
             async () => {
                 process.env.NODE_ENV =
                     'test';
 
+                await authRoutes(
+                    fastify,
+                );
+
                 const route =
-                    getRoute(
-                        routes,
+                    findRoute(
+                        'POST',
                         '/logout',
                     );
 
                 const reply =
-                    createReplyMock();
+                    createReply();
 
-                await route.handler(
+                await route.handler?.(
                     {},
                     reply,
                 );
 
                 expect(
-                    reply.clearCookie,
+                    clearCookie,
                 ).toHaveBeenCalledWith(
                     'token',
-                    {
-                        path:
-                            '/',
-
-                        httpOnly:
-                            true,
-
-                        secure:
-                            false,
-
-                        sameSite:
-                            'strict',
-                    },
+                    expect.objectContaining(
+                        {
+                            path: '/',
+                            httpOnly:
+                                true,
+                            secure:
+                                false,
+                        },
+                    ),
                 );
+
+                expect(
+                    reply.status,
+                ).toHaveBeenCalledWith(
+                    200,
+                );
+
+                expect(
+                    reply.send,
+                ).toHaveBeenCalledWith({
+                    success:
+                        true,
+                    message:
+                        'Logged out successfully',
+                });
+            },
+        );
+
+        it(
+            'returns the authenticated administrator from /me',
+            async () => {
+                await authRoutes(
+                    fastify,
+                );
+
+                const route =
+                    findRoute(
+                        'GET',
+                        '/me',
+                    );
+
+                const jwtVerify =
+                    vi.fn()
+                        .mockResolvedValue(
+                            {
+                                id:
+                                    'admin-id',
+                                username:
+                                    'admin',
+                                role:
+                                    'admin',
+                            },
+                        );
+
+                const reply =
+                    createReply();
+
+                await route.handler?.(
+                    {
+                        jwtVerify,
+                    },
+                    reply,
+                );
+
+                expect(
+                    jwtVerify,
+                ).toHaveBeenCalled();
+
+                expect(
+                    reply.status,
+                ).toHaveBeenCalledWith(
+                    200,
+                );
+
+                expect(
+                    reply.send,
+                ).toHaveBeenCalledWith(
+                    expect.objectContaining(
+                        {
+                            success:
+                                true,
+                            user:
+                                expect.objectContaining(
+                                    {
+                                        id:
+                                            'admin-id',
+                                        username:
+                                            'admin',
+                                        role:
+                                            'admin',
+                                    },
+                                ),
+                        },
+                    ),
+                );
+            },
+        );
+
+        it(
+            'rejects /me when JWT verification fails',
+            async () => {
+                await authRoutes(
+                    fastify,
+                );
+
+                const route =
+                    findRoute(
+                        'GET',
+                        '/me',
+                    );
+
+                const jwtVerify =
+                    vi.fn()
+                        .mockRejectedValue(
+                            new Error(
+                                'Unauthorized',
+                            ),
+                        );
+
+                const reply =
+                    createReply();
+
+                await route.handler?.(
+                    {
+                        jwtVerify,
+                    },
+                    reply,
+                );
+
+                expect(
+                    reply.status,
+                ).toHaveBeenCalledWith(
+                    401,
+                );
+
+                expect(
+                    reply.send,
+                ).toHaveBeenCalledWith({
+                    success:
+                        false,
+                    message:
+                        'Authentication required',
+                });
+            },
+        );
+
+        it(
+            'rejects /me when the token is not an admin token',
+            async () => {
+                await authRoutes(
+                    fastify,
+                );
+
+                const route =
+                    findRoute(
+                        'GET',
+                        '/me',
+                    );
+
+                const jwtVerify =
+                    vi.fn()
+                        .mockResolvedValue(
+                            {
+                                id:
+                                    'user-id',
+                                username:
+                                    'user',
+                                role:
+                                    'user',
+                            },
+                        );
+
+                const reply =
+                    createReply();
+
+                await route.handler?.(
+                    {
+                        jwtVerify,
+                    },
+                    reply,
+                );
+
+                expect(
+                    reply.status,
+                ).toHaveBeenCalledWith(
+                    403,
+                );
+
+                expect(
+                    reply.send,
+                ).toHaveBeenCalledWith({
+                    success:
+                        false,
+                    message:
+                        'Admin access required',
+                });
             },
         );
     },

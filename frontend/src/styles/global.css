@@ -1,74 +1,163 @@
+/**
+ * @file frontend/src/styles/global.css
+ * @description Global CodeForge visual system and accessibility utilities.
+ */
+
 @import "tailwindcss";
 
 @keyframes tap-pulse {
-
     0%,
     100% {
         opacity: 1;
-        filter: drop-shadow(0 0 2px rgba(34, 211, 238, 0.4));
-        
+        filter:
+            drop-shadow(
+                0 0 2px
+                rgba(
+                    34,
+                    211,
+                    238,
+                    0.4
+                )
+            );
     }
 
     50% {
         opacity: 0.85;
-        
-        filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.8));
+
+        filter:
+            drop-shadow(
+                0 0 4px
+                rgba(
+                    34,
+                    211,
+                    238,
+                    0.8
+                )
+            );
     }
 }
 
 @keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    from {
+        opacity: 0;
+        transform:
+            translateY(
+                20px
+            );
+    }
+
+    to {
+        opacity: 1;
+        transform:
+            translateY(
+                0
+            );
+    }
 }
 
 @layer utilities {
-  .animate-fade-in-up {
-    animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    opacity: 0;
-  }
-}
+    .animate-fade-in-up {
+        animation:
+            fade-in-up
+            0.8s
+            cubic-bezier(
+                0.16,
+                1,
+                0.3,
+                1
+            )
+            forwards;
 
-/* ============================================================
-   PROJECT DETAIL PAGE
-   ============================================================ */
+        opacity: 0;
+    }
+
+    /*
+     * Accessibility overrides.
+     *
+     * These colors preserve the dark visual language while ensuring
+     * sufficient contrast against the primary #020617 background.
+     */
+    .text-slate-500 {
+        color:
+            #94a3b8
+            !important;
+    }
+
+    .text-slate-600 {
+        color:
+            #94a3b8
+            !important;
+    }
+
+    .group-index {
+        color:
+            #94a3b8
+            !important;
+    }
+}
 
 .project-prose {
-  max-width: 72ch;
+    max-width: 72ch;
 }
 
-.project-prose :where(h3, h4) {
-  color: #f8fafc;
+.project-prose :where(
+    h3,
+    h4
+) {
+    color:
+        #f8fafc;
 }
 
-.project-prose :where(p, li) {
-  color: rgba(255, 255, 255, 0.68);
+.project-prose :where(
+    p,
+    li
+) {
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.78
+        );
 }
 
-.project-prose :where(code):not(:where(pre *)) {
-  font-weight: 600;
+.project-prose :where(
+    code
+):not(:where(pre *)) {
+    font-weight: 600;
 }
 
-.project-prose :where(pre) {
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+.project-prose :where(
+    pre
+) {
+    box-shadow:
+        0 20px
+        60px
+        rgba(
+            0,
+            0,
+            0,
+            0.25
+        );
 }
 
-@media (max-width: 768px) {
-  .project-prose {
-    max-width: 100%;
-  }
+@media (
+    max-width: 768px
+) {
+    .project-prose {
+        max-width:
+            100%;
+    }
 }
-
 
 @layer base {
-  :focus-visible {
-    outline: 2px solid #22d3ee;
-    outline-offset: 2px;
-  }
-}
+    :focus-visible {
+        outline:
+            2px
+            solid
+            #22d3ee;
 
+        outline-offset:
+            2px;
+    }
+}

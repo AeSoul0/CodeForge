@@ -5,10 +5,11 @@
  * Architecture Layer:
  * Infrastructure / Data Access
  *
- * Responsibility:
- * - Validate the MongoDB connection configuration.
+ * Responsibilities:
+ * - Validate MongoDB configuration.
  * - Establish the MongoDB connection.
  * - Retry transient connection failures.
+ * - Provide useful diagnostics during E2E startup.
  * - Surface startup failures to the application bootstrap.
  *
  * Process termination is intentionally handled by index.ts rather than
@@ -23,9 +24,18 @@ const DEFAULT_DELAY_MS = 5000;
 const SERVER_SELECTION_TIMEOUT_MS = 5000;
 
 /**
+ * Return whether the process is running an end-to-end test.
+ *
+ * E2E runs use NODE_ENV=test but must provide production-like startup
+ * diagnostics because Playwright starts the real backend process.
+ */
+const isE2EEnvironment = (): boolean =>
+    process.env.E2E === 'true';
+
+/**
  * Establish a connection to MongoDB.
  *
- * @param retries Number of attempts before failing.
+ * @param retries Number of connection attempts before failing.
  * @param delay Delay in milliseconds between attempts.
  * @throws Error when MongoDB configuration is missing or all attempts fail.
  */
@@ -71,8 +81,7 @@ const connectDB = async (
             /**
              * Handle post-connection events for resilience.
              *
-             * These listeners are registered once after a successful
-             * connection and remain active for the lifetime of the process.
+             * These listeners remain active for the lifetime of the process.
              */
             mongoose.connection.on(
                 'error',
@@ -100,15 +109,40 @@ const connectDB = async (
             const attemptsRemaining =
                 retries - attempt;
 
+            const errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : String(error);
+
+            /**
+             * Test environments intentionally keep ordinary Vitest output
+             * quiet. E2E is different because it starts the real server and
+             * therefore needs actionable startup diagnostics.
+             */
+            if (
+                process.env.NODE_ENV !== 'test' ||
+                isE2EEnvironment()
+            ) {
+                console.warn(
+                    `MongoDB connection attempt ${attempt}/${retries} failed.`,
+                );
+
+                if (isE2EEnvironment()) {
+                    console.warn(
+                        `MongoDB error: ${errorMessage}`,
+                    );
+                }
+            }
+
             if (
                 attemptsRemaining > 0
             ) {
                 if (
-                    process.env.NODE_ENV !==
-                    'test'
+                    process.env.NODE_ENV !== 'test' ||
+                    isE2EEnvironment()
                 ) {
                     console.warn(
-                        `MongoDB connection attempt ${attempt}/${retries} failed. Retrying in ${delay}ms.`,
+                        `Retrying MongoDB connection in ${delay}ms.`,
                     );
                 }
 

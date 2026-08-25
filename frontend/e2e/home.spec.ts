@@ -1,11 +1,41 @@
-import { test, expect } from '@playwright/test';
+/**
+ * @file frontend/e2e/home.spec.ts
+ * @description Basic frontend smoke tests.
+ */
 
-test('homepage has title', async ({ page }) => {
-  await page.goto('/');
-  await expect(page).toHaveTitle(/CodeForge/);
-});
+import {
+    expect,
+    test,
+} from '@playwright/test';
 
-test('admin login page renders', async ({ page }) => {
-  await page.goto('/admin/login');
-  await expect(page.locator('h1')).toContainText('Admin Access');
-});
+test(
+    'homepage has title',
+    async ({ page }) => {
+        await page.goto('/');
+
+        await expect(
+            page,
+        ).toHaveTitle(
+            /CodeForge/,
+        );
+    },
+);
+
+test(
+    'admin login page renders',
+    async ({ page }) => {
+        await page.goto(
+            '/admin/login',
+        );
+
+        await expect(
+            page.getByRole(
+                'heading',
+                {
+                    name: 'Admin Access',
+                    exact: true,
+                },
+            ),
+        ).toBeVisible();
+    },
+);

@@ -5,13 +5,11 @@
  * Responsibilities:
  * - Establish the MongoDB connection.
  * - Seed the initial administrator account.
- * - Start the configured Fastify application.
- * - Run background AI enrichment tasks.
+ * - Initialize Fastify.
+ * - Start the HTTP server in development/production.
+ * - Start the real server explicitly for Playwright E2E.
+ * - Never start an HTTP server during Vitest.
  * - Handle graceful shutdown.
- *
- * Application configuration and route registration are intentionally kept
- * in app.ts so integration tests can use the same configured Fastify
- * application without starting an HTTP server.
  */
 
 import mongoose from 'mongoose';
@@ -21,46 +19,29 @@ import app, {
 } from './app';
 
 import connectDB from './config/db';
-import { seedAdmin } from './utils/seedAdmin';
+import {
+    seedAdmin,
+} from './utils/seedAdmin';
 
 import {
     generateMissingProjectDescriptions,
 } from './utils/ai';
 
 /**
- * Start the CodeForge backend server.
- *
- * Database initialization is deliberately kept here rather than inside
- * app.ts because tests should be able to import the configured application
- * without connecting to production infrastructure.
+ * Start the CodeForge backend.
  */
 async function startServer(): Promise<void> {
     try {
-        // ============================================================
-        // 1. DATABASE
-        // ============================================================
-
         await connectDB();
 
         await seedAdmin();
 
-        // ============================================================
-        // 2. APPLICATION CONFIGURATION
-        // ============================================================
-
-        /**
-         * Wait until all Fastify plugins, middleware and routes have been
-         * registered before opening the HTTP server.
-         */
         await appInitialization;
 
-        // ============================================================
-        // 3. HTTP SERVER
-        // ============================================================
-
-        const port = Number(
-            process.env.PORT || 3002,
-        );
+        const port =
+            Number(
+                process.env.PORT ?? 3002,
+            );
 
         await app.listen({
             port,
@@ -71,17 +52,6 @@ async function startServer(): Promise<void> {
             `🚀 CodeForge Backend is running on port ${port}`,
         );
 
-        // ============================================================
-        // 4. AI BACKGROUND TASKS
-        // ============================================================
-
-        /**
-         * Run the missing-description scan after the HTTP server becomes
-         * available so startup is not blocked by optional AI enrichment.
-         *
-         * Projects with an existing description are skipped by the
-         * generation utility.
-         */
         void generateMissingProjectDescriptions();
     } catch (error) {
         app.log.error(
@@ -94,11 +64,11 @@ async function startServer(): Promise<void> {
 }
 
 /**
- * Gracefully close the Fastify server and MongoDB connection.
+ * Gracefully shut down the application.
  */
-const closeGracefully = async (
+async function closeGracefully(
     signal: string,
-): Promise<void> => {
+): Promise<void> {
     app.log.info(
         `Received shutdown signal: ${signal}`,
     );
@@ -125,25 +95,53 @@ const closeGracefully = async (
 
         process.exit(1);
     }
-};
+}
 
-process.on('SIGINT', () => {
-    void closeGracefully('SIGINT');
-});
+process.on(
+    'SIGINT',
+    () => {
+        void closeGracefully(
+            'SIGINT',
+        );
+    },
+);
 
-process.on('SIGTERM', () => {
-    void closeGracefully('SIGTERM');
-});
+process.on(
+    'SIGTERM',
+    () => {
+        void closeGracefully(
+            'SIGTERM',
+        );
+    },
+);
 
 /**
- * Start the real HTTP server only outside the test environment.
+ * Vitest exposes VITEST=true.
  *
- * Integration tests import app.ts and use app.ready()/app.inject() without
- * opening a network port or running the production bootstrap.
+ * This check takes precedence over E2E so that a stale E2E=true environment
+ * variable cannot cause unit/integration tests to start an HTTP server.
  */
-if (
-    process.env.NODE_ENV !== 'test'
-) {
+const isVitest =
+    process.env.VITEST === 'true';
+
+const isE2E =
+    process.env.E2E === 'true';
+
+/**
+ * Start the HTTP server when:
+ *
+ * - not running under Vitest, and
+ * - either NODE_ENV is not "test", or E2E=true.
+ */
+const shouldStartServer =
+    !isVitest &&
+    (
+        process.env.NODE_ENV !==
+            'test' ||
+        isE2E
+    );
+
+if (shouldStartServer) {
     void startServer();
 }
 

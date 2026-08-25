@@ -2,7 +2,7 @@
   "type": "commonjs",
   "version": "1.0.0",
   "engines": {
-    "node": ">=22.12.0"
+    "node": "24.x"
   },
   "overrides": {
     "path-to-regexp": "6.3.0"
@@ -21,7 +21,12 @@
     "typecheck": "tsc --noEmit",
     "env:test:check": "dotenvx run -f=.env.test -- node .env-check.cjs"
   },
-  "keywords": ["fastify", "api", "portfolio", "backend"],
+  "keywords": [
+    "fastify",
+    "api",
+    "portfolio",
+    "backend"
+  ],
   "author": "ÆSoul",
   "license": "UNLICENSED",
   "private": true,

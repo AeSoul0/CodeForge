@@ -1,41 +1,123 @@
 ---
+/**
+ * @file frontend/src/pages/admin/login.astro
+ * @description Administrator authentication page.
+ *
+ * Responsibilities:
+ * - Collect administrator username and password.
+ * - Submit credentials to the backend.
+ * - Preserve HttpOnly cookie authentication.
+ * - Display server-side authentication errors.
+ * - Redirect authenticated administrators to the dashboard.
+ */
+
 import Layout from '../../layouts/Layout.astro';
 import ParticleCanvas from '../../components/ParticleCanvas.astro';
 import '../../styles/global.css';
 ---
+
 <Layout title="Admin Login | CodeForge">
     <ParticleCanvas />
-    
-    <div class="pointer-events-none fixed inset-x-0 top-0 z-0 h-[420px] bg-gradient-to-b from-cyan-500/[0.07] via-transparent to-transparent"></div>
 
-    <div class="min-h-screen bg-transparent flex flex-col items-center justify-center p-4 relative z-10">
-        <a href="/" class="absolute top-8 left-8 sm:top-12 sm:left-12 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/60 backdrop-blur-md transition-all duration-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+    <div
+        class="pointer-events-none fixed inset-x-0 top-0 z-0 h-[420px] bg-gradient-to-b from-cyan-500/[0.07] via-transparent to-transparent"
+    ></div>
+
+    <div
+        class="min-h-screen bg-transparent flex flex-col items-center justify-center p-4 relative z-10"
+    >
+        <a
+            href="/"
+            class="absolute top-8 left-8 sm:top-12 sm:left-12 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/70 backdrop-blur-md transition-all duration-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+            >
+                <path d="m15 18-6-6 6-6"></path>
+            </svg>
+
             Back to Home
         </a>
 
-        <div class="w-full max-w-md glass-card p-8 sm:p-10 relative overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-transparent pointer-events-none"></div>
-            
-            <h1 class="text-3xl font-black tracking-tight text-white mb-2 relative z-10">Admin Access</h1>
-            <p class="text-white/60 mb-8 relative z-10 text-sm">Sign in to manage portfolio content and projects.</p>
-            
-            <form id="loginForm" class="relative z-10 flex flex-col gap-6">
+        <div
+            class="w-full max-w-md glass-card p-8 sm:p-10 relative overflow-hidden"
+        >
+            <div
+                class="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-transparent pointer-events-none"
+            ></div>
+
+            <h1
+                class="text-3xl font-black tracking-tight text-white mb-2 relative z-10"
+            >
+                Admin Access
+            </h1>
+
+            <p
+                class="text-slate-300 mb-8 relative z-10 text-sm"
+            >
+                Sign in to manage portfolio content and projects.
+            </p>
+
+            <form
+                id="loginForm"
+                class="relative z-10 flex flex-col gap-6"
+            >
                 <div>
-                    <label for="username" class="block text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-2">Username</label>
-                    <input type="text" id="username" name="username" required 
-                           class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400/50 focus:bg-white/5 transition-all placeholder-white/20">
+                    <label
+                        for="username"
+                        class="block text-[10px] uppercase tracking-widest text-slate-300 font-semibold mb-2"
+                    >
+                        Username
+                    </label>
+
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        autocomplete="username"
+                        required
+                        class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400/50 focus:bg-white/5 transition-all placeholder-slate-400"
+                    />
                 </div>
+
                 <div>
-                    <label for="password" class="block text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-2">Password</label>
-                    <input type="password" id="password" name="password" required 
-                           class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400/50 focus:bg-white/5 transition-all placeholder-white/20">
+                    <label
+                        for="password"
+                        class="block text-[10px] uppercase tracking-widest text-slate-300 font-semibold mb-2"
+                    >
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        autocomplete="current-password"
+                        required
+                        class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400/50 focus:bg-white/5 transition-all placeholder-slate-400"
+                    />
                 </div>
-                
-                <div id="errorMsg" class="hidden text-red-400 text-sm mt-1 bg-red-500/10 border border-red-500/20 p-3 rounded-lg"></div>
-                
-                <button type="submit" 
-                        class="w-full bg-cyan-400/10 hover:bg-cyan-400/20 border border-cyan-400/30 text-cyan-300 font-bold tracking-wide py-3 rounded-full mt-2 transition-all duration-300 shadow-[0_0_20px_rgba(34,211,238,0.15)] hover:shadow-[0_0_30px_rgba(34,211,238,0.3)] hover:-translate-y-0.5 uppercase text-xs">
+
+                <div
+                    id="errorMsg"
+                    role="alert"
+                    aria-live="assertive"
+                    class="hidden text-red-300 text-sm mt-1 bg-red-500/10 border border-red-500/20 p-3 rounded-lg"
+                ></div>
+
+                <button
+                    type="submit"
+                    class="w-full bg-cyan-400/10 hover:bg-cyan-400/20 border border-cyan-400/30 text-cyan-200 font-bold tracking-wide py-3 rounded-full mt-2 transition-all duration-300 shadow-[0_0_20px_rgba(34,211,238,0.15)] hover:shadow-[0_0_30px_rgba(34,211,238,0.3)] hover:-translate-y-0.5 uppercase text-xs"
+                >
                     Sign In
                 </button>
             </form>
@@ -44,49 +126,126 @@ import '../../styles/global.css';
 </Layout>
 
 <script>
-    const form = document.getElementById('loginForm');
-    const errorMsg = document.getElementById('errorMsg');
+    const form =
+        document.getElementById(
+            'loginForm',
+        );
 
-    form?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const username = (document.getElementById('username') as HTMLInputElement).value;
-        const password = (document.getElementById('password') as HTMLInputElement).value;
-        const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
-        
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Authenticating...';
-        if(errorMsg) errorMsg.classList.add('hidden');
+    const errorMsg =
+        document.getElementById(
+            'errorMsg',
+        );
 
-        try {
-            // Adjust the URL if the API is hosted elsewhere. 
-            // The Fastify backend expects credentials=include for cookies.
-            const apiUrl = import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") || 'https://codeforge-ukq5.onrender.com';
-            const response = await fetch(`${apiUrl}/api/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ username, password })
-            });
+    form?.addEventListener(
+        'submit',
+        async (event) => {
+            event.preventDefault();
 
-            const result = await response.json();
+            const username =
+                (
+                    document.getElementById(
+                        'username',
+                    ) as HTMLInputElement
+                ).value.trim();
 
-            if (result.success) {
-                window.location.href = '/admin/dashboard';
-            } else {
-                if(errorMsg) {
-                    errorMsg.textContent = result.message || 'Authentication failed';
-                    errorMsg.classList.remove('hidden');
+            const password =
+                (
+                    document.getElementById(
+                        'password',
+                    ) as HTMLInputElement
+                ).value;
+
+            const submitBtn =
+                form.querySelector(
+                    'button[type="submit"]',
+                ) as HTMLButtonElement | null;
+
+            if (!submitBtn) {
+                return;
+            }
+
+            submitBtn.disabled =
+                true;
+
+            submitBtn.textContent =
+                'Authenticating...';
+
+            errorMsg?.classList.add(
+                'hidden',
+            );
+
+            try {
+                const apiUrl =
+                    import.meta.env.PUBLIC_API_URL?.replace(
+                        /\/$/,
+                        '',
+                    ) ||
+                    'http://127.0.0.1:3002';
+
+                const response =
+                    await fetch(
+                        `${apiUrl}/api/auth/login`,
+                        {
+                            method: 'POST',
+
+                            headers: {
+                                'Content-Type':
+                                    'application/json',
+                            },
+
+                            credentials:
+                                'include',
+
+                            body:
+                                JSON.stringify({
+                                    username,
+                                    password,
+                                }),
+                        },
+                    );
+
+                const result =
+                    await response.json();
+
+                if (
+                    response.ok &&
+                    result.success
+                ) {
+                    window.location.href =
+                        '/admin/dashboard';
+
+                    return;
                 }
+
+                const message =
+                    result?.message ??
+                    result?.error?.message ??
+                    'Invalid credentials';
+
+                if (errorMsg) {
+                    errorMsg.textContent =
+                        message;
+
+                    errorMsg.classList.remove(
+                        'hidden',
+                    );
+                }
+            } catch {
+                if (errorMsg) {
+                    errorMsg.textContent =
+                        'Network error. Backend might be unreachable.';
+
+                    errorMsg.classList.remove(
+                        'hidden',
+                    );
+                }
+            } finally {
+                submitBtn.disabled =
+                    false;
+
+                submitBtn.textContent =
+                    'Sign In';
             }
-        } catch (err) {
-            if(errorMsg) {
-                errorMsg.textContent = 'Network error. Backend might be unreachable.';
-                errorMsg.classList.remove('hidden');
-            }
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Sign In';
-        }
-    });
+        },
+    );
 </script>

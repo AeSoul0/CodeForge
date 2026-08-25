@@ -1,51 +1,123 @@
 ---
+/**
+ * @file frontend/src/pages/admin/dashboard/index.astro
+ * @description Protected administrator dashboard overview.
+ *
+ * The dashboard verifies the real backend administrator session before
+ * exposing protected content. The JWT remains HttpOnly and is never read
+ * from client-side JavaScript.
+ */
+
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 ---
 
 <AdminLayout title="Dashboard | Admin">
-    <h1 class="text-3xl font-bold text-white mb-8">Dashboard Overview</h1>
-    
+    <h1 class="text-3xl font-bold text-white mb-8">
+        Dashboard Overview
+    </h1>
+
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Quick Links -->
-        <a href="/admin/dashboard/projects" class="block p-6 glass-card hover-glow group relative overflow-hidden">
+        <a
+            href="/admin/dashboard/projects"
+            class="block p-6 glass-card hover-glow group relative overflow-hidden"
+        >
             <div class="absolute inset-0 bg-cyan-500/5 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300"></div>
-            <h2 class="text-xl font-bold text-white mb-2 relative z-10 tracking-tight group-hover:text-cyan-300 transition-colors">Projects</h2>
-            <p class="text-slate-400 text-sm relative z-10">Manage portfolio projects and generate AI descriptions.</p>
-        </a>
-        
-        <a href="/admin/dashboard/experiences" class="block p-6 glass-card hover-glow group relative overflow-hidden">
-            <div class="absolute inset-0 bg-cyan-500/5 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300"></div>
-            <h2 class="text-xl font-bold text-white mb-2 relative z-10 tracking-tight group-hover:text-cyan-300 transition-colors">Experiences</h2>
-            <p class="text-slate-400 text-sm relative z-10">Manage work history and roles.</p>
-        </a>
-        
-        <a href="/admin/dashboard/api" class="block p-6 glass-card hover-glow group relative overflow-hidden">
-            <div class="absolute inset-0 bg-cyan-500/5 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300"></div>
-            <h2 class="text-xl font-bold text-white mb-2 relative z-10 tracking-tight group-hover:text-cyan-300 transition-colors">API Playground</h2>
-            <p class="text-slate-400 text-sm relative z-10">Test endpoints directly from the browser.</p>
+
+            <h2 class="text-xl font-bold text-white mb-2 relative z-10 tracking-tight group-hover:text-cyan-300 transition-colors">
+                Projects
+            </h2>
+
+            <p class="text-slate-300 text-sm relative z-10">
+                Manage portfolio projects and generate AI descriptions.
+            </p>
         </a>
 
-        <a href="/admin/dashboard/system" class="block p-6 glass-card hover-glow group relative overflow-hidden">
+        <a
+            href="/admin/dashboard/experiences"
+            class="block p-6 glass-card hover-glow group relative overflow-hidden"
+        >
             <div class="absolute inset-0 bg-cyan-500/5 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300"></div>
-            <h2 class="text-xl font-bold text-white mb-2 relative z-10 tracking-tight group-hover:text-cyan-300 transition-colors">System Status</h2>
-            <p class="text-slate-400 text-sm relative z-10">Check backend and database health.</p>
+
+            <h2 class="text-xl font-bold text-white mb-2 relative z-10 tracking-tight group-hover:text-cyan-300 transition-colors">
+                Experiences
+            </h2>
+
+            <p class="text-slate-300 text-sm relative z-10">
+                Manage work history and roles.
+            </p>
+        </a>
+
+        <a
+            href="/admin/dashboard/api"
+            class="block p-6 glass-card hover-glow group relative overflow-hidden"
+        >
+            <div class="absolute inset-0 bg-cyan-500/5 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300"></div>
+
+            <h2 class="text-xl font-bold text-white mb-2 relative z-10 tracking-tight group-hover:text-cyan-300 transition-colors">
+                API Playground
+            </h2>
+
+            <p class="text-slate-300 text-sm relative z-10">
+                Test endpoints directly from the browser.
+            </p>
+        </a>
+
+        <a
+            href="/admin/dashboard/system"
+            class="block p-6 glass-card hover-glow group relative overflow-hidden"
+        >
+            <div class="absolute inset-0 bg-cyan-500/5 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300"></div>
+
+            <h2 class="text-xl font-bold text-white mb-2 relative z-10 tracking-tight group-hover:text-cyan-300 transition-colors">
+                System Status
+            </h2>
+
+            <p class="text-slate-300 text-sm relative z-10">
+                Check backend and database health.
+            </p>
         </a>
     </div>
 </AdminLayout>
 
 <script>
-    // Simple client-side auth check
-    // In a real production scenario, Astro SSR or middleware would handle this better
-    // But since the API sets an HttpOnly cookie, we can't read it via JS.
-    // The real source of truth is the backend. We'll do a quick fetch to test auth.
-    async function verifyAuth() {
+    /**
+     * Verify the HttpOnly JWT through the backend.
+     *
+     * The cookie itself cannot be read by JavaScript, but fetch with
+     * credentials: include allows the browser to send it to the backend.
+     */
+    async function verifyAuth(): Promise<void> {
         try {
-            // Using a safe GET endpoint that requires auth, or simply just relying on API calls failing later.
-            // For now, if the user doesn't have the cookie, their API calls will just 401.
-        } catch (e) {
-            console.error(e);
+            const apiUrl =
+                import.meta.env.PUBLIC_API_URL?.replace(
+                    /\/$/,
+                    '',
+                ) ||
+                'http://127.0.0.1:3002';
+
+            const response =
+                await fetch(
+                    `${apiUrl}/api/auth/me`,
+                    {
+                        method: 'GET',
+                        credentials:
+                            'include',
+                    },
+                );
+
+            if (
+                !response.ok
+            ) {
+                window.location.replace(
+                    '/admin/login',
+                );
+            }
+        } catch {
+            window.location.replace(
+                '/admin/login',
+            );
         }
     }
-    
-    verifyAuth();
+
+    void verifyAuth();
 </script>

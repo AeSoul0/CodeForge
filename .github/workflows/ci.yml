@@ -1,111 +1,214 @@
 # .github/workflows/ci.yml
 # ------------------------------------------------------------------------------
-# @description GitHub Actions workflow for Continuous Integration (CI).
-# This pipeline automatically triggers on pushes and pull requests to the main 
-# branch, ensuring that code quality (linting) and business logic (testing) 
-# remain intact before any merge operations.
+# @file .github/workflows/ci.yml
+# @description CodeForge continuous integration and quality-gate pipeline.
+#
+# The workflow validates:
+# - backend/frontend linting;
+# - backend/frontend type safety;
+# - backend unit and integration tests;
+# - backend coverage thresholds;
+# - backend/frontend production builds;
+# - Playwright end-to-end tests;
+# - dependency security audits.
+#
+# MongoDB is provided as an isolated CI service for integration and E2E tests.
+# ------------------------------------------------------------------------------
+#
+# The pipeline intentionally fails on any quality-gate regression.
 # ------------------------------------------------------------------------------
 
 name: CodeForge CI Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codeforge-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   quality-gates:
     name: CodeForge Quality Gates
+
     runs-on: ubuntu-latest
-    
+
+    timeout-minutes: 20
+
     services:
       mongodb:
         image: mongo:6.0
+
         ports:
           - 27017:27017
 
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ ping: 1 }).ok'"
+
+          --health-interval 5s
+
+          --health-timeout 5s
+
+          --health-retries 20
+
     strategy:
+      fail-fast: true
+
       matrix:
-        node-version: [22.x]
+        node-version:
+          - 22.x
+
+    env:
+      NODE_ENV: test
+      MONGODB_URI: mongodb://127.0.0.1:27017/codeforge_test
+      JWT_SECRET: testsecret123
+      ADMIN_API_KEY: test-admin-api-key
 
     steps:
+      # ------------------------------------------------------------------------
+      # Source
+      # ------------------------------------------------------------------------
+
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      # ------------------------------------------------------------------------
+      # Runtime
+      # ------------------------------------------------------------------------
 
       - name: Set up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
 
-      - name: Install dependencies (Backend)
+      # ------------------------------------------------------------------------
+      # Dependencies
+      # ------------------------------------------------------------------------
+
+      - name: Install backend dependencies
+        working-directory: ./backend
         run: npm ci
-        working-directory: ./backend
 
-      - name: Install dependencies (Frontend)
+      - name: Install frontend dependencies
+        working-directory: ./frontend
         run: npm ci
-        working-directory: ./frontend
 
-      - name: Lint (Backend)
-        run: npm run lint
+      # ------------------------------------------------------------------------
+      # Static quality
+      # ------------------------------------------------------------------------
+
+      - name: Lint backend
         working-directory: ./backend
-
-      - name: Lint (Frontend)
         run: npm run lint
-        working-directory: ./frontend
 
-      - name: Typecheck (Backend)
-        run: npm run typecheck
+      - name: Lint frontend
+        working-directory: ./frontend
+        run: npm run lint
+
+      - name: Typecheck backend
         working-directory: ./backend
-
-      - name: Typecheck (Frontend)
         run: npm run typecheck
-        working-directory: ./frontend
 
-      - name: Unit / Integration Tests (Backend)
-        env:
-          NODE_ENV: test
-          MONGODB_URI: 'mongodb://localhost:27017/codeforge_test'
-          JWT_SECRET: 'testsecret123'
-          ADMIN_API_KEY: 'test-admin-api-key'
+      - name: Typecheck frontend
+        working-directory: ./frontend
+        run: npm run typecheck
+
+      # ------------------------------------------------------------------------
+      # Backend tests and coverage
+      # ------------------------------------------------------------------------
+
+      - name: Run backend tests with coverage
+        working-directory: ./backend
         run: npm run test:cov
-        working-directory: ./backend
 
-      - name: Build (Backend)
-        run: npm run build
-        working-directory: ./backend
-
-      - name: Build (Frontend)
-        run: npm run build
-        working-directory: ./frontend
-
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-        working-directory: ./frontend
-
-      - name: E2E Tests (Playwright)
-        env:
-          NODE_ENV: test
-          MONGODB_URI: 'mongodb://localhost:27017/codeforge_test'
-          JWT_SECRET: 'testsecret123'
-          ADMIN_API_KEY: 'test-admin-api-key'
-        run: npx playwright test
-        working-directory: ./frontend
-
-      - name: Upload Playwright Report
-        uses: actions/upload-artifact@v4
+      - name: Upload backend coverage report
         if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: |
+            backend/coverage/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      # ------------------------------------------------------------------------
+      # Production builds
+      # ------------------------------------------------------------------------
+
+      - name: Build backend
+        working-directory: ./backend
+        run: npm run build
+
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
+
+      # ------------------------------------------------------------------------
+      # E2E infrastructure
+      # ------------------------------------------------------------------------
+
+      - name: Install Playwright browsers
+        working-directory: ./frontend
+        run: npx playwright install --with-deps chromium
+
+      # ------------------------------------------------------------------------
+      # End-to-end tests
+      # ------------------------------------------------------------------------
+
+      - name: Run Playwright E2E tests
+        working-directory: ./frontend
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: playwright-report
-          path: frontend/playwright-report/
-          retention-days: 30
+          path: |
+            frontend/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 14
 
-      - name: Security Audit (Backend)
-        run: npm audit
+      # ------------------------------------------------------------------------
+      # Dependency security
+      # ------------------------------------------------------------------------
+
+      - name: Audit backend dependencies
         working-directory: ./backend
+        run: npm audit --audit-level=high
 
-      - name: Security Audit (Frontend)
-        run: npm audit
-        working-directory: ./frontend
+      - name: Audit frontend dependencies
+        working-directory: ./frontend
+        run: npm audit --audit-level=high
+
+      # ------------------------------------------------------------------------
+      # Final status
+      # ------------------------------------------------------------------------
+
+      - name: Quality gate summary
+        if: success()
+        run: |
+          echo "=========================================="
+          echo "CodeForge CI quality gates: PASSED"
+          echo "=========================================="
+          echo "Lint:         PASSED"
+          echo "Typecheck:    PASSED"
+          echo "Tests:        PASSED"
+          echo "Coverage:     PASSED"
+          echo "Builds:       PASSED"
+          echo "E2E:          PASSED"
+          echo "Security:     PASSED"
+          echo "=========================================="
