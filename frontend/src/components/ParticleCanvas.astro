@@ -3,24 +3,618 @@
  * @file src/components/ParticleCanvas.astro
  * @description Decorative animated particle network background.
  *
- * The particle system is enabled for normal users and automatically
- * disabled for automated browser sessions such as Playwright.
+ * Production:
+ * - renders the canvas
+ * - renders the animation script
  *
- * This keeps concurrent E2E runs deterministic without affecting
- * the production visual experience.
+ * E2E:
+ * - renders neither canvas nor animation script
+ *
+ * This keeps Playwright's six concurrent workers deterministic
+ * without changing the production visual experience.
  */
 
 const isE2E =
     import.meta.env.PUBLIC_E2E === "true";
 ---
 
-<canvas
-    id="particleCanvas"
-    aria-hidden="true"
-    class:list={{
-        "e2e-particle-disabled": isE2E,
-    }}
-></canvas>
+{
+    !isE2E && (
+        <>
+            <canvas
+                id="particleCanvas"
+                aria-hidden="true"
+            ></canvas>
+
+            <script is:inline>
+                (() => {
+                    const canvas =
+                        document.getElementById(
+                            "particleCanvas",
+                        );
+
+                    if (!canvas) {
+                        return;
+                    }
+
+                    const ctx =
+                        canvas.getContext("2d");
+
+                    if (!ctx) {
+                        return;
+                    }
+
+                    let width = 0;
+                    let height = 0;
+
+                    let particles = [];
+
+                    let animationFrameId = null;
+
+                    let lastFrameTime = 0;
+
+                    let isPageVisible =
+                        !document.hidden;
+
+                    const mouse = {
+                        x: null,
+                        y: null,
+                    };
+
+                    const prefersReducedMotion =
+                        window.matchMedia(
+                            "(prefers-reduced-motion: reduce)",
+                        );
+
+                    const getParticleCount =
+                        () => {
+                            if (
+                                prefersReducedMotion.matches
+                            ) {
+                                return 0;
+                            }
+
+                            const viewportWidth =
+                                window.innerWidth;
+
+                            if (
+                                viewportWidth >
+                                1440
+                            ) {
+                                return 55;
+                            }
+
+                            if (
+                                viewportWidth >
+                                1024
+                            ) {
+                                return 45;
+                            }
+
+                            if (
+                                viewportWidth >
+                                768
+                            ) {
+                                return 30;
+                            }
+
+                            return 18;
+                        };
+
+                    const getTargetFps =
+                        () => {
+                            const isLowEnd =
+                                (
+                                    navigator.hardwareConcurrency &&
+                                    navigator.hardwareConcurrency <=
+                                        4
+                                ) ||
+                                /Mobi|Android/i.test(
+                                    navigator.userAgent,
+                                );
+
+                            return isLowEnd
+                                ? 30
+                                : 60;
+                        };
+
+                    class Particle {
+                        x;
+                        y;
+                        vx;
+                        vy;
+                        baseColor;
+
+                        constructor() {
+                            this.x =
+                                Math.random() *
+                                width;
+
+                            this.y =
+                                Math.random() *
+                                height;
+
+                            this.vx =
+                                (Math.random() -
+                                    0.5) *
+                                0.55;
+
+                            this.vy =
+                                (Math.random() -
+                                    0.5) *
+                                0.55;
+
+                            this.baseColor =
+                                Math.random() >
+                                0.5
+                                    ? "6, 182, 212"
+                                    : "99, 102, 241";
+                        }
+
+                        update() {
+                            this.x +=
+                                this.vx;
+
+                            this.y +=
+                                this.vy;
+
+                            if (
+                                this.x < 0 ||
+                                this.x > width
+                            ) {
+                                this.vx *=
+                                    -1;
+                            }
+
+                            if (
+                                this.y < 0 ||
+                                this.y > height
+                            ) {
+                                this.vy *=
+                                    -1;
+                            }
+                        }
+
+                        draw() {
+                            ctx.beginPath();
+
+                            ctx.arc(
+                                this.x,
+                                this.y,
+                                1.2,
+                                0,
+                                Math.PI * 2,
+                            );
+
+                            ctx.fillStyle =
+                                `rgba(${this.baseColor}, 0.62)`;
+
+                            ctx.fill();
+                        }
+                    }
+
+                    const initParticles =
+                        () => {
+                            particles = [];
+
+                            const count =
+                                getParticleCount();
+
+                            for (
+                                let index = 0;
+                                index < count;
+                                index += 1
+                            ) {
+                                particles.push(
+                                    new Particle(),
+                                );
+                            }
+                        };
+
+                    const resize =
+                        () => {
+                            const dpr =
+                                Math.min(
+                                    window.devicePixelRatio ||
+                                        1,
+                                    2,
+                                );
+
+                            width =
+                                window.innerWidth;
+
+                            height =
+                                window.innerHeight;
+
+                            canvas.width =
+                                Math.floor(
+                                    width *
+                                        dpr,
+                                );
+
+                            canvas.height =
+                                Math.floor(
+                                    height *
+                                        dpr,
+                                );
+
+                            canvas.style.width =
+                                `${width}px`;
+
+                            canvas.style.height =
+                                `${height}px`;
+
+                            ctx.setTransform(
+                                dpr,
+                                0,
+                                0,
+                                dpr,
+                                0,
+                                0,
+                            );
+
+                            initParticles();
+                        };
+
+                    const drawConnections =
+                        () => {
+                            const maxDistance =
+                                110;
+
+                            for (
+                                let i = 0;
+                                i <
+                                particles.length;
+                                i += 1
+                            ) {
+                                const current =
+                                    particles[
+                                        i
+                                    ];
+
+                                for (
+                                    let j =
+                                        i + 1;
+                                    j <
+                                    particles.length;
+                                    j += 1
+                                ) {
+                                    const next =
+                                        particles[
+                                            j
+                                        ];
+
+                                    const dx =
+                                        current.x -
+                                        next.x;
+
+                                    const dy =
+                                        current.y -
+                                        next.y;
+
+                                    const distance =
+                                        Math.sqrt(
+                                            dx *
+                                                dx +
+                                                dy *
+                                                    dy,
+                                        );
+
+                                    if (
+                                        distance >=
+                                        maxDistance
+                                    ) {
+                                        continue;
+                                    }
+
+                                    const opacity =
+                                        Math.max(
+                                            0,
+                                            0.12 -
+                                                distance /
+                                                    900,
+                                        );
+
+                                    ctx.beginPath();
+
+                                    ctx.strokeStyle =
+                                        `rgba(${current.baseColor}, ${opacity})`;
+
+                                    ctx.lineWidth =
+                                        0.7;
+
+                                    ctx.moveTo(
+                                        current.x,
+                                        current.y,
+                                    );
+
+                                    ctx.lineTo(
+                                        next.x,
+                                        next.y,
+                                    );
+
+                                    ctx.stroke();
+                                }
+                            }
+                        };
+
+                    const drawMouseConnections =
+                        () => {
+                            if (
+                                mouse.x ===
+                                    null ||
+                                mouse.y ===
+                                    null
+                            ) {
+                                return;
+                            }
+
+                            const maxDistance =
+                                160;
+
+                            for (
+                                const particle of particles
+                            ) {
+                                const dx =
+                                    particle.x -
+                                    mouse.x;
+
+                                const dy =
+                                    particle.y -
+                                    mouse.y;
+
+                                const distance =
+                                    Math.sqrt(
+                                        dx *
+                                            dx +
+                                            dy *
+                                                dy,
+                                    );
+
+                                if (
+                                    distance >=
+                                    maxDistance
+                                ) {
+                                    continue;
+                                }
+
+                                const opacity =
+                                    Math.max(
+                                        0,
+                                        0.25 -
+                                            distance /
+                                                640,
+                                    );
+
+                                ctx.beginPath();
+
+                                ctx.strokeStyle =
+                                    `rgba(6, 182, 212, ${opacity})`;
+
+                                ctx.lineWidth =
+                                    0.9;
+
+                                ctx.moveTo(
+                                    particle.x,
+                                    particle.y,
+                                );
+
+                                ctx.lineTo(
+                                    mouse.x,
+                                    mouse.y,
+                                );
+
+                                ctx.stroke();
+                            }
+                        };
+
+                    const stopAnimation =
+                        () => {
+                            if (
+                                animationFrameId !==
+                                null
+                            ) {
+                                cancelAnimationFrame(
+                                    animationFrameId,
+                                );
+
+                                animationFrameId =
+                                    null;
+                            }
+                        };
+
+                    const animate =
+                        (
+                            timestamp = 0,
+                        ) => {
+                            if (
+                                !isPageVisible ||
+                                particles.length ===
+                                    0
+                            ) {
+                                stopAnimation();
+
+                                return;
+                            }
+
+                            animationFrameId =
+                                requestAnimationFrame(
+                                    animate,
+                                );
+
+                            const frameDelay =
+                                1000 /
+                                getTargetFps();
+
+                            if (
+                                timestamp -
+                                    lastFrameTime <
+                                frameDelay
+                            ) {
+                                return;
+                            }
+
+                            lastFrameTime =
+                                timestamp;
+
+                            ctx.clearRect(
+                                0,
+                                0,
+                                width,
+                                height,
+                            );
+
+                            for (
+                                const particle of particles
+                            ) {
+                                particle.update();
+                                particle.draw();
+                            }
+
+                            drawConnections();
+                            drawMouseConnections();
+                        };
+
+                    const restartAnimation =
+                        () => {
+                            stopAnimation();
+
+                            if (
+                                !prefersReducedMotion.matches &&
+                                isPageVisible
+                            ) {
+                                animationFrameId =
+                                    requestAnimationFrame(
+                                        animate,
+                                    );
+                            }
+                        };
+
+                    const handleMouseMove =
+                        (event) => {
+                            mouse.x =
+                                event.clientX;
+
+                            mouse.y =
+                                event.clientY;
+                        };
+
+                    const handleMouseLeave =
+                        () => {
+                            mouse.x = null;
+                            mouse.y = null;
+                        };
+
+                    const handleVisibilityChange =
+                        () => {
+                            isPageVisible =
+                                !document.hidden;
+
+                            if (
+                                isPageVisible
+                            ) {
+                                restartAnimation();
+                            } else {
+                                stopAnimation();
+                            }
+                        };
+
+                    const handleReducedMotionChange =
+                        () => {
+                            initParticles();
+
+                            if (
+                                prefersReducedMotion.matches
+                            ) {
+                                stopAnimation();
+
+                                ctx.clearRect(
+                                    0,
+                                    0,
+                                    width,
+                                    height,
+                                );
+
+                                return;
+                            }
+
+                            restartAnimation();
+                        };
+
+                    resize();
+
+                    window.addEventListener(
+                        "resize",
+                        resize,
+                        {
+                            passive: true,
+                        },
+                    );
+
+                    window.addEventListener(
+                        "mousemove",
+                        handleMouseMove,
+                        {
+                            passive: true,
+                        },
+                    );
+
+                    window.addEventListener(
+                        "mouseleave",
+                        handleMouseLeave,
+                    );
+
+                    document.addEventListener(
+                        "visibilitychange",
+                        handleVisibilityChange,
+                    );
+
+                    prefersReducedMotion.addEventListener(
+                        "change",
+                        handleReducedMotionChange,
+                    );
+
+                    restartAnimation();
+
+                    window.addEventListener(
+                        "beforeunload",
+                        () => {
+                            stopAnimation();
+
+                            window.removeEventListener(
+                                "resize",
+                                resize,
+                            );
+
+                            window.removeEventListener(
+                                "mousemove",
+                                handleMouseMove,
+                            );
+
+                            window.removeEventListener(
+                                "mouseleave",
+                                handleMouseLeave,
+                            );
+
+                            document.removeEventListener(
+                                "visibilitychange",
+                                handleVisibilityChange,
+                            );
+
+                            prefersReducedMotion.removeEventListener(
+                                "change",
+                                handleReducedMotionChange,
+                            );
+                        },
+                        {
+                            once: true,
+                        },
+                    );
+                })();
+            </script>
+        </>
+    )
+}
 
 <style>
     #particleCanvas {
@@ -32,613 +626,14 @@ const isE2E =
 
         z-index: 1;
         pointer-events: none;
-
         display: block;
     }
 
-    .e2e-particle-disabled {
-        display: none;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
+    @media (
+        prefers-reduced-motion: reduce
+    ) {
         #particleCanvas {
             display: none;
         }
     }
 </style>
-
-<script is:inline>
-    (() => {
-        const canvas =
-            document.getElementById(
-                "particleCanvas",
-            );
-
-        if (!canvas) {
-            return;
-        }
-
-        /*
-         * Automated browsers such as Playwright expose
-         * navigator.webdriver = true.
-         *
-         * This is intentionally checked in the browser,
-         * so E2E never depends on import.meta.env being
-         * available inside an inline script.
-         */
-        const isAutomatedBrowser =
-            navigator.webdriver === true;
-
-        if (isAutomatedBrowser) {
-            canvas.classList.add(
-                "e2e-particle-disabled",
-            );
-
-            return;
-        }
-
-        /*
-         * Astro-rendered E2E flag is kept as a secondary
-         * safeguard for environments that explicitly set it.
-         */
-        if (
-            canvas.classList.contains(
-                "e2e-particle-disabled",
-            )
-        ) {
-            return;
-        }
-
-        const ctx =
-            canvas.getContext("2d");
-
-        if (!ctx) {
-            return;
-        }
-
-        let width = 0;
-        let height = 0;
-
-        let particles = [];
-
-        let animationFrameId = null;
-
-        let lastFrameTime = 0;
-
-        let isPageVisible =
-            !document.hidden;
-
-        const mouse = {
-            x: null,
-            y: null,
-        };
-
-        const prefersReducedMotion =
-            window.matchMedia(
-                "(prefers-reduced-motion: reduce)",
-            );
-
-        const getParticleCount = () => {
-            if (
-                prefersReducedMotion.matches
-            ) {
-                return 0;
-            }
-
-            const viewportWidth =
-                window.innerWidth;
-
-            if (
-                viewportWidth > 1440
-            ) {
-                return 55;
-            }
-
-            if (
-                viewportWidth > 1024
-            ) {
-                return 45;
-            }
-
-            if (
-                viewportWidth > 768
-            ) {
-                return 30;
-            }
-
-            return 18;
-        };
-
-        const getTargetFps = () => {
-            const isLowEnd =
-                (
-                    navigator.hardwareConcurrency &&
-                    navigator.hardwareConcurrency <=
-                        4
-                ) ||
-                /Mobi|Android/i.test(
-                    navigator.userAgent,
-                );
-
-            return isLowEnd
-                ? 30
-                : 60;
-        };
-
-        class Particle {
-            x;
-            y;
-            vx;
-            vy;
-            baseColor;
-
-            constructor() {
-                this.x =
-                    Math.random() *
-                    width;
-
-                this.y =
-                    Math.random() *
-                    height;
-
-                this.vx =
-                    (Math.random() -
-                        0.5) *
-                    0.55;
-
-                this.vy =
-                    (Math.random() -
-                        0.5) *
-                    0.55;
-
-                this.baseColor =
-                    Math.random() >
-                    0.5
-                        ? "6, 182, 212"
-                        : "99, 102, 241";
-            }
-
-            update() {
-                this.x +=
-                    this.vx;
-
-                this.y +=
-                    this.vy;
-
-                if (
-                    this.x < 0 ||
-                    this.x > width
-                ) {
-                    this.vx *= -1;
-                }
-
-                if (
-                    this.y < 0 ||
-                    this.y > height
-                ) {
-                    this.vy *= -1;
-                }
-            }
-
-            draw() {
-                ctx.beginPath();
-
-                ctx.arc(
-                    this.x,
-                    this.y,
-                    1.2,
-                    0,
-                    Math.PI * 2,
-                );
-
-                ctx.fillStyle =
-                    `rgba(${this.baseColor}, 0.62)`;
-
-                ctx.fill();
-            }
-        }
-
-        const initParticles =
-            () => {
-                particles = [];
-
-                const count =
-                    getParticleCount();
-
-                for (
-                    let index = 0;
-                    index < count;
-                    index += 1
-                ) {
-                    particles.push(
-                        new Particle(),
-                    );
-                }
-            };
-
-        const resize = () => {
-            const dpr =
-                Math.min(
-                    window.devicePixelRatio ||
-                        1,
-                    2,
-                );
-
-            width =
-                window.innerWidth;
-
-            height =
-                window.innerHeight;
-
-            canvas.width =
-                Math.floor(
-                    width * dpr,
-                );
-
-            canvas.height =
-                Math.floor(
-                    height * dpr,
-                );
-
-            canvas.style.width =
-                `${width}px`;
-
-            canvas.style.height =
-                `${height}px`;
-
-            ctx.setTransform(
-                dpr,
-                0,
-                0,
-                dpr,
-                0,
-                0,
-            );
-
-            initParticles();
-        };
-
-        const drawConnections =
-            () => {
-                const maxDistance =
-                    110;
-
-                for (
-                    let i = 0;
-                    i <
-                    particles.length;
-                    i += 1
-                ) {
-                    const current =
-                        particles[i];
-
-                    for (
-                        let j =
-                            i + 1;
-                        j <
-                        particles.length;
-                        j += 1
-                    ) {
-                        const next =
-                            particles[j];
-
-                        const dx =
-                            current.x -
-                            next.x;
-
-                        const dy =
-                            current.y -
-                            next.y;
-
-                        const distance =
-                            Math.sqrt(
-                                dx * dx +
-                                    dy * dy,
-                            );
-
-                        if (
-                            distance >=
-                            maxDistance
-                        ) {
-                            continue;
-                        }
-
-                        const opacity =
-                            Math.max(
-                                0,
-                                0.12 -
-                                    distance /
-                                        900,
-                            );
-
-                        ctx.beginPath();
-
-                        ctx.strokeStyle =
-                            `rgba(${current.baseColor}, ${opacity})`;
-
-                        ctx.lineWidth =
-                            0.7;
-
-                        ctx.moveTo(
-                            current.x,
-                            current.y,
-                        );
-
-                        ctx.lineTo(
-                            next.x,
-                            next.y,
-                        );
-
-                        ctx.stroke();
-                    }
-                }
-            };
-
-        const drawMouseConnections =
-            () => {
-                if (
-                    mouse.x === null ||
-                    mouse.y === null
-                ) {
-                    return;
-                }
-
-                const maxDistance =
-                    160;
-
-                for (
-                    const particle of particles
-                ) {
-                    const dx =
-                        particle.x -
-                        mouse.x;
-
-                    const dy =
-                        particle.y -
-                        mouse.y;
-
-                    const distance =
-                        Math.sqrt(
-                            dx * dx +
-                                dy * dy,
-                        );
-
-                    if (
-                        distance >=
-                        maxDistance
-                    ) {
-                        continue;
-                    }
-
-                    const opacity =
-                        Math.max(
-                            0,
-                            0.25 -
-                                distance /
-                                    640,
-                        );
-
-                    ctx.beginPath();
-
-                    ctx.strokeStyle =
-                        `rgba(6, 182, 212, ${opacity})`;
-
-                    ctx.lineWidth =
-                        0.9;
-
-                    ctx.moveTo(
-                        particle.x,
-                        particle.y,
-                    );
-
-                    ctx.lineTo(
-                        mouse.x,
-                        mouse.y,
-                    );
-
-                    ctx.stroke();
-                }
-            };
-
-        const stopAnimation =
-            () => {
-                if (
-                    animationFrameId !==
-                    null
-                ) {
-                    cancelAnimationFrame(
-                        animationFrameId,
-                    );
-
-                    animationFrameId =
-                        null;
-                }
-            };
-
-        const animate = (
-            timestamp = 0,
-        ) => {
-            if (
-                !isPageVisible ||
-                particles.length === 0
-            ) {
-                stopAnimation();
-
-                return;
-            }
-
-            animationFrameId =
-                requestAnimationFrame(
-                    animate,
-                );
-
-            const frameDelay =
-                1000 /
-                getTargetFps();
-
-            if (
-                timestamp -
-                    lastFrameTime <
-                frameDelay
-            ) {
-                return;
-            }
-
-            lastFrameTime =
-                timestamp;
-
-            ctx.clearRect(
-                0,
-                0,
-                width,
-                height,
-            );
-
-            for (
-                const particle of particles
-            ) {
-                particle.update();
-                particle.draw();
-            }
-
-            drawConnections();
-            drawMouseConnections();
-        };
-
-        const restartAnimation =
-            () => {
-                stopAnimation();
-
-                if (
-                    !prefersReducedMotion.matches &&
-                    isPageVisible
-                ) {
-                    animationFrameId =
-                        requestAnimationFrame(
-                            animate,
-                        );
-                }
-            };
-
-        const handleMouseMove =
-            (event) => {
-                mouse.x =
-                    event.clientX;
-
-                mouse.y =
-                    event.clientY;
-            };
-
-        const handleMouseLeave =
-            () => {
-                mouse.x = null;
-                mouse.y = null;
-            };
-
-        const handleVisibilityChange =
-            () => {
-                isPageVisible =
-                    !document.hidden;
-
-                if (
-                    isPageVisible
-                ) {
-                    restartAnimation();
-                } else {
-                    stopAnimation();
-                }
-            };
-
-        const handleReducedMotionChange =
-            () => {
-                initParticles();
-
-                if (
-                    prefersReducedMotion.matches
-                ) {
-                    stopAnimation();
-
-                    ctx.clearRect(
-                        0,
-                        0,
-                        width,
-                        height,
-                    );
-
-                    return;
-                }
-
-                restartAnimation();
-            };
-
-        resize();
-
-        window.addEventListener(
-            "resize",
-            resize,
-            {
-                passive: true,
-            },
-        );
-
-        window.addEventListener(
-            "mousemove",
-            handleMouseMove,
-            {
-                passive: true,
-            },
-        );
-
-        window.addEventListener(
-            "mouseleave",
-            handleMouseLeave,
-        );
-
-        document.addEventListener(
-            "visibilitychange",
-            handleVisibilityChange,
-        );
-
-        prefersReducedMotion.addEventListener(
-            "change",
-            handleReducedMotionChange,
-        );
-
-        restartAnimation();
-
-        window.addEventListener(
-            "beforeunload",
-            () => {
-                stopAnimation();
-
-                window.removeEventListener(
-                    "resize",
-                    resize,
-                );
-
-                window.removeEventListener(
-                    "mousemove",
-                    handleMouseMove,
-                );
-
-                window.removeEventListener(
-                    "mouseleave",
-                    handleMouseLeave,
-                );
-
-                document.removeEventListener(
-                    "visibilitychange",
-                    handleVisibilityChange,
-                );
-
-                prefersReducedMotion.removeEventListener(
-                    "change",
-                    handleReducedMotionChange,
-                );
-            },
-            {
-                once: true,
-            },
-        );
-    })();
-</script>

@@ -305,4 +305,6 @@ lighthouse-report/
 .playwright-report
 .playwright-report/
 
-.playwright-results/
+.playwright-results
+
+.playwright-results/index.html

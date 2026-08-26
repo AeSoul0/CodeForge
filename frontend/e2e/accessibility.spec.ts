@@ -11,12 +11,16 @@ import {
 
 import AxeBuilder from '@axe-core/playwright';
 
+test.describe.configure({
+    mode: 'serial',
+    timeout: 60_000,
+});
+
 async function stabilizePage(
     page: Page,
 ): Promise<void> {
     await page.emulateMedia({
-        reducedMotion:
-            'reduce',
+        reducedMotion: 'reduce',
     });
 
     await page.waitForLoadState(
@@ -37,6 +41,15 @@ async function stabilizePage(
                 scroll-behavior: auto !important;
                 caret-color: transparent !important;
             }
+
+            /*
+             * Decorative particle rendering is not part of the
+             * accessibility surface. Keep it out of the audit
+             * environment to make axe deterministic.
+             */
+            #particleCanvas {
+                display: none !important;
+            }
         `,
     });
 }
@@ -55,8 +68,7 @@ async function runAccessibilityScan(
         })
             .include(selector)
             .options({
-                iframes:
-                    false,
+                iframes: false,
             })
             .analyze();
 
@@ -81,6 +93,8 @@ test.describe(
                     {
                         waitUntil:
                             'domcontentloaded',
+                        timeout:
+                            30_000,
                     },
                 );
 
@@ -124,6 +138,8 @@ test.describe(
                     {
                         waitUntil:
                             'domcontentloaded',
+                        timeout:
+                            30_000,
                     },
                 );
 
