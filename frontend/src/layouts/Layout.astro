@@ -74,10 +74,6 @@ const ogImageUrl = new URL("/og-image.png", Astro.url).href;
 				background-color: #020617;
 				color: #e2e8f0;
 
-				/*
-				 * System font stack keeps text paintable immediately
-				 * and removes Google Fonts from the critical path.
-				 */
 				font-family:
 					"Segoe UI",
 					Inter,
@@ -99,89 +95,83 @@ const ogImageUrl = new URL("/og-image.png", Astro.url).href;
 			}
 
 			/* ======================================================
+			   ACCESSIBILITY
+			   ====================================================== */
+
+			:focus-visible {
+				outline: 2px solid rgba(34, 211, 238, 0.9);
+				outline-offset: 3px;
+			}
+
+			/* ======================================================
 			   INITIAL GLOBAL LOADER
 			   ====================================================== */
+
+			/*
+			 * Lightweight loader.
+			 *
+			 * The original 1.28 MB SVG is NOT loaded here.
+			 * The loader uses an 80x80 WebP derivative instead.
+			 *
+			 * The page remains visible underneath the loader.
+			 */
 
 			#initial-loader {
 				position: fixed;
 				inset: 0;
+
 				width: 100vw;
 				width: 100dvw;
+
 				height: 100vh;
 				height: 100dvh;
+
 				z-index: 99999;
 
 				display: flex;
 				align-items: center;
 				justify-content: center;
 
-				/*
-				 * Transparent so the initial page paint is not hidden
-				 * behind an opaque full-screen overlay.
-				 */
-				background-color: transparent;
+				background: transparent;
 
 				opacity: 1;
 				visibility: visible;
-				pointer-events: auto;
+
+				pointer-events: none;
 
 				transition:
-					opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-					visibility 0.35s ease;
+					opacity 280ms cubic-bezier(0.22, 1, 0.36, 1),
+					visibility 280ms ease;
 			}
 
-			#initial-loader.logo-pending .logo-shadow-container {
-				opacity: 0;
-				visibility: hidden;
-			}
+			.loader-logo {
+				width: 80px;
+				height: 80px;
 
-			#initial-loader.fade-out {
-				opacity: 0;
-				visibility: hidden;
-				pointer-events: none;
-			}
+				display: flex;
+				align-items: center;
+				justify-content: center;
 
-			.logo-shadow-container {
-				opacity: 1;
-				visibility: visible;
+				filter:
+					drop-shadow(0 0 18px rgba(6, 182, 212, 0.35))
+					drop-shadow(0 0 32px rgba(6, 182, 212, 0.12));
 
-				filter: drop-shadow(0 0 20px rgba(6, 182, 212, 0.5));
-
-				animation: customPulse 1.5s cubic-bezier(0.4, 0, 0.6, 1)
+				animation:
+					loaderPulse 1.15s cubic-bezier(0.4, 0, 0.6, 1)
 					infinite;
 
 				transform: translate3d(0, 0, 0);
 
 				will-change: transform, opacity;
-
-				transition:
-					opacity 120ms ease,
-					visibility 120ms ease;
 			}
 
-			.logo-pulse-wrapper {
-				width: 110px;
-				height: 110px;
-
-				border-radius: 2rem;
-				overflow: hidden;
-
-				-webkit-mask-image: -webkit-radial-gradient(white, black);
-				mask-image: radial-gradient(white, black);
-
-				background-color: #020617;
-
-				transform: translate3d(0, 0, 0);
-
-				backface-visibility: hidden;
-				-webkit-backface-visibility: hidden;
-			}
-
-			.logo-pulse-wrapper img {
+			.loader-logo img {
 				display: block;
-				width: 100%;
-				height: 100%;
-				object-fit: cover;
+
+				width: 80px;
+				height: 80px;
+
+				object-fit: contain;
 
 				transform: translate3d(0, 0, 0);
 
@@ -189,16 +179,21 @@ const ogImageUrl = new URL("/og-image.png", Astro.url).href;
 				-webkit-backface-visibility: hidden;
 			}
 
-			@keyframes customPulse {
+			#initial-loader.fade-out {
+				opacity: 0;
+				visibility: hidden;
+			}
+
+			@keyframes loaderPulse {
 				0%,
 				100% {
-					opacity: 1;
 					transform: scale(1);
+					opacity: 1;
 				}
 
 				50% {
-					opacity: 0.5;
-					transform: scale(0.92);
+					transform: scale(0.93);
+					opacity: 0.76;
 				}
 			}
 
@@ -344,13 +339,18 @@ const ogImageUrl = new URL("/og-image.png", Astro.url).href;
 
 			.social-link {
 				position: relative;
+
 				display: flex;
 				align-items: center;
 				justify-content: center;
+
 				width: 36px;
 				height: 36px;
+
 				color: #94a3b8;
+
 				text-decoration: none;
+
 				border-radius: 50%;
 
 				transition:
@@ -362,7 +362,9 @@ const ogImageUrl = new URL("/og-image.png", Astro.url).href;
 			.social-link svg {
 				width: 18px;
 				height: 18px;
-				transition: transform 0.3s cubic-bezier(0.22, 1.2, 0.36, 1);
+
+				transition:
+					transform 0.3s cubic-bezier(0.22, 1.2, 0.36, 1);
 			}
 
 			.social-link:hover {
@@ -459,6 +461,10 @@ const ogImageUrl = new URL("/og-image.png", Astro.url).href;
 	<body
 		class="min-h-screen flex flex-col relative selection:bg-cyan-500 selection:text-white overflow-x-hidden bg-[#020617]"
 	>
+		<!-- ======================================================
+		     ACCESSIBILITY SKIP LINK
+		     ====================================================== -->
+
 		<a
 			href="#main-content"
 			class="absolute left-0 top-0 p-3 m-3 -translate-y-16 bg-blue-600 text-white z-[999999] transition focus:translate-y-0"
@@ -471,19 +477,15 @@ const ogImageUrl = new URL("/og-image.png", Astro.url).href;
 		     INITIAL GLOBAL LOADER
 		     ====================================================== -->
 
-		<div id="initial-loader" class="logo-pending" aria-hidden="true">
-			<div class="logo-shadow-container">
-				<div class="logo-pulse-wrapper">
-					<img
-						id="loader-logo"
-						src="/AeSoul_logo.svg"
-						alt="ÆSoul Loading"
-						width="110"
-						height="110"
-						fetchpriority="high"
-						decoding="async"
-					/>
-				</div>
+		<div id="initial-loader" aria-hidden="true">
+			<div class="loader-logo">
+				<img
+					src="/AeSoul_logo-loader.webp"
+					alt=""
+					width="80"
+					height="80"
+					decoding="async"
+				/>
 			</div>
 		</div>
 
@@ -522,79 +524,49 @@ const ogImageUrl = new URL("/og-image.png", Astro.url).href;
 
 		<script is:inline>
 			(() => {
-				let loaderDismissed = false;
-
-				const getLoader = () =>
-					document.getElementById("initial-loader");
-
 				const dismissLoader = () => {
-					if (loaderDismissed) return;
+					const loader =
+						document.getElementById("initial-loader");
 
-					const loader = getLoader();
-
-					if (!loader) {
-						loaderDismissed = true;
+					if (
+						!loader ||
+						loader.classList.contains("fade-out")
+					) {
 						return;
 					}
 
-					loaderDismissed = true;
+					loader.classList.add("fade-out");
 
-					loader.classList.remove("logo-pending");
-
-					/*
-					 * Keep the loader lightweight and short-lived.
-					 * The page itself is already visible underneath it.
-					 */
-					requestAnimationFrame(() => {
-						loader.classList.add("fade-out");
-
-						window.setTimeout(() => {
-							loader.remove();
-						}, 380);
-					});
+					window.setTimeout(() => {
+						loader.remove();
+					}, 320);
 				};
-
-				const prepareLoader = async () => {
-					const loader = getLoader();
-					const logo = document.getElementById("loader-logo");
-
-					if (!loader) return;
-
-					try {
-						if (logo && typeof logo.decode === "function") {
-							await logo.decode();
-						} else if (logo && !logo.complete) {
-							await new Promise((resolve) => {
-								logo.addEventListener("load", resolve, {
-									once: true,
-								});
-
-								logo.addEventListener("error", resolve, {
-									once: true,
-								});
-							});
-						}
-					} catch {
-						/*
-						 * Never block page rendering because of
-						 * an image decoding problem.
-						 */
-					}
-
-					loader.classList.remove("logo-pending");
-				};
-
-				prepareLoader();
-
-				window.addEventListener("load", dismissLoader, {
-					once: true,
-				});
 
 				/*
-				 * Safety fallback. The loader must never become
-				 * a dependency of the first meaningful paint.
+				 * The loader never waits for:
+				 * - window.load
+				 * - API calls
+				 * - fonts
+				 * - SVG decoding
+				 *
+				 * It is purely visual.
 				 */
-				window.setTimeout(dismissLoader, 1800);
+				if (document.readyState === "loading") {
+					document.addEventListener(
+						"DOMContentLoaded",
+						() => {
+							requestAnimationFrame(dismissLoader);
+						},
+						{ once: true },
+					);
+				} else {
+					requestAnimationFrame(dismissLoader);
+				}
+
+				/*
+				 * Safety fallback.
+				 */
+				window.setTimeout(dismissLoader, 700);
 			})();
 		</script>
 
@@ -616,7 +588,8 @@ const ogImageUrl = new URL("/og-image.png", Astro.url).href;
 
 					if (!sectionElements.length) return;
 
-					let currentHash = window.location.hash.replace("#", "");
+					let currentHash =
+						window.location.hash.replace("#", "");
 
 					const observerOptions = {
 						root: null,
@@ -627,30 +600,30 @@ const ogImageUrl = new URL("/og-image.png", Astro.url).href;
 					const observer = new IntersectionObserver(
 						(entries) => {
 							entries.forEach((entry) => {
-								if (entry.isIntersecting) {
-									const targetId = entry.target.id;
+								if (!entry.isIntersecting) return;
 
-									if (
-										targetId &&
-										currentHash !== targetId
-									) {
-										currentHash = targetId;
+								const targetId = entry.target.id;
 
-										history.replaceState(
-											null,
-											"",
-											`#${targetId}`,
-										);
-									}
+								if (
+									targetId &&
+									currentHash !== targetId
+								) {
+									currentHash = targetId;
+
+									history.replaceState(
+										null,
+										"",
+										`#${targetId}`,
+									);
 								}
 							});
 						},
 						observerOptions,
 					);
 
-					sectionElements.forEach((section) =>
-						observer.observe(section),
-					);
+					sectionElements.forEach((section) => {
+						observer.observe(section);
+					});
 
 					window.addEventListener(
 						"scroll",
