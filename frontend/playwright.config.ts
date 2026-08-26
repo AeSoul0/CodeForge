@@ -1,27 +1,3 @@
-/**
- * @file frontend/playwright.config.ts
- * @description Playwright end-to-end test configuration for CodeForge.
- *
- * Responsibilities:
- * - Configure the E2E test suite and Chromium project.
- * - Start and monitor the Astro frontend and Fastify backend.
- * - Provide deterministic E2E environment variables.
- * - Keep real multi-worker execution locally.
- * - Exercise the production UI with reduced-motion accessibility preferences.
- * - Wait for backend/frontend readiness before starting tests.
- * - Collect traces, screenshots and videos when tests fail.
- *
- * The reduced-motion preference is intentional:
- * ParticleCanvas respects prefers-reduced-motion and disables
- * its particle simulation under this accessibility preference.
- * This keeps the E2E browser deterministic and tests the UI in
- * an accessibility-supported mode without changing production
- * behavior for users who do not request reduced motion.
- *
- * @requires @playwright/test
- * @requires Node.js path
- */
-
 import {
     defineConfig,
     devices,
@@ -38,36 +14,53 @@ const frontendUrl =
 const backendHealthUrl =
     'http://127.0.0.1:3002/ready';
 
-export default defineConfig({
-    testDir: './e2e',
+const playwrightResultsDir =
+    path.resolve(
+        __dirname,
+        '../.playwright-results',
+    );
 
-    timeout:
-        30_000,
+const playwrightReportDir =
+    path.resolve(
+        __dirname,
+        '../.playwright-report',
+    );
+
+export default defineConfig({
+    testDir:
+        './e2e',
 
     /**
-     * Keep true multi-worker execution.
-     *
-     * Every test receives an isolated browser context, while the
-     * shared backend remains the real E2E backend.
+     * Keep real concurrent E2E execution.
      */
     fullyParallel:
         true,
 
+    workers:
+        6,
+
+    timeout:
+        30_000,
+
     forbidOnly:
         !!process.env.CI,
-
-    /**
-     * The local E2E gate explicitly uses six workers.
-     */
-    workers:
-        process.env.CI
-            ? 1
-            : 6,
 
     retries:
         process.env.CI
             ? 2
             : 0,
+
+    /**
+     * Important:
+     *
+     * Do not write Playwright videos/traces/screenshots inside
+     * the Astro/Vite project root.
+     *
+     * Otherwise Astro dev can detect those files and trigger HMR
+     * while the E2E browser is interacting with the page.
+     */
+    outputDir:
+        playwrightResultsDir,
 
     reporter: [
         [
@@ -75,6 +68,9 @@ export default defineConfig({
             {
                 open:
                     'never',
+
+                outputFolder:
+                    playwrightReportDir,
             },
         ],
         ['line'],
@@ -98,25 +94,12 @@ export default defineConfig({
 
         navigationTimeout:
             30_000,
-
-        /**
-         * Test the application with the user's reduced-motion
-         * accessibility preference enabled.
-         *
-         * ParticleCanvas detects this preference and performs
-         * zero particle simulation, removing unnecessary animation
-         * contention between concurrent Chromium workers.
-         */
     },
 
     webServer: [
         {
             /**
-             * Always start a fresh backend for the E2E run.
-             *
-             * This prevents stale processes, old environment variables,
-             * old compiled code, cookies or rate-limit state from leaking
-             * into the test suite.
+             * Start a fresh backend for every E2E run.
              */
             command:
                 'npm run start',
@@ -167,14 +150,10 @@ export default defineConfig({
 
         {
             /**
-             * Astro's Vercel adapter does not support `astro preview`,
-             * therefore the E2E frontend uses Astro's development server.
-             *
-             * reuseExistingServer is disabled so the test suite always
-             * receives a fresh process with the expected environment.
+             * Run the Astro SSR frontend used by E2E.
              */
             command:
-                'npm run dev -- --host 127.0.0.1 --port 4321',
+                'npm run dev -- --host 0.0.0.0 --port 4321',
 
             url:
                 frontendUrl,
@@ -195,6 +174,9 @@ export default defineConfig({
 
                 PUBLIC_API_URL:
                     backendUrl,
+
+                PUBLIC_E2E:
+                    'true',
             },
         },
     ],

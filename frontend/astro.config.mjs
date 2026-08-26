@@ -6,7 +6,6 @@ import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
 import vercel from '@astrojs/vercel';
 
-// https://astro.build/config
 export default defineConfig({
     output: 'server',
 
@@ -25,6 +24,17 @@ export default defineConfig({
         plugins: [
             tailwindcss(),
         ],
+
+        server: {
+            watch: {
+                ignored: [
+                    '**/.playwright-results/**',
+                    '**/.playwright-report/**',
+                    '**/test-results/**',
+                    '**/playwright-report/**',
+                ],
+            },
+        },
     },
 
     server: {
@@ -32,13 +42,6 @@ export default defineConfig({
         host: '0.0.0.0',
     },
 
-    /**
-     * Disable the Astro development toolbar during E2E.
-     *
-     * The toolbar injects its own UI into every page during `astro dev`.
-     * That pollutes accessibility scans and can interfere with deterministic
-     * Playwright interaction with the application under test.
-     */
     devToolbar: {
         enabled: false,
     },
