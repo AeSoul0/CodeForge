@@ -24,9 +24,6 @@ import Footer from "../components/Footer.astro";
 
 import "../styles/global.css";
 
-/**
- * Frontend representation of a project returned by the API.
- */
 interface Project {
 	_id: string;
 	titolo: string;
@@ -36,15 +33,6 @@ interface Project {
 	linkGithub?: string;
 }
 
-/**
- * Frontend representation of an experience returned by the API.
- *
- * Dates remain ISO-compatible strings because the data is received
- * through the HTTP API and formatted by the Experience component.
- *
- * image is optional because not every experience necessarily needs
- * an associated organization logo.
- */
 interface ExperienceItem {
 	_id: string;
 	role: string;
@@ -59,188 +47,104 @@ interface ExperienceItem {
 
 let projects: Project[] = [];
 let experiences: ExperienceItem[] = [];
-let apiError: boolean = false;
+let apiError = false;
 
-/**
- * Backend API base URL.
- *
- * PUBLIC_API_URL is used in production, while localhost:3002
- * remains the default for local development.
- */
 const apiUrl =
 	import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") ||
 	"https://codeforge-ukq5.onrender.com";
 
-// ======================================================
-// PROJECTS
-// ======================================================
-
 /**
- * Fetch project data from the backend.
+ * Fetch projects and experiences in parallel.
  *
- * The backend is responsible for querying MongoDB and sorting
- * project records before returning them to the frontend.
+ * The previous implementation awaited the projects request first
+ * and only then started the experiences request, unnecessarily
+ * serializing two independent network calls during SSR.
  */
 try {
-	const response = await fetch(`${apiUrl}/api/projects`);
+	const [projectsResponse, experiencesResponse] = await Promise.all([
+		fetch(`${apiUrl}/api/projects`),
+		fetch(`${apiUrl}/api/experiences`),
+	]);
 
-	if (!response.ok) {
+	if (!projectsResponse.ok) {
 		throw new Error(
-			`Projects API request failed with status ${response.status}`,
+			`Projects API request failed with status ${projectsResponse.status}`,
 		);
 	}
 
-	const responseBody: any = await response.json();
+	if (!experiencesResponse.ok) {
+		throw new Error(
+			`Experiences API request failed with status ${experiencesResponse.status}`,
+		);
+	}
 
-	/**
-	 * Validate the top-level API response before assigning it
-	 * to the strongly typed projects collection.
-	 * The backend wraps the response in { success: true, data: [...] }
-	 */
-	if (responseBody && Array.isArray(responseBody.data)) {
-		projects = responseBody.data as Project[];
-	} else if (Array.isArray(responseBody)) {
-		projects = responseBody as Project[];
+	const [projectsBody, experiencesBody]: [any, any] = await Promise.all([
+		projectsResponse.json(),
+		experiencesResponse.json(),
+	]);
+
+	if (projectsBody && Array.isArray(projectsBody.data)) {
+		projects = projectsBody.data as Project[];
+	} else if (Array.isArray(projectsBody)) {
+		projects = projectsBody as Project[];
 	} else {
 		console.warn("[API Warning] Expected an array of projects.");
 	}
-} catch (error) {
-	/**
-	 * Keep the page renderable even when the backend is unavailable.
-	 */
-	apiError = true;
-	console.error(
-		"[Backend Connection Error] Failed to fetch projects:",
-		error,
-	);
-}
 
-// ======================================================
-// EXPERIENCES
-// ======================================================
-
-/**
- * Fetch experience data from the backend.
- *
- * The backend queries MongoDB and returns experiences ordered
- * by startDate from newest to oldest.
- */
-try {
-	const response = await fetch(`${apiUrl}/api/experiences`);
-
-	if (!response.ok) {
-		throw new Error(
-			`Experiences API request failed with status ${response.status}`,
-		);
-	}
-
-	const responseBody: any = await response.json();
-
-	/**
-	 * Validate the API response before passing the records
-	 * to the Experience component.
-	 * The backend wraps the response in { success: true, data: [...] }
-	 */
-	if (responseBody && Array.isArray(responseBody.data)) {
-		experiences = responseBody.data as ExperienceItem[];
-	} else if (Array.isArray(responseBody)) {
-		experiences = responseBody as ExperienceItem[];
+	if (experiencesBody && Array.isArray(experiencesBody.data)) {
+		experiences = experiencesBody.data as ExperienceItem[];
+	} else if (Array.isArray(experiencesBody)) {
+		experiences = experiencesBody as ExperienceItem[];
 	} else {
 		console.warn("[API Warning] Expected an array of experiences.");
 	}
 } catch (error) {
-	/**
-	 * The rest of the homepage remains available even if
-	 * the experience endpoint cannot be reached.
-	 */
 	apiError = true;
+
 	console.error(
-		"[Backend Connection Error] Failed to fetch experiences:",
+		"[Backend Connection Error] Failed to fetch homepage data:",
 		error,
 	);
 }
 ---
 
 <Layout title="CodeForge | ÆSoul">
-	<!-- ======================================================
-         BACKGROUND / INTERACTIVE CANVAS
-         ====================================================== -->
-
 	<ParticleCanvas />
 
-	<!-- ======================================================
-         NAVIGATION
-         ====================================================== -->
-
 	<Navbar />
-
-	<!-- ======================================================
-         MAIN CONTENT
-         ====================================================== -->
 
 	<section
 		class="max-w-6xl mx-auto px-6 py-4 flex-grow relative z-10 pointer-events-auto w-full"
 		aria-label="Homepage content"
 	>
-		<!-- ======================================================
-             HERO
-             ====================================================== -->
-
 		<HeroBento />
 
 		<div class="section-divider" aria-hidden="true"></div>
-
-		<!-- ======================================================
-             FEATURED PROJECT
-             ====================================================== -->
 
 		<FeaturedProject />
 
 		<div class="section-divider" aria-hidden="true"></div>
 
-		<!-- ======================================================
-             WHAT I BRING
-             ====================================================== -->
-
 		<WhatIBring />
 
 		<div class="section-divider" aria-hidden="true"></div>
-
-		<!-- ======================================================
-             RECENT PROJECTS
-             ====================================================== -->
 
 		<ProjectsGrid projects={projects} apiError={apiError} />
 
 		<div class="section-divider" aria-hidden="true"></div>
 
-		<!-- ======================================================
-             PROFESSIONAL / ACADEMIC EXPERIENCE
-             ====================================================== -->
-
 		<Experience experiences={experiences} apiError={apiError} />
 
 		<div class="section-divider" aria-hidden="true"></div>
 
-		<!-- ======================================================
-             CORE COMPETENCIES
-             ====================================================== -->
-
 		<CoreCompetencies />
 
 		<div class="section-divider" aria-hidden="true"></div>
-		<!-- ======================================================
-             TECHNICAL PROOF / ENGINEERING STANDARDS
-             ====================================================== -->
 
 		<TechnicalProof />
 
 		<div class="section-divider" aria-hidden="true"></div>
 	</section>
-
-	<!-- ======================================================
-         FOOTER
-         ====================================================== -->
 
 	<Footer />
 </Layout>

@@ -1,331 +1,298 @@
 ---
 
-/** @file src/components/HeroBento.astro * @description Minimal editorial hero with
-simultaneous generated reveal. * Optimized for smooth animation and synchronized entrance
-with the loader. **/
+/**
+ * @file src/components/HeroBento.astro
+ * @description Minimal editorial hero with lightweight entrance animation.
+ */
 
 ---
 
 <section
-    id="hero-section"
-    class="hero-section relative min-h-[calc(100vh-5rem)] flex items-center overflow-visible antialiased"
+	id="hero-section"
+	class="hero-section relative min-h-[calc(100vh-5rem)] flex items-center overflow-visible antialiased"
 >
-    <!-- Ambient background -->
-    <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
-        <div
-            class="absolute left-[18%] top-[28%] w-[28rem] h-[28rem] rounded-full bg-cyan-500/[0.035] blur-[120px]"
-        >
-        </div>
+	<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+		<div
+			class="absolute left-[18%] top-[28%] w-[28rem] h-[28rem] rounded-full bg-cyan-500/[0.035] blur-[120px]"
+		></div>
 
-        <div
-            class="absolute right-[12%] bottom-[12%] w-[24rem] h-[24rem] rounded-full bg-blue-500/[0.025] blur-[110px]"
-        >
-        </div>
-    </div>
+		<div
+			class="absolute right-[12%] bottom-[12%] w-[24rem] h-[24rem] rounded-full bg-blue-500/[0.025] blur-[110px]"
+		></div>
+	</div>
 
-    <div class="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-        <div
-            class="max-w-5xl -translate-y-8 sm:-translate-y-[4.5rem] lg:-translate-y-[5.5rem]"
-        >
-            <!-- Identity / Name -->
-            <div
-                class="hero-element mb-8 flex items-start sm:items-center gap-6"
-            >
-                <span
-                    class="inline-block w-3 h-3 rounded-full bg-cyan-400/90 mt-1 sm:mt-0 flex-shrink-0"
-                    aria-hidden="true"></span>
+	<div class="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+		<div
+			class="max-w-5xl -translate-y-8 sm:-translate-y-[4.5rem] lg:-translate-y-[5.5rem]"
+		>
+			<div class="hero-element mb-8 flex items-start sm:items-center gap-6">
+				<span
+					class="inline-block w-3 h-3 rounded-full bg-cyan-400/90 mt-1 sm:mt-0 flex-shrink-0"
+					aria-hidden="true"
+				></span>
 
-                <span
-                    class="text-lg sm:text-xl font-medium uppercase tracking-[0.25em] text-slate-400/90 leading-relaxed"
-                >
-                    Samuele Arabia
-                </span>
-            </div>
+				<span
+					class="text-lg sm:text-xl font-medium uppercase tracking-[0.25em] text-slate-400/90 leading-relaxed"
+				>
+					Samuele Arabia
+				</span>
+			</div>
 
-            <!-- Main headline -->
-            <h1
-                class="text-[clamp(3.5rem,8vw,7rem)] font-extrabold tracking-[-0.055em] leading-[0.95] text-white"
-            >
-                <span class="hero-line block"> Software Engineer </span>
+			<h1
+				class="text-[clamp(3.5rem,8vw,7rem)] font-extrabold tracking-[-0.055em] leading-[0.95] text-white"
+			>
+				<span class="hero-line block">Software Engineer</span>
 
-                <span class="hero-line block text-[clamp(2.2rem,5vw,4.5rem)] text-cyan-400 mt-2">
-                    Embedded · AI · Full-stack
-                </span>
-            </h1>
+				<span
+					class="hero-line block text-[clamp(2.2rem,5vw,4.5rem)] text-cyan-400 mt-2"
+				>
+					Embedded · AI · Full-stack
+				</span>
+			</h1>
 
-            <!-- Value Proposition -->
-            <p class="hero-element mt-6 text-base sm:text-lg text-slate-400/95 tracking-wide max-w-2xl leading-relaxed">
-                I design and build production-oriented digital systems, from backend architecture to polished interfaces.
-            </p>
+			<p
+				class="hero-element mt-6 text-base sm:text-lg text-slate-400/95 tracking-wide max-w-2xl leading-relaxed"
+			>
+				I design and build production-oriented digital systems, from backend
+				architecture to polished interfaces.
+			</p>
 
-            <!-- Actions + Micro-proof -->
-            <div
-                class="hero-element mt-10 relative flex flex-col md:flex-row items-start justify-between gap-6 md:gap-0 w-full"
-            >
-                <!-- Decorative large lines for empty spaces -->
-                <div class="hidden md:block absolute top-6 left-[42%] -translate-x-1/2 w-[10%] lg:w-[11%] h-[2px] rounded-full bg-white/10 z-0" aria-hidden="true"></div>
-                <div class="hidden md:block absolute top-6 left-[76%] -translate-x-1/2 w-[6%] lg:w-[7%] h-[2px] rounded-full bg-white/10 z-0" aria-hidden="true"></div>
+			<div
+				class="hero-element mt-10 relative flex flex-col md:flex-row items-start justify-between gap-6 md:gap-0 w-full"
+			>
+				<div
+					class="hidden md:block absolute top-6 left-[42%] -translate-x-1/2 w-[10%] lg:w-[11%] h-[2px] rounded-full bg-white/10 z-0"
+					aria-hidden="true"
+				></div>
 
-                <!-- Explore Works (Primary CTA) -->
-                <div class="flex flex-col gap-3 w-full md:w-auto z-10">
-                    <a
-                        href="#projects&experiences"
-                        class="hero-action group inline-flex items-center justify-center w-full sm:w-[323px] h-[49px] gap-4 rounded-full border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 text-sm font-semibold text-white shadow-[0_0_20px_rgba(34,211,238,0.1)] transition-all"
-                    >
-                        <span>View selected work</span>
+				<div
+					class="hidden md:block absolute top-6 left-[76%] -translate-x-1/2 w-[6%] lg:w-[7%] h-[2px] rounded-full bg-white/10 z-0"
+					aria-hidden="true"
+				></div>
 
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="w-4 h-4 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[2px]"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            stroke-width="2.2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            aria-hidden="true"
-                        >
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                            <polyline points="12 5 19 12 12 19"></polyline>
-                        </svg>
-                    </a>
-                    
-                    <span class="text-[11px] sm:text-xs text-slate-500 text-center font-medium tracking-wide w-full sm:w-[323px]">
-                        3+ projects · Embedded · AI · Full-stack
-                    </span>
-                </div>
+				<div class="flex flex-col gap-3 w-full md:w-auto z-10">
+					<a
+						href="#projects&experiences"
+						class="hero-action group inline-flex items-center justify-center w-full sm:w-[323px] h-[49px] gap-4 rounded-full border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 text-sm font-semibold text-white shadow-[0_0_20px_rgba(34,211,238,0.1)] transition-all"
+					>
+						<span>View selected work</span>
 
-                <!-- Download CV (Center Desktop) -->
-                <div class="w-full md:w-auto md:absolute md:left-[60%] md:-translate-x-1/2 z-10 flex justify-center">
-                    <a
-                        href="/CV.pdf"
-                        download="Samuele_Arabia_CV.pdf"
-                        class="hero-action group inline-flex items-center justify-center w-full sm:w-auto gap-3 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 px-8 py-3.5 text-sm font-semibold text-white transition-all"
-                    >
-                        <span>Download CV</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-y-[2px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    </a>
-                </div>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="w-4 h-4 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[2px]"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+							stroke-width="2.2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							aria-hidden="true"
+						>
+							<line x1="5" y1="12" x2="19" y2="12"></line>
+							<polyline points="12 5 19 12 12 19"></polyline>
+						</svg>
+					</a>
 
-                <!-- ÆSoul signature (Desktop) -->
-                <div
-                    class="hero-element hidden md:flex items-center gap-3 text-right z-10 mt-1"
-                    aria-label="ÆSoul Digital Systems"
-                >
-                    <div class="flex flex-col items-end leading-none">
-                        <span
-                            class="text-[11px] sm:text-xs font-bold tracking-[0.3em] text-white/90"
-                        >
-                            ÆSOUL
-                        </span>
+					<span
+						class="text-[11px] sm:text-xs text-slate-500 text-center font-medium tracking-wide w-full sm:w-[323px]"
+					>
+						3+ projects · Embedded · AI · Full-stack
+					</span>
+				</div>
 
-                        <span
-                            class="mt-2 text-[8px] sm:text-[9px] font-medium uppercase tracking-[0.28em] text-slate-500"
-                        >
-                            Digital Systems
-                        </span>
-                    </div>
+				<div
+					class="w-full md:w-auto md:absolute md:left-[60%] md:-translate-x-1/2 z-10 flex justify-center"
+				>
+					<a
+						href="/CV.pdf"
+						download="Samuele_Arabia_CV.pdf"
+						class="hero-action group inline-flex items-center justify-center w-full sm:w-auto gap-3 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 px-8 py-3.5 text-sm font-semibold text-white transition-all"
+					>
+						<span>Download CV</span>
 
-                    <div
-                        class="h-10 w-px bg-gradient-to-b from-transparent via-cyan-400/40 to-transparent"
-                        aria-hidden="true"
-                    >
-                    </div>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="w-4 h-4 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-y-[2px]"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2.2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							aria-hidden="true"
+						>
+							<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+							<polyline points="7 10 12 15 17 10"></polyline>
+							<line x1="12" y1="15" x2="12" y2="3"></line>
+						</svg>
+					</a>
+				</div>
 
-                    <span
-                        class="text-cyan-400/70 text-lg font-light"
-                        aria-hidden="true"
-                    >
-                        Æ
-                    </span>
-                </div>
-            </div>
+				<div
+					class="hero-element hidden md:flex items-center gap-3 text-right z-10 mt-1"
+					aria-label="ÆSoul Digital Systems"
+				>
+					<div class="flex flex-col items-end leading-none">
+						<span
+							class="text-[11px] sm:text-xs font-bold tracking-[0.3em] text-white/90"
+						>
+							ÆSOUL
+						</span>
 
-            <!-- ÆSoul signature (Mobile Optimized) -->
-            <div
-                class="hero-element mt-12 flex md:hidden items-center justify-center gap-4 border-t border-white/[0.05] pt-8 w-full"
-                aria-label="ÆSoul Digital Systems"
-            >
-                <div class="flex flex-col items-end leading-none">
-                    <span
-                        class="text-[11px] font-bold tracking-[0.3em] text-white/90"
-                    >
-                        ÆSOUL
-                    </span>
+						<span
+							class="mt-2 text-[8px] sm:text-[9px] font-medium uppercase tracking-[0.28em] text-slate-500"
+						>
+							Digital Systems
+						</span>
+					</div>
 
-                    <span
-                        class="mt-2 text-[8px] font-medium uppercase tracking-[0.28em] text-slate-500"
-                    >
-                        Digital Systems
-                    </span>
-                </div>
+					<div
+						class="h-10 w-px bg-gradient-to-b from-transparent via-cyan-400/40 to-transparent"
+						aria-hidden="true"
+					></div>
 
-                <div
-                    class="h-8 w-px bg-gradient-to-b from-transparent via-cyan-400/40 to-transparent"
-                    aria-hidden="true"
-                >
-                </div>
+					<span
+						class="text-cyan-400/70 text-lg font-light"
+						aria-hidden="true"
+					>
+						Æ
+					</span>
+				</div>
+			</div>
 
-                <span
-                    class="text-cyan-400/70 text-xl font-light"
-                    aria-hidden="true"
-                >
-                    Æ
-                </span>
-            </div>
-        </div>
-    </div>
+			<div
+				class="hero-element mt-12 flex md:hidden items-center justify-center gap-4 border-t border-white/[0.05] pt-8 w-full"
+				aria-label="ÆSoul Digital Systems"
+			>
+				<div class="flex flex-col items-end leading-none">
+					<span class="text-[11px] font-bold tracking-[0.3em] text-white/90">
+						ÆSOUL
+					</span>
+
+					<span
+						class="mt-2 text-[8px] font-medium uppercase tracking-[0.28em] text-slate-500"
+					>
+						Digital Systems
+					</span>
+				</div>
+
+				<div
+					class="h-8 w-px bg-gradient-to-b from-transparent via-cyan-400/40 to-transparent"
+					aria-hidden="true"
+				></div>
+
+				<span class="text-cyan-400/70 text-xl font-light" aria-hidden="true">
+					Æ
+				</span>
+			</div>
+		</div>
+	</div>
 </section>
 
 <style>
-    /*
-     * ======================================================
-     * HERO SPACING
-     * ======================================================
-     */
+	.hero-section {
+		overflow: visible;
+	}
 
-    .hero-section {
-        overflow: visible;
-    }
+	/*
+	 * Important performance change:
+	 * hero content is visible from the first paint.
+	 * The animation may enhance the entrance, but it must not
+	 * determine whether the LCP element exists.
+	 */
+	.hero-element,
+	.hero-line {
+		opacity: 1;
+		transform: none;
+		filter: none;
 
-    /*
-     * ======================================================
-     * INITIAL STATE
-     * ======================================================
-     */
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
 
-    .hero-element,
-    .hero-line {
-        opacity: 0;
-        transform: translate3d(0, 24px, 0);
-        filter: blur(4.5px);
+	.hero-section.is-loaded .hero-element,
+	.hero-section.is-loaded .hero-line {
+		animation: generatedReveal 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+		will-change: transform, opacity;
+	}
 
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-    }
+	@keyframes generatedReveal {
+		from {
+			opacity: 0.01;
+			transform: translate3d(0, 10px, 0);
+		}
 
-    /*
-     * ======================================================
-     * LOADER FINISHED
-     * ======================================================
-     */
+		to {
+			opacity: 1;
+			transform: translate3d(0, 0, 0);
+		}
+	}
 
-    .hero-section.is-loaded .hero-element,
-    .hero-section.is-loaded .hero-line {
-        animation: generatedReveal 950ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+	.hero-action {
+		color: rgb(255 255 255);
 
-        will-change: transform, opacity, filter;
-    }
+		transition:
+			color 220ms ease,
+			border-color 220ms ease,
+			background-color 220ms ease,
+			text-shadow 220ms ease,
+			transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
 
-    @keyframes generatedReveal {
-        from {
-            opacity: 0;
-            transform: translate3d(0, 24px, 0);
-            filter: blur(4.5px);
-        }
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
 
-        to {
-            opacity: 1;
-            transform: translate3d(0, 0, 0);
-            filter: blur(0);
-        }
-    }
+	.hero-action:hover {
+		color: rgb(103 232 249);
 
-    /* ======================================================
-       HERO ACTIONS
-       ====================================================== */
+		text-shadow:
+			0 0 10px rgba(34, 211, 238, 0.22),
+			0 0 24px rgba(34, 211, 238, 0.1);
+	}
 
-    .hero-action {
-        color: rgb(255 255 255);
+	.hero-action:first-of-type:hover {
+		border-color: rgba(34, 211, 238, 0.28);
+		background-color: rgba(34, 211, 238, 0.045);
+		transform: translateY(-2px);
+	}
 
-        transition:
-            color 220ms ease,
-            border-color 220ms ease,
-            background-color 220ms ease,
-            text-shadow 220ms ease,
-            transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+	.hero-action svg {
+		transition: filter 220ms ease;
+	}
 
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-    }
+	.hero-action:hover svg {
+		filter: drop-shadow(0 0 5px rgba(34, 211, 238, 0.35));
+	}
 
-    .hero-action:hover {
-        color: rgb(103 232 249);
+	@media (prefers-reduced-motion: reduce) {
+		.hero-element,
+		.hero-line {
+			opacity: 1;
+			transform: none;
+			filter: none;
+			animation: none !important;
+			will-change: auto;
+		}
 
-        text-shadow:
-            0 0 10px rgba(34, 211, 238, 0.22),
-            0 0 24px rgba(34, 211, 238, 0.1);
-    }
-
-    .hero-action:first-of-type:hover {
-        border-color: rgba(34, 211, 238, 0.28);
-        background-color: rgba(34, 211, 238, 0.045);
-        transform: translateY(-2px);
-    }
-
-    .hero-action svg {
-        transition: filter 220ms ease;
-    }
-
-    .hero-action:hover svg {
-        filter: drop-shadow(0 0 5px rgba(34, 211, 238, 0.35));
-    }
-
-    /* ======================================================
-       ACCESSIBILITY
-       ====================================================== */
-
-    @media (prefers-reduced-motion: reduce) {
-        .hero-element,
-        .hero-line {
-            opacity: 1;
-            transform: none;
-            filter: none;
-            animation: none !important;
-            will-change: auto;
-        }
-
-        .hero-action,
-        .hero-action svg {
-            transition: none;
-        }
-    }
+		.hero-action,
+		.hero-action svg {
+			transition: none;
+		}
+	}
 </style>
 
 <script is:inline>
-    document.addEventListener("DOMContentLoaded", () => {
-        const hero = document.getElementById("hero-section");
+	document.addEventListener("DOMContentLoaded", () => {
+		const hero = document.getElementById("hero-section");
 
-        if (!hero) return;
+		if (!hero) return;
 
-        const activateHero = () => {
-            if (hero.classList.contains("is-loaded")) {
-                return;
-            }
-
-            hero.classList.add("is-loaded");
-        };
-
-        const loader = document.getElementById("initial-loader");
-
-        if (!loader) {
-            requestAnimationFrame(activateHero);
-            return;
-        }
-
-        const observer = new MutationObserver(() => {
-            if (loader.classList.contains("fade-out")) {
-                observer.disconnect();
-
-                window.setTimeout(() => {
-                    requestAnimationFrame(activateHero);
-                }, 40);
-            }
-        });
-
-        observer.observe(loader, {
-            attributes: true,
-            attributeFilter: ["class"],
-        });
-    });
+		/*
+		 * Do not make the hero depend on the loader anymore.
+		 * It is already visible and paintable before this runs.
+		 */
+		requestAnimationFrame(() => {
+			hero.classList.add("is-loaded");
+		});
+	});
 </script>
