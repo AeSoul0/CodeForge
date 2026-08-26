@@ -50,18 +50,17 @@ const apiUrl =
 	import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") ||
 	"https://codeforge-ukq5.onrender.com";
 
-/*
- * Cache the rendered homepage at the Vercel CDN.
+/**
+ * Cache the SSR-generated homepage at the Vercel edge.
  *
- * 60 seconds fresh:
- *   repeated visits are served without rerunning SSR immediately.
+ * 60 seconds:
+ *   fresh cache lifetime.
  *
- * 5 minutes stale-while-revalidate:
- *   Vercel can serve the previous response while regenerating it
- *   in the background.
+ * 300 seconds:
+ *   stale-while-revalidate window.
  *
- * This is appropriate for the public portfolio homepage because
- * projects/experiences do not need second-by-second freshness.
+ * This avoids re-running the homepage SSR/API requests for
+ * every public request while keeping content reasonably fresh.
  */
 Astro.response.headers.set(
 	"Cache-Control",
