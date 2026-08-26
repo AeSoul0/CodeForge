@@ -28,7 +28,6 @@
 node_modules/
 **/node_modules/
 
-# Package manager caches
 .npm/
 .pnpm-store/
 .yarn/
@@ -39,17 +38,26 @@ node_modules/
 # ------------------------------------------------------------
 
 dist/
+**/dist/
+
 build/
+**/build/
+
 out/
+**/out/
+
 .output/
+**/.output/
 
 # Astro
 .astro/
+**/.astro/
 
 # Vite
 .vite/
+**/.vite/
 
-# Next/Vercel-style generated output, harmless if unused
+# Next/Vercel-style generated output
 .next/
 .vercel/
 
@@ -68,8 +76,19 @@ blob-report/
 
 *.lcov
 
-# Vitest temporary artifacts
 .vitest/
+
+# ------------------------------------------------------------
+# Lighthouse / Performance reports
+# ------------------------------------------------------------
+
+lighthouse*.json
+lighthouse*.html
+lighthouse*.xml
+
+# Chrome / Lighthouse temporary artifacts
+lighthouse-report/
+.lighthouse/
 
 # ------------------------------------------------------------
 # Logs
@@ -77,6 +96,7 @@ blob-report/
 
 logs/
 *.log
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -87,15 +107,17 @@ pnpm-debug.log*
 # ------------------------------------------------------------
 
 tmp/
+**/tmp/
+
 temp/
+**/temp/
+
 *.tmp
 *.temp
 
 *.pid
 *.pid.lock
-
 *.seed
-*.pid
 
 # ------------------------------------------------------------
 # OS files
@@ -111,7 +133,6 @@ ehthumbs.db
 ehthumbs_vista.db
 
 Desktop.ini
-
 $RECYCLE.BIN/
 
 # ------------------------------------------------------------
@@ -238,7 +259,7 @@ docs/.generated/
 docs/.cache/
 
 # ------------------------------------------------------------
-# Optional: local reports
+# Optional local reports / artifacts
 # ------------------------------------------------------------
 
 reports/
@@ -251,5 +272,3 @@ artifacts/
 !.gitkeep
 !.env.example
 !.env.test.example
-
-roadmap.md
