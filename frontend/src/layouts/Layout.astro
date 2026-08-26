@@ -2,7 +2,7 @@
 /**
  * @file src/layouts/Layout.astro
  * @description Master Layout establishing the global HTML skeleton,
- * typography, ambient background, loader, global UI utilities,
+ * typography, loader, ambient background, global UI utilities,
  * and SEO/OpenGraph metadata.
  */
 
@@ -217,8 +217,20 @@ const ogImageUrl = new URL("/og-image.png", Astro.url).href;
 			}
 
 			/* ======================================================
-			   BACKGROUND BLOBS
+			   AMBIENT BACKGROUND BLOBS
 			   ====================================================== */
+
+			/*
+			 * Intentionally static.
+			 *
+			 * Lighthouse identified the animated blob as the only
+			 * CLS culprit on the production homepage:
+			 *
+			 * body.min-h-screen > div.fixed > div.absolute
+			 *
+			 * Keeping the shapes static preserves the visual effect
+			 * while removing the measured layout shift.
+			 */
 
 			@keyframes blob {
 				0% {
@@ -239,8 +251,15 @@ const ogImageUrl = new URL("/og-image.png", Astro.url).href;
 			}
 
 			.animate-blob {
-				animation: blob 12s infinite alternate ease-in-out;
-				will-change: transform;
+				/*
+				 * No animation: prevents the background blob from
+				 * producing the 0.169 CLS reported by Lighthouse.
+				 */
+				animation: none;
+
+				transform: translate3d(0, 0, 0);
+
+				will-change: auto;
 			}
 
 			/* ======================================================
@@ -551,6 +570,7 @@ const ogImageUrl = new URL("/og-image.png", Astro.url).href;
 				 *
 				 * It is purely visual.
 				 */
+
 				if (document.readyState === "loading") {
 					document.addEventListener(
 						"DOMContentLoaded",

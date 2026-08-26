@@ -5,9 +5,6 @@
  *
  * Handles server-side API fetching and composes the main
  * visual sections inside the global layout.
- *
- * Projects and experiences are retrieved from the backend API
- * rather than accessing MongoDB directly from the frontend.
  */
 
 import Layout from "../layouts/Layout.astro";
@@ -53,12 +50,26 @@ const apiUrl =
 	import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") ||
 	"https://codeforge-ukq5.onrender.com";
 
+/*
+ * Cache the rendered homepage at the Vercel CDN.
+ *
+ * 60 seconds fresh:
+ *   repeated visits are served without rerunning SSR immediately.
+ *
+ * 5 minutes stale-while-revalidate:
+ *   Vercel can serve the previous response while regenerating it
+ *   in the background.
+ *
+ * This is appropriate for the public portfolio homepage because
+ * projects/experiences do not need second-by-second freshness.
+ */
+Astro.response.headers.set(
+	"Cache-Control",
+	"public, s-maxage=60, stale-while-revalidate=300",
+);
+
 /**
  * Fetch projects and experiences in parallel.
- *
- * The previous implementation awaited the projects request first
- * and only then started the experiences request, unnecessarily
- * serializing two independent network calls during SSR.
  */
 try {
 	const [projectsResponse, experiencesResponse] = await Promise.all([
