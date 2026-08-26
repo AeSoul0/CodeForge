@@ -301,3 +301,8 @@ lighthouse*.xml
 
 lighthouse-report/
 **/lighthouse-report/
+
+.playwright-report
+.playwright-report/
+
+.playwright-results/
