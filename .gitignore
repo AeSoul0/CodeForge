@@ -272,3 +272,32 @@ artifacts/
 !.gitkeep
 !.env.example
 !.env.test.example
+
+# ------------------------------------------------------------
+# Local test runs
+# ------------------------------------------------------------
+
+test-run/
+**/test-run/
+
+test-runs/
+**/test-runs/
+
+# ------------------------------------------------------------
+# Lighthouse reports
+# ------------------------------------------------------------
+
+lighthouse*.json
+**/lighthouse*.json
+
+lighthouse*.html
+**/lighthouse*.html
+
+lighthouse*.xml
+**/lighthouse*.xml
+
+.lighthouse/
+**/.lighthouse/
+
+lighthouse-report/
+**/lighthouse-report/
