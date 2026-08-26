@@ -1,544 +1,632 @@
 ---
 /**
  * @file src/components/ParticleCanvas.astro
- * @description Interactive particle canvas used for the decorative
- * background network effect.
+ * @description Decorative animated particle network background.
  *
- * In E2E mode the decorative animation is intentionally disabled.
- * This keeps Playwright's multi-worker browser runs deterministic
- * without changing application functionality.
+ * The E2E flag is resolved by Astro during rendering instead of
+ * reading import.meta.env inside a browser inline script.
  */
+
+const isE2E =
+    import.meta.env.PUBLIC_E2E === "true";
 ---
 
 <canvas
-	id="particleCanvas"
-	aria-hidden="true"
+    id="particleCanvas"
+    aria-hidden="true"
+    class:list={{
+        "e2e-particle-disabled": isE2E,
+    }}
 ></canvas>
 
 <style>
-	#particleCanvas {
-		position: fixed;
-		top: 0;
-		left: 0;
+    #particleCanvas {
+        position: fixed;
+        inset: 0;
 
-		width: 100%;
-		height: 100%;
+        width: 100%;
+        height: 100%;
 
-		z-index: 1;
+        z-index: 1;
+        pointer-events: none;
 
-		pointer-events: none;
-	}
+        display: block;
+    }
 
-	/*
-	 * The canvas is removed from rendering in E2E mode.
-	 * The visual effect is decorative and does not represent
-	 * application functionality or content.
-	 */
-	.e2e-particle-disabled {
-		display: none;
-	}
+    .e2e-particle-disabled {
+        display: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        #particleCanvas {
+            display: none;
+        }
+    }
 </style>
 
 <script is:inline>
-	document.addEventListener(
-		"DOMContentLoaded",
-		() => {
-			const canvas =
-				document.getElementById(
-					"particleCanvas",
-				);
-
-			if (!canvas) {
-				return;
-			}
-
-			/*
-			 * Playwright starts the real application with E2E=true.
-			 *
-			 * The particle layer is decorative and intentionally
-			 * excluded from concurrent browser runs so that six
-			 * workers do not spend their CPU budget rendering
-			 * identical background simulations.
-			 */
-			if (
-				import.meta.env.PUBLIC_E2E ===
-				"true"
-			) {
-				canvas.classList.add(
-					"e2e-particle-disabled",
-				);
-
-				return;
-			}
-
-			const ctx =
-				canvas.getContext("2d");
-
-			if (!ctx) {
-				return;
-			}
-
-			let w = 0;
-			let h = 0;
-
-			let particles = [];
-
-			let mouse = {
-				x: null,
-				y: null,
-			};
-
-			let isVisible = true;
-
-			let animationFrameId =
-				null;
-
-			const prefersReducedMotion =
-				window.matchMedia(
-					"(prefers-reduced-motion: reduce)",
-				);
-
-			const getParticleCount = () => {
-				if (
-					prefersReducedMotion.matches
-				) {
-					return 0;
-				}
-
-				const width =
-					window.innerWidth;
-
-				if (width > 1024) {
-					return 55;
-				}
-
-				if (width > 768) {
-					return 35;
-				}
-
-				return 20;
-			};
-
-			class Particle {
-				x;
-				y;
-				vx;
-				vy;
-				baseColor;
-
-				constructor() {
-					this.x =
-						Math.random() * w;
-
-					this.y =
-						Math.random() * h;
-
-					this.vx =
-						(Math.random() -
-							0.5) *
-						0.6;
-
-					this.vy =
-						(Math.random() -
-							0.5) *
-						0.6;
-
-					this.baseColor =
-						Math.random() >
-						0.5
-							? "6, 182, 212"
-							: "99, 102, 241";
-				}
-
-				update() {
-					this.x +=
-						this.vx;
-
-					this.y +=
-						this.vy;
-
-					if (
-						this.x < 0 ||
-						this.x > w
-					) {
-						this.vx *= -1;
-					}
-
-					if (
-						this.y < 0 ||
-						this.y > h
-					) {
-						this.vy *= -1;
-					}
-				}
-
-				draw() {
-					ctx.beginPath();
-
-					ctx.arc(
-						this.x,
-						this.y,
-						1.2,
-						0,
-						Math.PI * 2,
-					);
-
-					ctx.fillStyle =
-						`rgba(${this.baseColor}, 0.6)`;
-
-					ctx.fill();
-				}
-			}
-
-			const initParticles = () => {
-				particles = [];
-
-				const count =
-					getParticleCount();
-
-				for (
-					let i = 0;
-					i < count;
-					i += 1
-				) {
-					particles.push(
-						new Particle(),
-					);
-				}
-			};
-
-			const resize = () => {
-				w =
-					canvas.width =
-					window.innerWidth;
-
-				h =
-					canvas.height =
-					window.innerHeight;
-
-				initParticles();
-			};
-
-			const onMouseMove = (
-				event,
-			) => {
-				mouse.x =
-					event.clientX;
-
-				mouse.y =
-					event.clientY;
-			};
-
-			const onMouseOut = () => {
-				mouse.x = null;
-				mouse.y = null;
-			};
-
-			window.addEventListener(
-				"resize",
-				resize,
-			);
-
-			window.addEventListener(
-				"mousemove",
-				onMouseMove,
-			);
-
-			window.addEventListener(
-				"mouseout",
-				onMouseOut,
-			);
-
-			prefersReducedMotion.addEventListener(
-				"change",
-				initParticles,
-			);
-
-			resize();
-
-			const isLowEnd =
-				(
-					navigator.hardwareConcurrency &&
-					navigator.hardwareConcurrency <=
-						4
-				) ||
-				/Mobi|Android/i.test(
-					navigator.userAgent,
-				);
-
-			const targetFPS =
-				isLowEnd
-					? 30
-					: 60;
-
-			const frameDelay =
-				1000 /
-				targetFPS;
-
-			let lastTime = 0;
-
-			function animate(
-				time,
-			) {
-				if (
-					!isVisible ||
-					particles.length ===
-						0
-				) {
-					if (
-						animationFrameId
-					) {
-						cancelAnimationFrame(
-							animationFrameId,
-						);
-
-						animationFrameId =
-							null;
-					}
-
-					return;
-				}
-
-				animationFrameId =
-					requestAnimationFrame(
-						animate,
-					);
-
-				if (
-					time -
-						lastTime <
-					frameDelay
-				) {
-					return;
-				}
-
-				lastTime =
-					time;
-
-				ctx.clearRect(
-					0,
-					0,
-					w,
-					h,
-				);
-
-				for (
-					let i = 0;
-					i <
-					particles.length;
-					i += 1
-				) {
-					particles[
-						i
-					].update();
-
-					particles[
-						i
-					].draw();
-
-					for (
-						let j =
-							i + 1;
-						j <
-							particles.length;
-						j += 1
-					) {
-						const dx =
-							particles[i]
-								.x -
-							particles[j]
-								.x;
-
-						const dy =
-							particles[i]
-								.y -
-							particles[j]
-								.y;
-
-						const distance =
-							Math.sqrt(
-								dx * dx +
-									dy * dy,
-							);
-
-						if (
-							distance <
-							110
-						) {
-							ctx.beginPath();
-
-							ctx.strokeStyle =
-								`rgba(${particles[i].baseColor}, ${
-									0.12 -
-									distance /
-										900
-								})`;
-
-							ctx.lineWidth =
-								0.7;
-
-							ctx.moveTo(
-								particles[i]
-									.x,
-								particles[i]
-									.y,
-							);
-
-							ctx.lineTo(
-								particles[j]
-									.x,
-								particles[j]
-									.y,
-							);
-
-							ctx.stroke();
-						}
-					}
-
-					if (
-						mouse.x !== null &&
-						mouse.y !== null
-					) {
-						const dx =
-							particles[i]
-								.x -
-							mouse.x;
-
-						const dy =
-							particles[i]
-								.y -
-							mouse.y;
-
-						const distance =
-							Math.sqrt(
-								dx * dx +
-									dy * dy,
-							);
-
-						if (
-							distance <
-							160
-						) {
-							ctx.beginPath();
-
-							ctx.strokeStyle =
-								`rgba(6, 182, 212, ${
-									0.25 -
-									distance /
-										640
-								})`;
-
-							ctx.lineWidth =
-								0.9;
-
-							ctx.moveTo(
-								particles[i]
-									.x,
-								particles[i]
-									.y,
-							);
-
-							ctx.lineTo(
-								mouse.x,
-								mouse.y,
-							);
-
-							ctx.stroke();
-						}
-					}
-				}
-			}
-
-			const observer =
-				new IntersectionObserver(
-					(entries) => {
-						entries.forEach(
-							(entry) => {
-								isVisible =
-									entry.isIntersecting;
-
-								if (
-									isVisible &&
-									!animationFrameId &&
-									particles.length >
-										0
-								) {
-									animate();
-								}
-							},
-						);
-					},
-					{
-						threshold:
-							0.05,
-					},
-				);
-
-			observer.observe(
-				canvas,
-			);
-
-			document.addEventListener(
-				"visibilitychange",
-				() => {
-					isVisible =
-						!document.hidden;
-
-					if (
-						isVisible &&
-						!animationFrameId &&
-						particles.length >
-							0
-					) {
-						animate();
-					}
-				},
-			);
-
-			if (
-				particles.length >
-				0
-			) {
-				animate();
-			}
-
-			document.addEventListener(
-				"astro:before-swap",
-				() => {
-					if (
-						animationFrameId
-					) {
-						cancelAnimationFrame(
-							animationFrameId,
-						);
-					}
-
-					observer.disconnect();
-
-					window.removeEventListener(
-						"resize",
-						resize,
-					);
-
-					window.removeEventListener(
-						"mousemove",
-						onMouseMove,
-					);
-
-					window.removeEventListener(
-						"mouseout",
-						onMouseOut,
-					);
-
-					prefersReducedMotion.removeEventListener(
-						"change",
-						initParticles,
-					);
-				},
-				{
-					once: true,
-				},
-			);
-		},
-	);
+    (() => {
+        const canvas =
+            document.getElementById(
+                "particleCanvas",
+            );
+
+        if (!canvas) {
+            return;
+        }
+
+        /*
+         * E2E state is resolved by Astro in the rendered HTML.
+         * This script must not read import.meta.env.
+         */
+        if (
+            canvas.classList.contains(
+                "e2e-particle-disabled",
+            )
+        ) {
+            return;
+        }
+
+        const ctx =
+            canvas.getContext("2d");
+
+        if (!ctx) {
+            return;
+        }
+
+        let width = 0;
+        let height = 0;
+
+        let particles = [];
+
+        let animationFrameId = null;
+
+        let lastFrameTime = 0;
+
+        let isPageVisible =
+            !document.hidden;
+
+        const mouse = {
+            x: null,
+            y: null,
+        };
+
+        const prefersReducedMotion =
+            window.matchMedia(
+                "(prefers-reduced-motion: reduce)",
+            );
+
+        const getParticleCount = () => {
+            if (
+                prefersReducedMotion.matches
+            ) {
+                return 0;
+            }
+
+            const viewportWidth =
+                window.innerWidth;
+
+            if (
+                viewportWidth > 1440
+            ) {
+                return 60;
+            }
+
+            if (
+                viewportWidth > 1024
+            ) {
+                return 50;
+            }
+
+            if (
+                viewportWidth > 768
+            ) {
+                return 32;
+            }
+
+            return 18;
+        };
+
+        const getTargetFps = () => {
+            const isLowEnd =
+                (
+                    navigator.hardwareConcurrency &&
+                    navigator.hardwareConcurrency <=
+                        4
+                ) ||
+                /Mobi|Android/i.test(
+                    navigator.userAgent,
+                );
+
+            return isLowEnd
+                ? 30
+                : 60;
+        };
+
+        class Particle {
+            x;
+            y;
+            vx;
+            vy;
+            baseColor;
+
+            constructor() {
+                this.x =
+                    Math.random() *
+                    width;
+
+                this.y =
+                    Math.random() *
+                    height;
+
+                this.vx =
+                    (Math.random() -
+                        0.5) *
+                    0.55;
+
+                this.vy =
+                    (Math.random() -
+                        0.5) *
+                    0.55;
+
+                this.baseColor =
+                    Math.random() >
+                    0.5
+                        ? "6, 182, 212"
+                        : "99, 102, 241";
+            }
+
+            update() {
+                this.x +=
+                    this.vx;
+
+                this.y +=
+                    this.vy;
+
+                if (
+                    this.x < 0 ||
+                    this.x > width
+                ) {
+                    this.vx *= -1;
+                }
+
+                if (
+                    this.y < 0 ||
+                    this.y > height
+                ) {
+                    this.vy *= -1;
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+
+                ctx.arc(
+                    this.x,
+                    this.y,
+                    1.2,
+                    0,
+                    Math.PI * 2,
+                );
+
+                ctx.fillStyle =
+                    `rgba(${this.baseColor}, 0.62)`;
+
+                ctx.fill();
+            }
+        }
+
+        const initParticles =
+            () => {
+                particles = [];
+
+                const count =
+                    getParticleCount();
+
+                for (
+                    let index = 0;
+                    index < count;
+                    index += 1
+                ) {
+                    particles.push(
+                        new Particle(),
+                    );
+                }
+            };
+
+        const resize = () => {
+            const dpr =
+                Math.min(
+                    window.devicePixelRatio ||
+                        1,
+                    2,
+                );
+
+            width =
+                window.innerWidth;
+
+            height =
+                window.innerHeight;
+
+            canvas.width =
+                Math.floor(
+                    width * dpr,
+                );
+
+            canvas.height =
+                Math.floor(
+                    height * dpr,
+                );
+
+            canvas.style.width =
+                `${width}px`;
+
+            canvas.style.height =
+                `${height}px`;
+
+            ctx.setTransform(
+                dpr,
+                0,
+                0,
+                dpr,
+                0,
+                0,
+            );
+
+            initParticles();
+        };
+
+        const drawConnections =
+            () => {
+                const connectionDistance =
+                    110;
+
+                for (
+                    let i = 0;
+                    i <
+                    particles.length;
+                    i += 1
+                ) {
+                    const current =
+                        particles[i];
+
+                    for (
+                        let j =
+                            i + 1;
+                        j <
+                        particles.length;
+                        j += 1
+                    ) {
+                        const next =
+                            particles[j];
+
+                        const dx =
+                            current.x -
+                            next.x;
+
+                        const dy =
+                            current.y -
+                            next.y;
+
+                        const distance =
+                            Math.sqrt(
+                                dx * dx +
+                                    dy * dy,
+                            );
+
+                        if (
+                            distance >=
+                            connectionDistance
+                        ) {
+                            continue;
+                        }
+
+                        const opacity =
+                            Math.max(
+                                0,
+                                0.12 -
+                                    distance /
+                                        900,
+                            );
+
+                        ctx.beginPath();
+
+                        ctx.strokeStyle =
+                            `rgba(${current.baseColor}, ${opacity})`;
+
+                        ctx.lineWidth =
+                            0.7;
+
+                        ctx.moveTo(
+                            current.x,
+                            current.y,
+                        );
+
+                        ctx.lineTo(
+                            next.x,
+                            next.y,
+                        );
+
+                        ctx.stroke();
+                    }
+                }
+            };
+
+        const drawMouseConnections =
+            () => {
+                if (
+                    mouse.x === null ||
+                    mouse.y === null
+                ) {
+                    return;
+                }
+
+                const mouseDistance =
+                    160;
+
+                for (
+                    const particle of particles
+                ) {
+                    const dx =
+                        particle.x -
+                        mouse.x;
+
+                    const dy =
+                        particle.y -
+                        mouse.y;
+
+                    const distance =
+                        Math.sqrt(
+                            dx * dx +
+                                dy * dy,
+                        );
+
+                    if (
+                        distance >=
+                        mouseDistance
+                    ) {
+                        continue;
+                    }
+
+                    const opacity =
+                        Math.max(
+                            0,
+                            0.25 -
+                                distance /
+                                    640,
+                        );
+
+                    ctx.beginPath();
+
+                    ctx.strokeStyle =
+                        `rgba(6, 182, 212, ${opacity})`;
+
+                    ctx.lineWidth =
+                        0.9;
+
+                    ctx.moveTo(
+                        particle.x,
+                        particle.y,
+                    );
+
+                    ctx.lineTo(
+                        mouse.x,
+                        mouse.y,
+                    );
+
+                    ctx.stroke();
+                }
+            };
+
+        const stopAnimation =
+            () => {
+                if (
+                    animationFrameId !==
+                    null
+                ) {
+                    cancelAnimationFrame(
+                        animationFrameId,
+                    );
+
+                    animationFrameId =
+                        null;
+                }
+            };
+
+        const animate = (
+            timestamp = 0,
+        ) => {
+            if (
+                !isPageVisible ||
+                particles.length === 0
+            ) {
+                stopAnimation();
+                return;
+            }
+
+            animationFrameId =
+                requestAnimationFrame(
+                    animate,
+                );
+
+            const targetFps =
+                getTargetFps();
+
+            const frameDelay =
+                1000 /
+                targetFps;
+
+            if (
+                timestamp -
+                    lastFrameTime <
+                frameDelay
+            ) {
+                return;
+            }
+
+            lastFrameTime =
+                timestamp;
+
+            ctx.clearRect(
+                0,
+                0,
+                width,
+                height,
+            );
+
+            for (
+                const particle of particles
+            ) {
+                particle.update();
+                particle.draw();
+            }
+
+            drawConnections();
+            drawMouseConnections();
+        };
+
+        const restartAnimation =
+            () => {
+                stopAnimation();
+
+                if (
+                    !prefersReducedMotion.matches &&
+                    isPageVisible
+                ) {
+                    animationFrameId =
+                        requestAnimationFrame(
+                            animate,
+                        );
+                }
+            };
+
+        const handleMouseMove =
+            (event) => {
+                mouse.x =
+                    event.clientX;
+
+                mouse.y =
+                    event.clientY;
+            };
+
+        const handleMouseLeave =
+            () => {
+                mouse.x = null;
+                mouse.y = null;
+            };
+
+        const handleVisibilityChange =
+            () => {
+                isPageVisible =
+                    !document.hidden;
+
+                if (
+                    isPageVisible
+                ) {
+                    restartAnimation();
+                } else {
+                    stopAnimation();
+                }
+            };
+
+        const handleReducedMotionChange =
+            () => {
+                initParticles();
+
+                if (
+                    prefersReducedMotion.matches
+                ) {
+                    stopAnimation();
+
+                    ctx.clearRect(
+                        0,
+                        0,
+                        width,
+                        height,
+                    );
+
+                    return;
+                }
+
+                restartAnimation();
+            };
+
+        resize();
+
+        window.addEventListener(
+            "resize",
+            resize,
+            {
+                passive: true,
+            },
+        );
+
+        window.addEventListener(
+            "mousemove",
+            handleMouseMove,
+            {
+                passive: true,
+            },
+        );
+
+        window.addEventListener(
+            "mouseleave",
+            handleMouseLeave,
+        );
+
+        document.addEventListener(
+            "visibilitychange",
+            handleVisibilityChange,
+        );
+
+        prefersReducedMotion.addEventListener(
+            "change",
+            handleReducedMotionChange,
+        );
+
+        /*
+         * Start immediately.
+         *
+         * The previous implementation relied on an
+         * IntersectionObserver for a fixed-position canvas.
+         * That is unnecessary and can make initialization
+         * dependent on intersection behavior.
+         */
+        restartAnimation();
+
+        window.addEventListener(
+            "beforeunload",
+            () => {
+                stopAnimation();
+
+                window.removeEventListener(
+                    "resize",
+                    resize,
+                );
+
+                window.removeEventListener(
+                    "mousemove",
+                    handleMouseMove,
+                );
+
+                window.removeEventListener(
+                    "mouseleave",
+                    handleMouseLeave,
+                );
+
+                document.removeEventListener(
+                    "visibilitychange",
+                    handleVisibilityChange,
+                );
+
+                prefersReducedMotion.removeEventListener(
+                    "change",
+                    handleReducedMotionChange,
+                );
+            },
+            {
+                once: true,
+            },
+        );
+    })();
 </script>
