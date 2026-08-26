@@ -28,10 +28,13 @@ type PopulatedExperienceReference = {
     toString(): string;
 };
 
+type ProjectObjectId = {
+    toString(): string;
+    getTimestamp?: () => Date;
+};
+
 type ProjectPersistenceModel = {
-    _id?: {
-        toString(): string;
-    };
+    _id?: ProjectObjectId;
 
     id?: string;
 
@@ -63,17 +66,46 @@ type ProjectPersistenceModel = {
     updatedAt?: Date;
 };
 
-function requireDate(
-    value: Date | undefined,
-    fieldName: string,
+/**
+ * Resolves a project timestamp.
+ *
+ * Normal documents use the Mongoose timestamp directly.
+ * Legacy documents created before timestamps were enabled can
+ * derive their creation time from the MongoDB ObjectId.
+ */
+function resolveCreatedAt(
+    project: ProjectPersistenceModel,
 ): Date {
-    if (!value) {
-        throw new Error(
-            `Project document is missing ${fieldName}.`,
-        );
+    if (project.createdAt) {
+        return project.createdAt;
     }
 
-    return value;
+    const objectIdTimestamp =
+        project._id?.getTimestamp?.();
+
+    if (objectIdTimestamp) {
+        return objectIdTimestamp;
+    }
+
+    throw new Error(
+        'Project document is missing createdAt.',
+    );
+}
+
+/**
+ * Resolves updatedAt.
+ *
+ * Legacy documents without updatedAt use their resolved
+ * createdAt as a safe historical fallback.
+ */
+function resolveUpdatedAt(
+    project: ProjectPersistenceModel,
+    createdAt: Date,
+): Date {
+    return (
+        project.updatedAt ??
+        createdAt
+    );
 }
 
 export class ProjectService {
@@ -134,6 +166,15 @@ export class ProjectService {
             );
         }
 
+        const createdAt =
+            resolveCreatedAt(project);
+
+        const updatedAt =
+            resolveUpdatedAt(
+                project,
+                createdAt,
+            );
+
         return {
             id,
 
@@ -168,17 +209,9 @@ export class ProjectService {
 
             experienceImage,
 
-            createdAt:
-                requireDate(
-                    project.createdAt,
-                    'createdAt',
-                ),
+            createdAt,
 
-            updatedAt:
-                requireDate(
-                    project.updatedAt,
-                    'updatedAt',
-                ),
+            updatedAt,
         };
     }
 
@@ -188,9 +221,7 @@ export class ProjectService {
     async getAllProjects(
         page: number = 1,
         limit: number = 10,
-    ): Promise<
-        ProjectResponse[]
-    > {
+    ): Promise<ProjectResponse[]> {
         const projects =
             await this.repository.findAll(
                 page,

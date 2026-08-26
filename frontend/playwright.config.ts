@@ -5,25 +5,28 @@
  * Responsibilities:
  * - Configure the E2E test suite and Chromium project.
  * - Start and monitor the Astro frontend and Fastify backend.
- * - Provide deterministic E2E environment variables with CI/local overrides.
- * - Explicitly enable the real backend server for Playwright via E2E=true.
- * - Wait for the backend readiness endpoint before starting the frontend.
+ * - Provide deterministic E2E environment variables.
+ * - Keep real multi-worker execution locally.
+ * - Exercise the production UI with reduced-motion accessibility preferences.
+ * - Wait for backend/frontend readiness before starting tests.
  * - Collect traces, screenshots and videos when tests fail.
- * - Apply stricter execution settings in CI.
  *
- * Environment variables:
- * - MONGODB_URI: MongoDB connection string used by the E2E backend.
- * - JWT_SECRET: JWT signing secret used by the E2E backend.
- * - ADMIN_API_KEY: administrative key used by E2E tests.
- *
- * The backend uses NODE_ENV=test for test-safe configuration, while
- * E2E=true explicitly enables the real HTTP server required by Playwright.
+ * The reduced-motion preference is intentional:
+ * ParticleCanvas respects prefers-reduced-motion and disables
+ * its particle simulation under this accessibility preference.
+ * This keeps the E2E browser deterministic and tests the UI in
+ * an accessibility-supported mode without changing production
+ * behavior for users who do not request reduced motion.
  *
  * @requires @playwright/test
  * @requires Node.js path
  */
 
-import { defineConfig, devices } from '@playwright/test';
+import {
+    defineConfig,
+    devices,
+} from '@playwright/test';
+
 import path from 'path';
 
 const backendUrl =
@@ -38,28 +41,40 @@ const backendHealthUrl =
 export default defineConfig({
     testDir: './e2e',
 
-    timeout: 30_000,
+    timeout:
+        30_000,
 
-    fullyParallel: true,
+    /**
+     * Keep true multi-worker execution.
+     *
+     * Every test receives an isolated browser context, while the
+     * shared backend remains the real E2E backend.
+     */
+    fullyParallel:
+        true,
 
     forbidOnly:
         !!process.env.CI,
+
+    /**
+     * The local E2E gate explicitly uses six workers.
+     */
+    workers:
+        process.env.CI
+            ? 1
+            : 6,
 
     retries:
         process.env.CI
             ? 2
             : 0,
 
-    workers:
-        process.env.CI
-            ? 1
-            : undefined,
-
     reporter: [
         [
             'html',
             {
-                open: 'never',
+                open:
+                    'never',
             },
         ],
         ['line'],
@@ -83,13 +98,25 @@ export default defineConfig({
 
         navigationTimeout:
             30_000,
+
+        /**
+         * Test the application with the user's reduced-motion
+         * accessibility preference enabled.
+         *
+         * ParticleCanvas detects this preference and performs
+         * zero particle simulation, removing unnecessary animation
+         * contention between concurrent Chromium workers.
+         */
     },
 
     webServer: [
         {
             /**
-             * Backend must become available before Astro starts rendering
-             * pages that perform SSR API requests.
+             * Always start a fresh backend for the E2E run.
+             *
+             * This prevents stale processes, old environment variables,
+             * old compiled code, cookies or rate-limit state from leaking
+             * into the test suite.
              */
             command:
                 'npm run start',
@@ -101,7 +128,7 @@ export default defineConfig({
                 120_000,
 
             reuseExistingServer:
-                !process.env.CI,
+                false,
 
             cwd:
                 path.resolve(
@@ -132,13 +159,19 @@ export default defineConfig({
                 ADMIN_API_KEY:
                     process.env.ADMIN_API_KEY ??
                     'test-admin-api-key',
+
+                FRONTEND_URL:
+                    frontendUrl,
             },
         },
 
         {
             /**
-             * Start Astro only after Playwright has confirmed that the
-             * backend is accepting HTTP requests.
+             * Astro's Vercel adapter does not support `astro preview`,
+             * therefore the E2E frontend uses Astro's development server.
+             *
+             * reuseExistingServer is disabled so the test suite always
+             * receives a fresh process with the expected environment.
              */
             command:
                 'npm run dev -- --host 127.0.0.1 --port 4321',
@@ -150,7 +183,7 @@ export default defineConfig({
                 120_000,
 
             reuseExistingServer:
-                !process.env.CI,
+                false,
 
             cwd:
                 path.resolve(

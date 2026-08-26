@@ -375,34 +375,28 @@ describe(
         );
 
         it(
-            'throws when createdAt is missing',
+            'derives createdAt from legacy MongoDB ObjectId',
             async () => {
-                const project =
-                    createProject({
-                        createdAt:
-                            undefined,
-                    });
-
-                repository.findById
-                    .mockResolvedValue(
-                        project,
+                const legacyDate =
+                    new Date(
+                        '2026-01-01T00:00:00.000Z',
                     );
 
-                await expect(
-                    service.getProjectById(
-                        'project-1',
-                    ),
-                ).rejects.toThrow(
-                    'Project document is missing createdAt.',
-                );
-            },
-        );
-
-        it(
-            'throws when updatedAt is missing',
-            async () => {
                 const project =
                     createProject({
+                        _id: {
+                            toString:
+                                () =>
+                                    'project-legacy',
+
+                            getTimestamp:
+                                () =>
+                                    legacyDate,
+                        },
+
+                        createdAt:
+                            undefined,
+
                         updatedAt:
                             undefined,
                     });
@@ -412,12 +406,77 @@ describe(
                         project,
                     );
 
-                await expect(
-                    service.getProjectById(
-                        'project-1',
-                    ),
-                ).rejects.toThrow(
-                    'Project document is missing updatedAt.',
+                const result =
+                    await service.getProjectById(
+                        'project-legacy',
+                    );
+
+                expect(
+                    result.createdAt,
+                ).toEqual(
+                    legacyDate,
+                );
+
+                expect(
+                    result.updatedAt,
+                ).toEqual(
+                    legacyDate,
+                );
+            },
+        );
+
+        it(
+            'keeps explicit updatedAt when createdAt is legacy-derived',
+            async () => {
+                const legacyCreatedAt =
+                    new Date(
+                        '2026-01-01T00:00:00.000Z',
+                    );
+
+                const explicitUpdatedAt =
+                    new Date(
+                        '2026-02-01T00:00:00.000Z',
+                    );
+
+                const project =
+                    createProject({
+                        _id: {
+                            toString:
+                                () =>
+                                    'project-legacy',
+
+                            getTimestamp:
+                                () =>
+                                    legacyCreatedAt,
+                        },
+
+                        createdAt:
+                            undefined,
+
+                        updatedAt:
+                            explicitUpdatedAt,
+                    });
+
+                repository.findById
+                    .mockResolvedValue(
+                        project,
+                    );
+
+                const result =
+                    await service.getProjectById(
+                        'project-legacy',
+                    );
+
+                expect(
+                    result.createdAt,
+                ).toEqual(
+                    legacyCreatedAt,
+                );
+
+                expect(
+                    result.updatedAt,
+                ).toEqual(
+                    explicitUpdatedAt,
                 );
             },
         );
@@ -476,6 +535,7 @@ describe(
                     createProject({
                         _id:
                             'new-project',
+
                         titolo:
                             'New Project',
                     });
@@ -546,6 +606,7 @@ describe(
                     createProject({
                         _id:
                             'updated-project',
+
                         titolo:
                             'Updated',
                     });

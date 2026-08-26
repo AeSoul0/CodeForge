@@ -1,13 +1,6 @@
 /**
  * @file frontend/e2e/auth.spec.ts
  * @description End-to-end authentication and authorization tests.
- *
- * Covered flows:
- * - invalid administrator credentials are rejected;
- * - unauthenticated access to the dashboard is rejected;
- * - valid administrator login succeeds;
- * - authenticated administrators can access dashboard content;
- * - logout clears the authenticated session.
  */
 
 import {
@@ -24,33 +17,70 @@ const ADMIN_PASSWORD =
     process.env.ADMIN_API_KEY ??
     'test-admin-api-key';
 
-/**
- * Authenticate an administrator through the real login UI.
- */
-async function login(
+const usernameInput =
+    'input[name="username"]';
+
+const passwordInput =
+    'input[name="password"]';
+
+async function openLoginPage(
     page: Page,
 ): Promise<void> {
     await page.goto(
         '/admin/login',
+        {
+            waitUntil:
+                'domcontentloaded',
+        },
+    );
+
+    await expect(
+        page.locator(
+            '#loginForm',
+        ),
+    ).toBeVisible();
+
+    await expect(
+        page.locator(
+            usernameInput,
+        ),
+    ).toBeEditable();
+
+    await expect(
+        page.locator(
+            passwordInput,
+        ),
+    ).toBeEditable();
+}
+
+async function login(
+    page: Page,
+): Promise<void> {
+    await openLoginPage(
+        page,
     );
 
     await page.fill(
-        'input[name="username"]',
+        usernameInput,
         ADMIN_USERNAME,
     );
 
     await page.fill(
-        'input[name="password"]',
+        passwordInput,
         ADMIN_PASSWORD,
     );
 
     const loginResponsePromise =
         page.waitForResponse(
             (response) =>
-                response.url().includes(
-                    '/api/auth/login',
-                ) &&
-                response.request().method() ===
+                response
+                    .url()
+                    .includes(
+                        '/api/auth/login',
+                    ) &&
+                response
+                    .request()
+                    .method() ===
                     'POST',
         );
 
@@ -65,10 +95,12 @@ async function login(
         loginResponse.status(),
     ).toBe(200);
 
-    await expect(
-        page,
-    ).toHaveURL(
-        /\/admin\/dashboard/,
+    await page.waitForURL(
+        /\/admin\/dashboard$/,
+        {
+            waitUntil:
+                'domcontentloaded',
+        },
     );
 }
 
@@ -78,27 +110,31 @@ test.describe(
         test(
             'invalid login fails and remains on login page',
             async ({ page }) => {
-                await page.goto(
-                    '/admin/login',
+                await openLoginPage(
+                    page,
                 );
 
                 await page.fill(
-                    'input[name="username"]',
+                    usernameInput,
                     ADMIN_USERNAME,
                 );
 
                 await page.fill(
-                    'input[name="password"]',
+                    passwordInput,
                     'wrong-password',
                 );
 
-                const loginResponsePromise =
+                const responsePromise =
                     page.waitForResponse(
                         (response) =>
-                            response.url().includes(
-                                '/api/auth/login',
-                            ) &&
-                            response.request().method() ===
+                            response
+                                .url()
+                                .includes(
+                                    '/api/auth/login',
+                                ) &&
+                            response
+                                .request()
+                                .method() ===
                                 'POST',
                     );
 
@@ -106,11 +142,11 @@ test.describe(
                     'button[type="submit"]',
                 );
 
-                const loginResponse =
-                    await loginResponsePromise;
+                const response =
+                    await responsePromise;
 
                 expect(
-                    loginResponse.status(),
+                    response.status(),
                 ).toBe(401);
 
                 await expect(
@@ -134,12 +170,24 @@ test.describe(
             async ({ page }) => {
                 await page.goto(
                     '/admin/dashboard',
+                    {
+                        waitUntil:
+                            'domcontentloaded',
+                    },
                 );
 
-                await expect(
-                    page,
-                ).toHaveURL(
-                    /\/admin\/login/,
+                await page.waitForURL(
+                    /\/admin\/login$/,
+                    {
+                        waitUntil:
+                            'domcontentloaded',
+                    },
+                );
+
+                expect(
+                    page.url(),
+                ).toMatch(
+                    /\/admin\/login$/,
                 );
             },
         );
@@ -147,12 +195,8 @@ test.describe(
         test(
             'valid login succeeds and redirects to dashboard',
             async ({ page }) => {
-                await login(page);
-
-                await expect(
+                await login(
                     page,
-                ).toHaveURL(
-                    /\/admin\/dashboard/,
                 );
 
                 await expect(
@@ -172,7 +216,9 @@ test.describe(
         test(
             'authenticated user can access protected dashboard content',
             async ({ page }) => {
-                await login(page);
+                await login(
+                    page,
+                );
 
                 await expect(
                     page.getByRole(
@@ -215,7 +261,9 @@ test.describe(
         test(
             'logout ends the authenticated session',
             async ({ page }) => {
-                await login(page);
+                await login(
+                    page,
+                );
 
                 const logoutButton =
                     page.getByRole(
@@ -233,10 +281,14 @@ test.describe(
                 const logoutResponsePromise =
                     page.waitForResponse(
                         (response) =>
-                            response.url().includes(
-                                '/api/auth/logout',
-                            ) &&
-                            response.request().method() ===
+                            response
+                                .url()
+                                .includes(
+                                    '/api/auth/logout',
+                                ) &&
+                            response
+                                .request()
+                                .method() ===
                                 'POST',
                     );
 
@@ -249,10 +301,12 @@ test.describe(
                     logoutResponse.status(),
                 ).toBe(200);
 
-                await expect(
-                    page,
-                ).toHaveURL(
-                    /\/admin\/login/,
+                await page.waitForURL(
+                    /\/admin\/login$/,
+                    {
+                        waitUntil:
+                            'domcontentloaded',
+                    },
                 );
             },
         );
