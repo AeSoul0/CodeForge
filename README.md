@@ -36,11 +36,11 @@ count alone.
 | Playwright workers | ✅ 6 |
 | Frontend dependency audit | ✅ 0 vulnerabilities |
 | Backend dependency audit | ✅ 0 vulnerabilities |
-| Lighthouse Performance | ✅ 96/100 |
+| Lighthouse Performance | ✅ 93/100 |
 | Lighthouse Accessibility | ✅ 100/100 |
-| Lighthouse Best Practices | ✅ 96/100 |
+| Lighthouse Best Practices | ✅ 100/100 |
 | Lighthouse SEO | ✅ 100/100 |
-| Lighthouse LCP | ✅ 2.2s |
+| Lighthouse LCP | ✅ 1.8s |
 | Lighthouse CLS | ✅ 0 |
 
 > The metrics above represent the latest verified local and production
@@ -743,9 +743,9 @@ The strongest current measured results are:
 
 0 dependency vulnerabilities
 
-Lighthouse Performance 96
+Lighthouse Performance 93
 Lighthouse Accessibility 100
-Lighthouse Best Practices 96
+Lighthouse Best Practices 100
 Lighthouse SEO 100
 
 LCP 2.2s
