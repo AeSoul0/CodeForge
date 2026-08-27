@@ -86,7 +86,7 @@ This scorecard intentionally distinguishes verified evidence from pending eviden
 | Lighthouse CLS               |                 **0** |             < 0.1 | ✅ PASS              |
 | Lighthouse TTFB              |            **770 ms** |           Improve | ⚠️ IMPROVEMENT AREA |
 | Lighthouse INP               |          Not reported |     Wait for CrUX | ⚠️ NO DATA          |
-| Mobile Lighthouse            |             **84/100**|          Required | ✅ PASS             |
+| Mobile Lighthouse            |             **90/100**|          Required | ✅ PASS             |
 | GitHub Actions full workflow |         Fully green |          Required | ✅ PASS             |
 
 ---
@@ -762,7 +762,7 @@ Status: ✅ Strong automated evidence
 | CLS                       |                             0 | ✅      |
 | TTFB                      |                        770 ms | ⚠️     |
 | INP                       |                  Not reported | ⚠️     |
-| Mobile Lighthouse         |                    84/100     | ✅     |
+| Mobile Lighthouse         |                    90/100     | ✅     |
 | GitHub Actions            |                   Fully green | ✅     |
 
 ---
