@@ -825,8 +825,8 @@ Status: ✅ Strong automated evidence
 * [x] Accessibility >= 90
 * [x] Best Practices >= 90
 * [x] SEO >= 90
-* [ ] INP measurement
-* [ ] Mobile Lighthouse
+* [ ] INP measurement (Pending CrUX data)
+* [x] Mobile Lighthouse
 
 ## CI/CD
 

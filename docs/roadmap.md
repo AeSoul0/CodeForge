@@ -733,8 +733,8 @@ Status:
 * [x] SEO >= 90
 * [x] LCP measured
 * [x] CLS measured
-* [ ] INP measured
-* [ ] Mobile Lighthouse measured
+* [ ] INP measured (Pending CrUX data)
+* [x] Mobile Lighthouse measured
 
 ## Target
 
@@ -1049,8 +1049,8 @@ Status:
 * [x] LCP 2.2s
 * [x] CLS 0
 * [x] ISR
-* [ ] INP
-* [ ] Mobile Lighthouse
+* [ ] INP (Pending CrUX data)
+* [x] Mobile Lighthouse
 
 ## CI/CD
 
@@ -1138,8 +1138,8 @@ The 90/100 roadmap is considered fully closed when:
 * [x] API documentation is available.
 * [x] Deployment documentation is available.
 * [x] GitHub Actions full workflow passes.
-* [ ] INP evidence recorded.
-* [ ] Mobile Lighthouse evidence recorded.
+* [ ] INP evidence recorded (Pending CrUX data)
+* [x] Mobile Lighthouse evidence recorded.
 
 ---
 

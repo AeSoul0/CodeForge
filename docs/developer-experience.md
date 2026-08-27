@@ -633,7 +633,7 @@ Verified by quality gates
 
 * [x] Fully green remote GitHub Actions validation
 * [x] Final mobile Lighthouse evidence
-* [ ] Final INP evidence
+* [ ] Final INP evidence (Pending CrUX data)
 
 ---
 

@@ -541,7 +541,11 @@ const isE2E =
                             restartAnimation();
                         };
 
-                    resize();
+                    if ('requestIdleCallback' in window) {
+                        window.requestIdleCallback(resize);
+                    } else {
+                        setTimeout(resize, 200);
+                    }
 
                     window.addEventListener(
                         "resize",

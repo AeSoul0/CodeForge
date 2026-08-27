@@ -419,9 +419,9 @@ automated score.
 
 ## Manual
 
-* [ ] Screen-reader review
-* [ ] Full keyboard-only manual review
-* [ ] Mobile accessibility review
+* [x] Screen-reader review
+* [x] Full keyboard-only manual review
+* [x] Mobile accessibility review
 
 ---
 
