@@ -308,3 +308,8 @@ lighthouse-report/
 .playwright-results
 
 .playwright-results/index.html
+
+# Lighthouse reports
+frontend/lh-report*.json
+# oppure per ignorarli ovunque
+*lh-report*.json
