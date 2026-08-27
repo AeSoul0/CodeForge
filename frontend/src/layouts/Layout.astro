@@ -886,11 +886,12 @@ const ogImageUrl = new URL(
                                     "fade-out",
                                 );
 
+                                // Wait for the 600ms CSS transition to finish before removing from DOM
                                 window.setTimeout(
                                     () => {
                                         loader.remove();
                                     },
-                                    320,
+                                    650,
                                 );
                             },
                             remainingTime,

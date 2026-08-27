@@ -1,6 +1,7 @@
 /**
  * @file frontend/src/styles/global.css
  * @description Global CodeForge visual system and accessibility utilities.
+ * Cache buster: 1
  */
 
 @import "tailwindcss";
