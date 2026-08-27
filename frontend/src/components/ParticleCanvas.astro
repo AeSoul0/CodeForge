@@ -74,6 +74,15 @@ const isE2E =
                                 return 0;
                             }
 
+                            const isSlowDevice = 
+                                (navigator.deviceMemory && navigator.deviceMemory < 4) ||
+                                (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) ||
+                                (navigator.connection && (navigator.connection.saveData || navigator.connection.effectiveType === '2g' || navigator.connection.effectiveType === '3g'));
+
+                            if (isSlowDevice) {
+                                return 0;
+                            }
+
                             const viewportWidth =
                                 window.innerWidth;
 
@@ -541,11 +550,7 @@ const isE2E =
                             restartAnimation();
                         };
 
-                    if ('requestIdleCallback' in window) {
-                        window.requestIdleCallback(resize);
-                    } else {
-                        setTimeout(resize, 200);
-                    }
+                    resize();
 
                     window.addEventListener(
                         "resize",
