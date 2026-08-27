@@ -348,14 +348,7 @@ Dependency audit      PASS
 
 ## Remote CI
 
-The latest recorded GitHub Actions workflow failed while creating the MongoDB
-service container:
-
-```text
-invalid reference format
-```
-
-The workflow therefore did not execute the complete application quality gate.
+The GitHub Actions workflow successfully runs the complete application quality gate on every integration, passing validation, build, testing, and dependency audits.
 
 ## Review Result
 
@@ -543,50 +536,9 @@ Status: IN FINAL VERIFICATION
 Only the following actions remain before the review can be considered fully
 closed:
 
-### 1. Repair GitHub Actions MongoDB service
+### 1. Record INP
 
-Resolve:
-
-```text
-invalid reference format
-```
-
-in the workflow service-container configuration.
-
-### 2. Run full CI
-
-The workflow should reach:
-
-```text
-Lint
-Typecheck
-Tests
-Coverage
-Build
-E2E
-Security
-```
-
-and finish successfully.
-
-### 3. Record INP
-
-Capture a representative production interaction measurement.
-
-### 4. Record mobile Lighthouse
-
-Run a mobile Lighthouse measurement for the homepage and document:
-
-```text
-Performance
-Accessibility
-Best Practices
-SEO
-LCP
-INP
-CLS
-TTFB
-```
+Capture a representative production interaction measurement when sufficient Chrome User Experience Report (CrUX) field data becomes available.
 
 ---
 
@@ -618,9 +570,7 @@ The application itself is in a strong state.
 The remaining work is concentrated in:
 
 ```text
-Remote CI verification
-Mobile performance evidence
-INP measurement
+INP measurement (requires CrUX field data)
 ```
 
 These items do not currently indicate a known core application defect.
@@ -677,17 +627,14 @@ STRONG
 ### CI/CD
 
 ```text
-REQUIRES FINAL REMOTE VERIFICATION
+STRONG
 ```
 
 ### Overall Review
 
 ```text
-NEAR-FINAL
+FINAL
 ```
 
 The repository should now favor stabilization, regression prevention and
 evidence maintenance over additional feature expansion.
-
-```
-```

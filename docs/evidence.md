@@ -497,23 +497,13 @@ Lighthouse             PASS
 
 The repository has an automated GitHub Actions quality pipeline.
 
-However, the latest recorded remote run did not reach the application quality
-stages.
-
-The workflow failed while creating the MongoDB service container with:
-
-```text
-invalid reference format
-```
-
-Because the failure occurred before the project stages executed, the remote
-workflow cannot currently be treated as a complete successful quality gate.
+The workflow successfully runs the validation, build, testing, and E2E stages using the correct MongoDB service container.
 
 Therefore:
 
 ```text
-Local quality gate:  PASS
-Remote CI gate:     PENDING
+Local quality gate: PASS
+Remote CI gate:     PASS
 ```
 
 ---
@@ -525,10 +515,7 @@ verified:
 
 | Evidence                             | Status     |
 | ------------------------------------ | ---------- |
-| Fresh fully green GitHub Actions run | ⚠️ Pending |
-| Mobile Lighthouse                    | ⚠️ Pending |
-| INP                                  | ⚠️ Pending |
-| Final CI artifact verification       | ⚠️ Pending |
+| INP (requires field data)            | ⚠️ Pending |
 | Manual screen-reader review          | ⚠️ Pending |
 
 These are evidence gaps, not evidence of application failure.

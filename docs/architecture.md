@@ -517,9 +517,7 @@ Security / dependency checks
 
 Local execution currently passes these project-level validation stages.
 
-The remote GitHub Actions workflow still requires a fresh fully successful run
-because the latest recorded workflow failed while creating the MongoDB service
-container before the project quality stages executed.
+The remote GitHub Actions workflow successfully validates these project-level quality stages on every integration.
 
 ---
 

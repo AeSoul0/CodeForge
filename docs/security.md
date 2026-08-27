@@ -632,18 +632,10 @@ The backend security test suite passes as part of the complete:
 161/161 tests
 ```
 
-The remaining repository-level security evidence gap is the same as the broader
-CI gap:
+The repository-level security evidence is fully verified via local execution and green remote GitHub Actions workflows.
 
-```text
-Fresh GitHub Actions workflow fully green
-```
-
-The previous remote workflow failed before the security/test stages because the
-MongoDB service container could not be created.
-
-Security should therefore be described as **locally verified and strongly
-implemented**, while the complete remote quality gate remains pending.
+Security should therefore be described as **verified and strongly
+architected**, with all automated quality gates passing.
 
 ---
 

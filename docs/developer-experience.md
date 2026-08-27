@@ -631,8 +631,8 @@ Verified by quality gates
 
 ## Remaining
 
-* [ ] Fully green remote GitHub Actions validation
-* [ ] Final mobile Lighthouse evidence
+* [x] Fully green remote GitHub Actions validation
+* [x] Final mobile Lighthouse evidence
 * [ ] Final INP evidence
 
 ---

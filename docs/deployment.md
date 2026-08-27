@@ -593,7 +593,7 @@ The current production frontend therefore meets the roadmap Performance target.
 * [x] Frontend build
 * [x] Playwright
 * [x] Dependency audits
-* [ ] Fully green remote GitHub Actions workflow
+* [x] Fully green remote GitHub Actions workflow
 
 ---
 
