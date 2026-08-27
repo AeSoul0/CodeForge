@@ -765,11 +765,9 @@ complete.
 
 The remaining items are primarily evidence and infrastructure verification:
 
-1. Repair the GitHub Actions MongoDB service-container failure.
-2. Obtain a fully green remote CI workflow.
-3. Record a production INP measurement.
-4. Record mobile Lighthouse results.
-5. Keep engineering evidence synchronized with future releases.
+1. Obtain a fully green remote CI workflow (pending push).
+2. Record a production INP measurement (requires sufficient real-user field data).
+3. Keep engineering evidence synchronized with future releases.
 
 No broad feature expansion is required to address these items.
 

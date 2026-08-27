@@ -1117,10 +1117,8 @@ Only a small number of evidence items remain before the review can be treated
 as fully closed:
 
 ```text
-1. Repair the GitHub Actions MongoDB service-container failure.
-2. Obtain a fully green remote CI run.
-3. Record INP.
-4. Record mobile Lighthouse results.
+1. Obtain a fully green remote CI run (pending push).
+2. Record INP (requires sufficient real-user field data).
 ```
 
 These remaining items are primarily evidence and infrastructure validation,

@@ -153,7 +153,7 @@ export default defineConfig({
              * Run the Astro SSR frontend used by E2E.
              */
             command:
-                'npm run dev -- --host 0.0.0.0 --port 4321',
+                'npm run dev -- --port 4321',
 
             url:
                 frontendUrl,
