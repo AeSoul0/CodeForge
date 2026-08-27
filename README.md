@@ -1,5 +1,12 @@
 # CodeForge
 
+[![GitHub](https://img.shields.io/badge/GitHub-AeSoul0%2FCodeForge-181717?logo=github)](https://github.com/AeSoul0/CodeForge)
+[![Backend](https://img.shields.io/badge/backend-Fastify-000000?logo=fastify)](https://fastify.dev/)
+[![Frontend](https://img.shields.io/badge/frontend-Astro-FF5D01?logo=astro)](https://astro.build/)
+[![Node.js](https://img.shields.io/badge/Node.js-24.x-339933?logo=nodedotjs)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker)](https://www.docker.com/)
+
 A production-oriented full-stack portfolio and administrative platform built
 to demonstrate modern software engineering practices across architecture,
 security, testing, accessibility and performance.
