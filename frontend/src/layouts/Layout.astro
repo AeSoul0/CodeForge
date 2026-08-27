@@ -1184,6 +1184,40 @@ const ogImageUrl = new URL(
                     initSectionHashObserver();
                 }
             })();
+            
+            // Scroll Reveal Observer
+            (() => {
+                const initScrollReveal = () => {
+                    const observerOptions = {
+                        root: null,
+                        rootMargin: "0px 0px -10% 0px",
+                        threshold: 0
+                    };
+
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add('is-revealed');
+                            } else {
+                                // "quando si scende e si sale" - remove class when out of view
+                                const rect = entry.boundingClientRect;
+                                // Only remove if it went out of view from the bottom (scrolling up)
+                                // or top (scrolling down). Removing it universally makes it re-trigger nicely.
+                                entry.target.classList.remove('is-revealed');
+                            }
+                        });
+                    }, observerOptions);
+
+                    const revealElements = document.querySelectorAll('.reveal-up, .reveal-scale');
+                    revealElements.forEach(el => observer.observe(el));
+                };
+
+                if (document.readyState === "loading") {
+                    document.addEventListener("DOMContentLoaded", initScrollReveal, { once: true });
+                } else {
+                    initScrollReveal();
+                }
+            })();
         </script>
     </body>
 </html>
