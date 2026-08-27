@@ -46,9 +46,9 @@ Playwright workers:     6
 Frontend audit:         0 vulnerabilities
 Backend audit:          0 vulnerabilities
 
-Lighthouse Performance:    96/100
+Lighthouse Performance:    93/100
 Lighthouse Accessibility: 100/100
-Lighthouse Best Practices: 96/100
+Lighthouse Best Practices: 100/100
 Lighthouse SEO:            100/100
 
 LCP: 2.2s
@@ -284,9 +284,9 @@ Manual accessibility review remains a future evidence item.
 ## Lighthouse
 
 ```text
-Performance:    96/100
+Performance:    93/100
 Accessibility: 100/100
-Best Practices: 96/100
+Best Practices: 100/100
 SEO:            100/100
 ```
 
@@ -426,9 +426,9 @@ PASS
 | E2E            | 12/12 with 6 workers            | ✅      |
 | Security       | 0 local vulnerabilities         | ✅      |
 | Accessibility  | Lighthouse 100                  | ✅      |
-| Performance    | Lighthouse 96                   | ✅      |
+| Performance    | Lighthouse 93                   | ✅      |
 | SEO            | Lighthouse 100                  | ✅      |
-| Best Practices | Lighthouse 96                   | ✅      |
+| Best Practices | Lighthouse 100                   | ✅      |
 | Documentation  | Complete core docs              | ✅      |
 | Remote CI      | Workflow infrastructure failure | ⚠️     |
 
@@ -496,7 +496,7 @@ Status: COMPLETE FOR CURRENT DESKTOP TARGET
 Lighthouse:
 
 ```text
-96/100
+93/100
 ```
 
 ## Milestone 6 — CI/CD

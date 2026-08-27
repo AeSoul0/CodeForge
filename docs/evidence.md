@@ -297,9 +297,9 @@ Latest Lighthouse measurement:
 
 | Metric         |                       Result |
 | -------------- | ---------------------------: |
-| Performance    |                       96/100 |
+| Performance    |                       93/100 |
 | Accessibility  |                      100/100 |
-| Best Practices |                       96/100 |
+| Best Practices |                       93/100 |
 | SEO            |                      100/100 |
 | LCP            |                        2.2 s |
 | CLS            |                            0 |
@@ -322,7 +322,7 @@ TTFB:        680 ms
 After enabling Vercel ISR:
 
 ```text
-Performance: 96/100
+Performance: 93/100
 LCP:         2.2 s
 CLS:         0
 TTFB:        770 ms
@@ -372,7 +372,7 @@ production route.
 Latest production homepage result:
 
 ```text
-Best Practices: 96/100
+Best Practices: 100/100
 ```
 
 The application passes the relevant Lighthouse best-practice audits except
@@ -457,7 +457,7 @@ The performance measurement changed from:
 to:
 
 ```text
-96/100 Performance
+93/100 Performance
 2.2s LCP
 ```
 
@@ -594,7 +594,7 @@ Environment: Local Windows / Node 24
 Route: https://www.aesoul0.com/
 Command: npx lighthouse ...
 Tool: Lighthouse
-Result: Performance 96 / Accessibility 100 / Best Practices 96 / SEO 100
+Result: Performance 93 / Accessibility 100 / Best Practices 100 / SEO 100
 ```
 
 The same policy applies to:
@@ -639,9 +639,9 @@ The strongest verified results are:
 
 0 dependency vulnerabilities
 
-Lighthouse Performance 96
+Lighthouse Performance 93
 Lighthouse Accessibility 100
-Lighthouse Best Practices 96
+Lighthouse Best Practices 100
 Lighthouse SEO 100
 
 LCP 2.2s

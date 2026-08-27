@@ -78,9 +78,9 @@ This scorecard intentionally distinguishes verified evidence from pending eviden
 | Playwright concurrency       |         **6 workers** |         6 workers | ✅ PASS              |
 | Frontend audit               | **0 vulnerabilities** |  No High/Critical | ✅ PASS              |
 | Backend audit                | **0 vulnerabilities** |  No High/Critical | ✅ PASS              |
-| Lighthouse Performance       |            **96/100** |              ≥ 90 | ✅ PASS              |
+| Lighthouse Performance       |            **93/100** |              ≥ 90 | ✅ PASS              |
 | Lighthouse Accessibility     |           **100/100** |              ≥ 90 | ✅ PASS              |
-| Lighthouse Best Practices    |            **96/100** |              ≥ 90 | ✅ PASS              |
+| Lighthouse Best Practices    |           **100/100** |              ≥ 90 | ✅ PASS              |
 | Lighthouse SEO               |           **100/100** |              ≥ 90 | ✅ PASS              |
 | Lighthouse LCP               |             **2.2 s** |           Improve | ✅ PASS              |
 | Lighthouse CLS               |                 **0** |             < 0.1 | ✅ PASS              |
@@ -517,9 +517,9 @@ Status: ⚠️ Pending final remote verification
 Latest measured production result:
 
 ```text
-Performance:    96/100
+Performance:    93/100
 Accessibility: 100/100
-Best Practices: 96/100
+Best Practices: 100/100
 SEO:            100/100
 ```
 
@@ -545,7 +545,7 @@ CLS:         0
 After introducing Vercel ISR:
 
 ```text
-Performance: 96/100
+Performance: 93/100
 LCP:         2.2 s
 CLS:         0
 ```
@@ -884,9 +884,9 @@ The strongest verified quantitative results are:
 
 0 dependency vulnerabilities
 
-Lighthouse Performance 96
+Lighthouse Performance 93
 Lighthouse Accessibility 100
-Lighthouse Best Practices 96
+Lighthouse Best Practices 100
 Lighthouse SEO 100
 
 LCP 2.2s

@@ -125,7 +125,7 @@ The homepage Lighthouse Performance score improved from:
 to:
 
 ```text
-96/100
+93/100
 ```
 
 and the captured LCP improved from:
@@ -581,9 +581,9 @@ Current mechanisms include:
 Latest production homepage measurement:
 
 ```text
-Performance:    96/100
+Performance:    93/100
 Accessibility: 100/100
-Best Practices: 96/100
+Best Practices: 100/100
 SEO:            100/100
 LCP:             2.2s
 CLS:             0

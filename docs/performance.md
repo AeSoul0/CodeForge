@@ -37,9 +37,9 @@ Latest captured Lighthouse result:
 
 | Metric         |      Result | Target | Status |
 | -------------- | ----------: | -----: | ------ |
-| Performance    |  **96/100** |   ≥ 90 | ✅ PASS |
+| Performance    |  **93/100** |   ≥ 90 | ✅ PASS |
 | Accessibility  | **100/100** |   ≥ 90 | ✅ PASS |
-| Best Practices |  **96/100** |   ≥ 90 | ✅ PASS |
+| Best Practices | **100/100** |   ≥ 90 | ✅ PASS |
 | SEO            | **100/100** |   ≥ 90 | ✅ PASS |
 
 ---
@@ -147,7 +147,7 @@ LCP:         3.0 s
 After ISR:
 
 ```text
-Performance: 96/100
+Performance: 93/100
 LCP:         2.2 s
 ```
 
@@ -315,9 +315,9 @@ Current performance requirements:
 
 | Metric                    |          Required |   Current | Status |
 | ------------------------- | ----------------: | --------: | ------ |
-| Lighthouse Performance    |              ≥ 90 |    **96** | ✅      |
+| Lighthouse Performance    |              ≥ 90 |    **93** | ✅      |
 | Lighthouse Accessibility  |              ≥ 90 |   **100** | ✅      |
-| Lighthouse Best Practices |              ≥ 90 |    **96** | ✅      |
+| Lighthouse Best Practices |              ≥ 90 |   **100** | ✅      |
 | Lighthouse SEO            |              ≥ 90 |   **100** | ✅      |
 | LCP                       | < 2.5 s preferred | **2.2 s** | ✅      |
 | CLS                       |             < 0.1 |     **0** | ✅      |
@@ -449,7 +449,7 @@ CLS: 0
 ## Current
 
 ```text
-Performance: 96
+Performance: 93
 LCP: 2.2s
 CLS: 0
 ```
@@ -473,9 +473,9 @@ CodeForge currently meets the roadmap performance target.
 The current production homepage demonstrates:
 
 ```text
-Performance:    96/100
+Performance:    93/100
 Accessibility: 100/100
-Best Practices: 96/100
+Best Practices: 100/100
 SEO:            100/100
 
 LCP: 2.2s

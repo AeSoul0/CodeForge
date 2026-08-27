@@ -656,9 +656,9 @@ Move Performance toward 9.0 with measurable evidence.
 Latest homepage:
 
 ```text
-Performance:    96/100
+Performance:    93/100
 Accessibility: 100/100
-Best Practices: 96/100
+Best Practices: 100/100
 SEO:            100/100
 ```
 
@@ -1045,7 +1045,7 @@ Status:
 
 ## Performance
 
-* [x] Lighthouse Performance 96
+* [x] Lighthouse Performance 93
 * [x] LCP 2.2s
 * [x] CLS 0
 * [x] ISR
@@ -1092,9 +1092,9 @@ The strongest verified evidence is:
 
 0 dependency vulnerabilities
 
-Lighthouse Performance 96
+Lighthouse Performance 93
 Lighthouse Accessibility 100
-Lighthouse Best Practices 96
+Lighthouse Best Practices 100
 Lighthouse SEO 100
 
 LCP 2.2s

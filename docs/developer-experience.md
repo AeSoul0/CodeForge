@@ -551,7 +551,7 @@ rather than introducing optimization complexity without measurement.
 The current production performance evidence is:
 
 ```text
-Performance: 96/100
+Performance: 93/100
 LCP:         2.2s
 CLS:         0
 ```

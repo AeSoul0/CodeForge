@@ -583,7 +583,7 @@ LCP: 3.0s
 After ISR:
 
 ```text
-Performance: 96
+Performance: 93
 LCP: 2.2s
 ```
 

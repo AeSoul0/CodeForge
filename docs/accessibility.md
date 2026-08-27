@@ -328,8 +328,8 @@ Latest production homepage:
 | Category       |      Result |
 | -------------- | ----------: |
 | Accessibility  | **100/100** |
-| Performance    |  **96/100** |
-| Best Practices |  **96/100** |
+| Performance    |  **93/100** |
+| Best Practices | **100/100** |
 | SEO            | **100/100** |
 
 The accessibility result exceeds the roadmap target:
