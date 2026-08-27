@@ -983,6 +983,7 @@ const ogImageUrl = new URL(
         </main>
 
         <script is:inline>
+            window.__LOADER_START_TIME = Date.now();
             (() => {
                 const dismissLoader =
                     () => {
@@ -1000,15 +1001,23 @@ const ogImageUrl = new URL(
                             return;
                         }
 
-                        loader.classList.add(
-                            "fade-out",
-                        );
+                        const elapsedTime = Date.now() - window.__LOADER_START_TIME;
+                        const remainingTime = Math.max(0, 800 - elapsedTime);
 
                         window.setTimeout(
                             () => {
-                                loader.remove();
+                                loader.classList.add(
+                                    "fade-out",
+                                );
+
+                                window.setTimeout(
+                                    () => {
+                                        loader.remove();
+                                    },
+                                    320,
+                                );
                             },
-                            320,
+                            remainingTime,
                         );
                     };
 
