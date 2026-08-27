@@ -87,10 +87,10 @@ The optimization produced a measurable improvement in Lighthouse:
 
 ```text
 Previous Performance: 88/100
-Current Performance:  93/100
+Current Performance: 99/100 (Desktop) / 90/100 (Mobile)
 
 Previous LCP: 3.0s
-Current LCP:  2.2s
+Current LCP: 0.4s (Desktop) / 1.6s (Mobile)
 ```
 
 ISR should therefore be considered part of the production performance
@@ -314,11 +314,11 @@ domain.
 Current homepage result:
 
 ```text
-Performance:    93/100
+Performance: 99/100 (Desktop) / 90/100 (Mobile)
 Accessibility: 100/100
 Best Practices: 100/100
 SEO:            100/100
-LCP:             2.2s
+LCP: 0.4s (Desktop) / 1.6s (Mobile)
 CLS:             0
 ```
 
@@ -545,8 +545,8 @@ LCP: 3.0s
 After:
 
 ```text
-Performance: 93
-LCP: 2.2s
+Performance: 99 (Desktop)
+LCP: 0.4s (Desktop) / 1.6s (Mobile)
 ```
 
 The current production frontend therefore meets the roadmap Performance target.
@@ -617,8 +617,8 @@ The frontend production deployment has demonstrated a measurable performance
 improvement through ISR and currently reports:
 
 ```text
-Performance: 93/100
-LCP: 2.2s
+Performance: 99/100 (Desktop) / 90/100 (Mobile)
+LCP: 0.4s (Desktop) / 1.6s (Mobile)
 CLS: 0
 ```
 

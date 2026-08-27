@@ -517,7 +517,7 @@ Status: ⚠️ Pending final remote verification
 Latest measured production result:
 
 ```text
-Performance:    93/100
+Performance: 99/100 (Desktop) / 90/100 (Mobile)
 Accessibility: 100/100
 Best Practices: 100/100
 SEO:            100/100
@@ -545,7 +545,7 @@ CLS:         0
 After introducing Vercel ISR:
 
 ```text
-Performance: 93/100
+Performance: 99/100 (Desktop) / 90/100 (Mobile)
 LCP:         2.2 s
 CLS:         0
 ```
@@ -884,12 +884,12 @@ The strongest verified quantitative results are:
 
 0 dependency vulnerabilities
 
-Lighthouse Performance 93
+Lighthouse Performance 99
 Lighthouse Accessibility 100
 Lighthouse Best Practices 100
 Lighthouse SEO 100
 
-LCP 2.2s
+LCP 0.4s
 CLS 0
 ```
 

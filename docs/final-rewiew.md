@@ -46,12 +46,12 @@ Playwright workers:     6
 Frontend audit:         0 vulnerabilities
 Backend audit:          0 vulnerabilities
 
-Lighthouse Performance:    93/100
+Lighthouse Performance: 99/100 (Desktop) / 90/100 (Mobile)
 Lighthouse Accessibility: 100/100
 Lighthouse Best Practices: 100/100
 Lighthouse SEO:            100/100
 
-LCP: 2.2s
+LCP: 0.4s (Desktop) / 1.6s (Mobile)
 CLS: 0
 ````
 
@@ -284,7 +284,7 @@ Manual accessibility review remains a future evidence item.
 ## Lighthouse
 
 ```text
-Performance:    93/100
+Performance: 99/100 (Desktop) / 90/100 (Mobile)
 Accessibility: 100/100
 Best Practices: 100/100
 SEO:            100/100
@@ -293,7 +293,7 @@ SEO:            100/100
 ## Core Metrics
 
 ```text
-LCP: 2.2s
+LCP: 0.4s (Desktop) / 1.6s (Mobile)
 CLS: 0
 TTFB: 770ms
 ```

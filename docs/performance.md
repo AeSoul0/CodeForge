@@ -147,7 +147,7 @@ LCP:         3.0 s
 After ISR:
 
 ```text
-Performance: 93/100
+Performance: 99/100 (Desktop) / 90/100 (Mobile)
 LCP:         2.2 s
 ```
 
@@ -449,8 +449,8 @@ CLS: 0
 ## Current
 
 ```text
-Performance: 93
-LCP: 2.2s
+Performance: 99 (Desktop)
+LCP: 0.4s (Desktop) / 1.6s (Mobile)
 CLS: 0
 ```
 
@@ -473,12 +473,12 @@ CodeForge currently meets the roadmap performance target.
 The current production homepage demonstrates:
 
 ```text
-Performance:    93/100
+Performance: 99/100 (Desktop) / 90/100 (Mobile)
 Accessibility: 100/100
 Best Practices: 100/100
 SEO:            100/100
 
-LCP: 2.2s
+LCP: 0.4s (Desktop) / 1.6s (Mobile)
 CLS: 0
 ```
 

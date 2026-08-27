@@ -322,7 +322,7 @@ TTFB:        680 ms
 After enabling Vercel ISR:
 
 ```text
-Performance: 93/100
+Performance: 99/100 (Desktop) / 90/100 (Mobile)
 LCP:         2.2 s
 CLS:         0
 TTFB:        770 ms
@@ -639,12 +639,12 @@ The strongest verified results are:
 
 0 dependency vulnerabilities
 
-Lighthouse Performance 93
+Lighthouse Performance 99
 Lighthouse Accessibility 100
 Lighthouse Best Practices 100
 Lighthouse SEO 100
 
-LCP 2.2s
+LCP 0.4s
 CLS 0
 ```
 

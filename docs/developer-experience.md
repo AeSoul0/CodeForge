@@ -551,8 +551,8 @@ rather than introducing optimization complexity without measurement.
 The current production performance evidence is:
 
 ```text
-Performance: 93/100
-LCP:         2.2s
+Performance: 99/100 (Desktop) / 90/100 (Mobile)
+LCP: 0.4s (Desktop) / 1.6s (Mobile)
 CLS:         0
 ```
 

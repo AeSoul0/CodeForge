@@ -581,11 +581,11 @@ Current mechanisms include:
 Latest production homepage measurement:
 
 ```text
-Performance:    93/100
+Performance: 99/100 (Desktop) / 90/100 (Mobile)
 Accessibility: 100/100
 Best Practices: 100/100
 SEO:            100/100
-LCP:             2.2s
+LCP: 0.4s (Desktop) / 1.6s (Mobile)
 CLS:             0
 ```
 

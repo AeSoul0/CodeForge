@@ -365,12 +365,12 @@ The production homepage is optimized around:
 ## Latest Lighthouse Measurement
 
 ```text
-Performance:    96/100
+Performance: 99/100 (Desktop) / 90/100 (Mobile)
 Accessibility: 100/100
-Best Practices: 96/100
+Best Practices: 100/100
 SEO:            100/100
 
-LCP: 2.2s
+LCP: 0.4s (Desktop) / 1.6s (Mobile)
 CLS: 0
 TTFB: 770ms
 ```
@@ -385,8 +385,8 @@ LCP:         3.0s
 After enabling Vercel ISR with a 300-second expiration:
 
 ```text
-Performance: 96/100
-LCP:         2.2s
+Performance: 99/100 (Desktop) / 90/100 (Mobile)
+LCP: 0.4s (Desktop) / 1.6s (Mobile)
 ```
 
 Measured improvement:
@@ -420,7 +420,7 @@ current measured SEO result.
 Latest production homepage Lighthouse result:
 
 ```text
-Best Practices: 96/100
+Best Practices: 100/100
 ```
 
 The project intentionally does not claim a perfect score where the measurement
@@ -743,12 +743,12 @@ The strongest current measured results are:
 
 0 dependency vulnerabilities
 
-Lighthouse Performance 93
+Lighthouse Performance 99
 Lighthouse Accessibility 100
 Lighthouse Best Practices 100
 Lighthouse SEO 100
 
-LCP 2.2s
+LCP 0.4s
 CLS 0
 ```
 
