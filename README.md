@@ -51,7 +51,6 @@ count alone.
 
 # Architecture
 
-```mermaid
 graph TD
     Browser[Browser] -->|HTTPS| Vercel[Vercel / Astro]
     Vercel -->|SSR / ISR| Frontend[Astro + React]
@@ -67,7 +66,7 @@ graph TD
 
     Repositories --> MongoDB[(MongoDB Atlas)]
     Services --> External[External Services / AI]
-````
+
 
 ## Frontend
 
