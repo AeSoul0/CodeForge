@@ -1056,12 +1056,11 @@ Current numbers: see [metrics.md](metrics.md).
 
 # 15. Remaining Work
 
-Only a small number of evidence items remain before the review can be treated
-as fully closed:
+Only one evidence item remains before the review can be treated as fully
+closed:
 
 ```text
 1. Record INP (requires sufficient real-user field data).
-2. Re-run Lighthouse after the 2026-10 frontend changes.
 ```
 
 The remote CI workflow is green on `main`. Additional open items are listed
