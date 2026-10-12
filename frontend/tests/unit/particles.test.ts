@@ -190,17 +190,22 @@ describe('initParticleCanvas', () => {
     });
 
     it('tracks the pointer and forgets it when it leaves', () => {
+        // Every particle starts at the centre (750, 450) and stays still,
+        // so the pointer links are deterministic.
+        vi.spyOn(Math, 'random').mockReturnValue(0.5);
         const { ctx } = setup();
+        const pointerLinks = () =>
+            ctx.lineTo.mock.calls.filter(([x, y]) => x === 700 && y === 450).length;
 
-        window.dispatchEvent(new MouseEvent('mousemove', { clientX: 10, clientY: 10 }));
+        window.dispatchEvent(new MouseEvent('mousemove', { clientX: 700, clientY: 450 }));
         rafCallbacks.shift()!(1000);
-        const withPointer = ctx.stroke.mock.calls.length;
+        expect(pointerLinks()).toBe(55);
 
         window.dispatchEvent(new Event('mouseleave'));
-        ctx.stroke.mockClear();
+        ctx.lineTo.mockClear();
         rafCallbacks.shift()!(3000);
 
-        expect(withPointer).toBeGreaterThanOrEqual(ctx.stroke.mock.calls.length);
+        expect(pointerLinks()).toBe(0);
     });
 
     it('pauses while the page is hidden and resumes when visible', () => {
