@@ -1,6 +1,3 @@
-# `docs/architecture.md`
-
-````md
 # CodeForge Architecture
 
 ## Overview
@@ -124,9 +121,7 @@ The homepage Lighthouse Performance score improved from:
 
 to:
 
-```text
-93/100
-```
+Current numbers: see [metrics.md](metrics.md).
 
 and the captured LCP improved from:
 
@@ -136,9 +131,7 @@ and the captured LCP improved from:
 
 to:
 
-```text
-2.2s
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ---
 
@@ -539,28 +532,15 @@ E2E
 
 Latest verified backend result:
 
-```text
-21 test files
-161 tests
-161 passed
-```
+Current numbers: see [metrics.md](metrics.md).
 
 Latest verified Playwright result:
 
-```text
-12 tests
-6 workers
-12 passed
-```
+Current numbers: see [metrics.md](metrics.md).
 
 Coverage:
 
-```text
-Statements: 95.08%
-Branches:   85.05%
-Functions:  95.29%
-Lines:      95.05%
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ---
 
@@ -580,14 +560,7 @@ Current mechanisms include:
 
 Latest production homepage measurement:
 
-```text
-Performance: 99/100 (Desktop) / 90/100 (Mobile)
-Accessibility: 100/100
-Best Practices: 100/100
-SEO:            100/100
-LCP: 0.4s (Desktop) / 1.6s (Mobile)
-CLS:             0
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ---
 
@@ -769,6 +742,3 @@ Remaining work should focus on:
 
 The project should avoid introducing additional architectural complexity
 without a measurable engineering requirement.
-
-```
-```

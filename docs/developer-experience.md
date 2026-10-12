@@ -1,6 +1,3 @@
-## `docs/developer-experience.md`
-
-````md
 # CodeForge Developer Experience
 
 ## 1. Purpose
@@ -192,15 +189,7 @@ npm audit --audit-level=high
 
 ## Current Verified Result
 
-```text
-21 test files passed
-161 tests passed
-
-Statements: 95.08%
-Branches:   85.05%
-Functions:  95.29%
-Lines:      95.05%
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ---
 
@@ -216,16 +205,7 @@ npm audit --audit-level=high
 
 ## Current Verified Result
 
-```text
-Lint: PASS
-Typecheck: PASS
-Build: PASS
-
-Playwright:
-12 tests
-6 workers
-12 passed
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ---
 
@@ -420,9 +400,7 @@ npm audit --audit-level=high
 
 Current local result:
 
-```text
-0 vulnerabilities
-```
+Current numbers: see [metrics.md](metrics.md).
 
 Dependency changes should be accompanied by appropriate test and build
 verification.
@@ -550,11 +528,7 @@ rather than introducing optimization complexity without measurement.
 
 The current production performance evidence is:
 
-```text
-Performance: 99/100 (Desktop) / 90/100 (Mobile)
-LCP: 0.4s (Desktop) / 1.6s (Mobile)
-CLS:         0
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ---
 
@@ -684,6 +658,3 @@ It should also be:
 
 CodeForge's current repository structure and validation workflow are designed
 around those principles.
-
-```
-```

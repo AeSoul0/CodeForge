@@ -1,6 +1,3 @@
-# `docs/deployment.md`
-
-````md
 # CodeForge Deployment Strategy
 
 ## 1. Overview
@@ -85,13 +82,7 @@ full server-side rendering for every request.
 
 The optimization produced a measurable improvement in Lighthouse:
 
-```text
-Previous Performance: 88/100
-Current Performance: 99/100 (Desktop) / 90/100 (Mobile)
-
-Previous LCP: 3.0s
-Current LCP: 0.4s (Desktop) / 1.6s (Mobile)
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ISR should therefore be considered part of the production performance
 architecture.
@@ -313,14 +304,7 @@ domain.
 
 Current homepage result:
 
-```text
-Performance: 99/100 (Desktop) / 90/100 (Mobile)
-Accessibility: 100/100
-Best Practices: 100/100
-SEO:            100/100
-LCP: 0.4s (Desktop) / 1.6s (Mobile)
-CLS:             0
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ---
 
@@ -544,10 +528,7 @@ LCP: 3.0s
 
 After:
 
-```text
-Performance: 99 (Desktop)
-LCP: 0.4s (Desktop) / 1.6s (Mobile)
-```
+Current numbers: see [metrics.md](metrics.md).
 
 The current production frontend therefore meets the roadmap Performance target.
 
@@ -616,16 +597,9 @@ MongoDB Atlas
 The frontend production deployment has demonstrated a measurable performance
 improvement through ISR and currently reports:
 
-```text
-Performance: 99/100 (Desktop) / 90/100 (Mobile)
-LCP: 0.4s (Desktop) / 1.6s (Mobile)
-CLS: 0
-```
+Current numbers: see [metrics.md](metrics.md).
 
 The remaining deployment-level gap is remote CI verification.
 
 No production architecture change is currently required solely for the
 90/100 roadmap target.
-
-```
-```

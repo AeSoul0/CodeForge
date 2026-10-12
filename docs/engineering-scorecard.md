@@ -62,32 +62,7 @@ This scorecard intentionally distinguishes verified evidence from pending eviden
 
 # 3. Verified Quality Gates
 
-| Metric                       |        Current Result |     Required Gate | Status              |
-| ---------------------------- | --------------------: | ----------------: | ------------------- |
-| Frontend lint                |                  PASS |              PASS | ✅ PASS              |
-| Frontend typecheck           |                  PASS |              PASS | ✅ PASS              |
-| Frontend production build    |                  PASS |              PASS | ✅ PASS              |
-| Backend lint                 |                  PASS |              PASS | ✅ PASS              |
-| Backend typecheck            |                  PASS |              PASS | ✅ PASS              |
-| Backend tests                |           **161/161** |         100% pass | ✅ PASS              |
-| Backend Statements coverage  |            **95.08%** |             ≥ 85% | ✅ PASS              |
-| Backend Branches coverage    |            **85.05%** |             ≥ 80% | ✅ PASS              |
-| Backend Functions coverage   |            **95.29%** |             ≥ 85% | ✅ PASS              |
-| Backend Lines coverage       |            **95.05%** |             ≥ 85% | ✅ PASS              |
-| Playwright E2E               |             **12/12** |         100% pass | ✅ PASS              |
-| Playwright concurrency       |         **6 workers** |         6 workers | ✅ PASS              |
-| Frontend audit               | **0 vulnerabilities** |  No High/Critical | ✅ PASS              |
-| Backend audit                | **0 vulnerabilities** |  No High/Critical | ✅ PASS              |
-| Lighthouse Performance       |            **93/100** |              ≥ 90 | ✅ PASS              |
-| Lighthouse Accessibility     |           **100/100** |              ≥ 90 | ✅ PASS              |
-| Lighthouse Best Practices    |           **100/100** |              ≥ 90 | ✅ PASS              |
-| Lighthouse SEO               |           **100/100** |              ≥ 90 | ✅ PASS              |
-| Lighthouse LCP               |             **2.2 s** |           Improve | ✅ PASS              |
-| Lighthouse CLS               |                 **0** |             < 0.1 | ✅ PASS              |
-| Lighthouse TTFB              |            **770 ms** |           Improve | ⚠️ IMPROVEMENT AREA |
-| Lighthouse INP               |          Not reported |     Wait for CrUX | ⚠️ NO DATA          |
-| Mobile Lighthouse            |             **84/100**|          Required | ✅ PASS             |
-| GitHub Actions full workflow |         Fully green |          Required | ✅ PASS             |
+Current numbers: see [metrics.md](metrics.md).
 
 ---
 
@@ -198,19 +173,11 @@ MongoDB
 
 Latest local test execution:
 
-```text
-Test Files  21 passed (21)
-Tests       161 passed (161)
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ## Coverage
 
-```text
-Statements: 95.08%
-Branches:   85.05%
-Functions:  95.29%
-Lines:      95.05%
-```
+Current numbers: see [metrics.md](metrics.md).
 
 All configured coverage thresholds are satisfied.
 
@@ -369,10 +336,7 @@ CREATE_PROJECT
 
 Latest local audits:
 
-```text
-Frontend: 0 vulnerabilities
-Backend:  0 vulnerabilities
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ## Target Assessment
 
@@ -388,30 +352,17 @@ Remote CI security verification: ⚠️ Pending
 
 ## Backend Tests
 
-```text
-21 test files
-161 tests
-161 passed
-0 failed
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ## Coverage Gate
 
-```text
-Statements >= 85%   → 95.08% ✅
-Branches   >= 80%   → 85.05% ✅
-Functions  >= 85%   → 95.29% ✅
-Lines      >= 85%   → 95.05% ✅
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ## Frontend E2E
 
 Latest result:
 
-```text
-Running 12 tests using 6 workers
-12 passed (35.2s)
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ## E2E Coverage
 
@@ -516,21 +467,11 @@ Status: ⚠️ Pending final remote verification
 
 Latest measured production result:
 
-```text
-Performance: 99/100 (Desktop) / 90/100 (Mobile)
-Accessibility: 100/100
-Best Practices: 100/100
-SEO:            100/100
-```
+Current numbers: see [metrics.md](metrics.md).
 
 Core measurements:
 
-```text
-LCP:  2.2 s
-CLS:  0
-TTFB: 770 ms
-INP:  Not reported
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ## Performance Improvement
 
@@ -544,11 +485,7 @@ CLS:         0
 
 After introducing Vercel ISR:
 
-```text
-Performance: 99/100 (Desktop) / 90/100 (Mobile)
-LCP:         2.2 s
-CLS:         0
-```
+Current numbers: see [metrics.md](metrics.md).
 
 Measured improvement:
 
@@ -741,29 +678,7 @@ Status: ✅ Strong automated evidence
 
 # 14. Evidence Matrix
 
-| Evidence                  |                        Result | Status |
-| ------------------------- | ----------------------------: | ------ |
-| Frontend lint             |                          PASS | ✅      |
-| Frontend typecheck        |                          PASS | ✅      |
-| Frontend build            |                          PASS | ✅      |
-| Backend lint              |                          PASS | ✅      |
-| Backend typecheck         |                          PASS | ✅      |
-| Backend tests             |                       161/161 | ✅      |
-| Coverage                  | 95.08 / 85.05 / 95.29 / 95.05 | ✅      |
-| Playwright                |                         12/12 | ✅      |
-| Playwright workers        |                             6 | ✅      |
-| Frontend audit            |             0 vulnerabilities | ✅      |
-| Backend audit             |             0 vulnerabilities | ✅      |
-| Lighthouse Performance    |                            96 | ✅      |
-| Lighthouse Accessibility  |                           100 | ✅      |
-| Lighthouse Best Practices |                            96 | ✅      |
-| Lighthouse SEO            |                           100 | ✅      |
-| LCP                       |                         2.2 s | ✅      |
-| CLS                       |                             0 | ✅      |
-| TTFB                      |                        770 ms | ⚠️     |
-| INP                       |                  Not reported | ⚠️     |
-| Mobile Lighthouse         |                    84/100     | ✅     |
-| GitHub Actions            |                   Fully green | ✅     |
+Current numbers: see [metrics.md](metrics.md).
 
 ---
 
@@ -788,7 +703,7 @@ Status: ✅ Strong automated evidence
 * [x] Authorization
 * [x] Structured services
 * [x] Repository abstraction
-* [x] 161/161 tests passing
+* [x] All backend tests passing (see [metrics.md](metrics.md))
 * [x] Coverage thresholds exceeded
 
 ## Security
@@ -819,7 +734,7 @@ Status: ✅ Strong automated evidence
 ## Performance
 
 * [x] Lighthouse Performance >= 90
-* [x] LCP improved to 2.2s
+* [x] LCP improved (see [metrics.md](metrics.md))
 * [x] CLS = 0
 * [x] ISR enabled
 * [x] Accessibility >= 90
@@ -872,26 +787,7 @@ Documentation
 
 The strongest verified quantitative results are:
 
-```text
-161/161 backend tests
-95.08% statements
-85.05% branches
-95.29% functions
-95.05% lines
-
-12/12 Playwright E2E
-6 concurrent workers
-
-0 dependency vulnerabilities
-
-Lighthouse Performance 99
-Lighthouse Accessibility 100
-Lighthouse Best Practices 100
-Lighthouse SEO 100
-
-LCP 0.4s
-CLS 0
-```
+Current numbers: see [metrics.md](metrics.md).
 
 The remaining blockers to a strict final **90+/100 evidence-based claim** are:
 

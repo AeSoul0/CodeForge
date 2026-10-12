@@ -18,34 +18,18 @@ security, testing, accessibility and performance.
 ## Engineering Snapshot
 
 CodeForge is evaluated using measurable engineering evidence rather than feature
-count alone.
+count alone. Every push runs the same quality gates in CI:
 
-| Area | Verified Result |
-|---|---:|
-| Frontend lint | ✅ PASS |
-| Frontend typecheck | ✅ PASS |
-| Frontend production build | ✅ PASS |
-| Backend lint | ✅ PASS |
-| Backend typecheck | ✅ PASS |
-| Backend tests | ✅ 161/161 |
-| Backend statements coverage | ✅ 95.08% |
-| Backend branches coverage | ✅ 85.05% |
-| Backend functions coverage | ✅ 95.29% |
-| Backend lines coverage | ✅ 95.05% |
-| Playwright E2E | ✅ 12/12 |
-| Playwright workers | ✅ 6 |
-| Frontend dependency audit | ✅ 0 vulnerabilities |
-| Backend dependency audit | ✅ 0 vulnerabilities |
-| Lighthouse Performance | ✅ 93/100 |
-| Lighthouse Accessibility | ✅ 100/100 |
-| Lighthouse Best Practices | ✅ 100/100 |
-| Lighthouse SEO | ✅ 100/100 |
-| Lighthouse LCP | ✅ 1.8s |
-| Lighthouse CLS | ✅ 0 |
+* lint and type checks (backend `tsc`, frontend `astro check`);
+* backend unit/API tests with coverage thresholds (85/80/85/85);
+* frontend unit and component-rendering tests with coverage thresholds (90/90/90/90);
+* production builds;
+* Playwright E2E, including axe accessibility scans of public and admin pages;
+* dependency audits and CodeQL.
 
-> The metrics above represent the latest verified local and production
-> measurements available during the engineering review. Remote CI validation is fully automated
-> and passing on GitHub Actions.
+**Current numbers live in one place: [docs/metrics.md](docs/metrics.md).**
+That file is generated from test output by `npm run metrics` and republished
+in the CI job summary, so no other document repeats them.
 
 ---
 
@@ -164,6 +148,8 @@ MongoDB Atlas
 ```text
 Vitest
 Supertest
+happy-dom
+Astro Container API
 V8 Coverage
 Playwright
 axe-core
@@ -205,54 +191,33 @@ Browser E2E
 
 ## Backend
 
-Latest verified local execution:
+Vitest unit, API and security tests run against a real MongoDB instance.
+Coverage thresholds: statements 85%, branches 80%, functions 85%, lines 85%.
 
-```text
-Test Files  21 passed (21)
-Tests       161 passed (161)
-```
+## Frontend
 
-Coverage:
+Vitest runs in two modes:
 
-```text
-Statements: 95.08%
-Branches:   85.05%
-Functions:  95.29%
-Lines:      95.05%
-```
+* client modules (admin dashboard, API client, particle animation, page
+  effects) against happy-dom;
+* `.astro` pages and components rendered with the Astro Container API, so
+  server-side templates count toward coverage.
 
-Required thresholds:
+The admin tests mount the real page markup before running the client code,
+which keeps element ids and scripts in sync. Coverage thresholds are 90% for
+statements, branches, functions and lines.
 
-```text
-Statements >= 85%
-Branches   >= 80%
-Functions  >= 85%
-Lines      >= 85%
-```
+## E2E
 
-All four current thresholds are satisfied.
+Playwright exercises the real backend and frontend:
 
-## Frontend E2E
+* homepage, project pages and API failure handling;
+* login, logout and protected-route redirects for every admin page;
+* admin CRUD for projects and experiences (including logo upload);
+* API playground, system status and mobile navigation;
+* axe accessibility scans and keyboard navigation.
 
-Latest Playwright result:
-
-```text
-Running 12 tests using 6 workers
-12 passed (35.2s)
-```
-
-The suite covers:
-
-* homepage;
-* admin login;
-* valid authentication;
-* invalid authentication;
-* protected routes;
-* authenticated dashboard access;
-* logout;
-* API failure handling;
-* accessibility;
-* keyboard navigation.
+Results: [docs/metrics.md](docs/metrics.md).
 
 More details:
 
@@ -287,7 +252,7 @@ context.
 
 Implemented controls include:
 
-* Content-Security-Policy;
+* Content-Security-Policy without `'unsafe-inline'`;
 * HSTS;
 * clickjacking protection;
 * Referrer Policy;
@@ -303,14 +268,29 @@ Security tests verify brute-force behavior including:
 429 Too Many Requests
 ```
 
+## CSRF Protection
+
+The session cookie is `SameSite=None` in production (frontend and API are
+different sites), so state-changing requests that carry it must also:
+
+* come from an allowed origin (Origin/Referer check);
+* send the `X-Requested-With: CodeForge` header, which cross-site pages
+  cannot add without passing the CORS allowlist.
+
+Login requests are origin-checked as well.
+
+## Content Security Policy
+
+* Frontend: Astro hashes every emitted script and style
+  (`security.csp`), so `script-src` and `style-src` contain no
+  `'unsafe-inline'`.
+* API: JSON responses use `default-src 'none'`; Swagger UI (development
+  only) sends its own hash-based policy.
+
 ## Dependency Security
 
-Latest local dependency audits:
-
-```text
-Frontend: 0 vulnerabilities
-Backend:  0 vulnerabilities
-```
+`npm audit --audit-level=high` runs for both packages in CI, alongside
+Dependabot and CodeQL.
 
 Full security documentation:
 
@@ -337,18 +317,12 @@ Implemented support includes:
 
 ## Measured Result
 
-Latest production Lighthouse result:
-
-```text
-Accessibility: 100/100
-```
-
-Automated Playwright accessibility scenarios also pass.
+Lighthouse and axe results are tracked in [docs/metrics.md](docs/metrics.md).
+The Playwright suite fails on any axe violation in the audited pages.
 
 See:
 
-[Testing](docs/testing.md)
-[Engineering Evidence](docs/evidence.md)
+[Accessibility](docs/accessibility.md)
 
 ---
 
@@ -365,67 +339,14 @@ The production homepage is optimized around:
 
 ## Latest Lighthouse Measurement
 
-```text
-Performance: 99/100 (Desktop) / 90/100 (Mobile)
-Accessibility: 100/100
-Best Practices: 100/100
-SEO:            100/100
-
-LCP: 0.4s (Desktop) / 1.6s (Mobile)
-CLS: 0
-TTFB: 770ms
-```
-
-The previous baseline was:
-
-```text
-Performance: 88/100
-LCP:         3.0s
-```
-
-After enabling Vercel ISR with a 300-second expiration:
-
-```text
-Performance: 99/100 (Desktop) / 90/100 (Mobile)
-LCP: 0.4s (Desktop) / 1.6s (Mobile)
-```
-
-Measured improvement:
-
-```text
-Performance: +8 points
-LCP:         -0.8 seconds
-```
+The latest recorded Lighthouse scores are in
+[docs/metrics.md](docs/metrics.md) (source: `docs/metrics-lighthouse.json`).
+Lighthouse is run manually against production; re-run it after
+frontend changes that affect loading.
 
 Full performance documentation:
 
 [Performance Baseline](docs/performance.md)
-
----
-
-# SEO
-
-Latest production homepage Lighthouse result:
-
-```text
-SEO: 100/100
-```
-
-The application includes the metadata and document structure required for the
-current measured SEO result.
-
----
-
-# Best Practices
-
-Latest production homepage Lighthouse result:
-
-```text
-Best Practices: 100/100
-```
-
-The project intentionally does not claim a perfect score where the measurement
-does not support it.
 
 ---
 
@@ -451,32 +372,28 @@ Security
 Quality Gate
 ```
 
-Local validation currently passes:
+Each run regenerates [docs/metrics.md](docs/metrics.md) from the test
+output and publishes it in the GitHub Actions job summary.
 
-```text
-Frontend lint        PASS
-Frontend typecheck   PASS
-Frontend build       PASS
+---
 
-Backend lint         PASS
-Backend typecheck    PASS
-Backend tests        PASS
-Coverage             PASS
+# Admin Dashboard
 
-Playwright E2E       PASS
-Dependency audits    PASS
-```
+`/admin` is a session-protected area (HttpOnly JWT cookie, verified against
+`GET /api/auth/me` on every page):
 
-## Remote CI Status
+| Page | Purpose |
+|---|---|
+| Overview | Project/experience counts, projects awaiting AI documentation, backend status, recently updated projects |
+| Projects | Search, create, edit and delete projects; categories, linked experience, image and GitHub link; trigger AI documentation regeneration |
+| Experiences | Create, edit and delete experiences with month pickers, "current role" handling and logo upload |
+| API Playground | Send authenticated requests from presets, inspect status/timing/body, local request history |
+| System | Liveness/readiness probes, request and error-rate metrics, optional 30 s auto-refresh |
 
-The GitHub Actions workflow successfully executes the complete quality pipeline, including validation, build, testing, and dependency audits.
-
-```text
-Local quality gates: PASS
-Remote CI gate:      PASS
-```
-
-This ensures the repository maintains automated quality enforcement for every integration.
+All API data is written to the DOM with `textContent`/attributes (never
+`innerHTML`), dialogs use the native `<dialog>` element, and destructive
+actions go through a confirmation dialog. The client logic lives in
+`frontend/src/lib/admin/` and is unit-tested against the real page markup.
 
 ---
 
@@ -588,9 +505,17 @@ cd frontend
 
 npm run lint
 npm run typecheck
+npm run test:cov
 npm run build
 npm run test:e2e
 npm audit --audit-level=high
+```
+
+## Metrics
+
+```bash
+# after backend/frontend `npm run test:ci` and `npm run test:e2e`
+npm run metrics   # rewrites docs/metrics.md
 ```
 
 ## Lighthouse
@@ -688,6 +613,7 @@ CodeForge/
 
 The repository maintains dedicated evidence documentation:
 
+* [Quality Metrics](docs/metrics.md) (single source of numbers)
 * [Engineering Scorecard](docs/engineering-scorecard.md)
 * [Engineering Evidence](docs/evidence.md)
 * [Architecture](docs/architecture.md)
@@ -730,28 +656,7 @@ Dependency Health
 Documentation
 ```
 
-The strongest current measured results are:
-
-```text
-161/161 backend tests
-95.08% statements
-85.05% branches
-95.29% functions
-95.05% lines
-
-12/12 Playwright E2E
-6 workers
-
-0 dependency vulnerabilities
-
-Lighthouse Performance 99
-Lighthouse Accessibility 100
-Lighthouse Best Practices 100
-Lighthouse SEO 100
-
-LCP 0.4s
-CLS 0
-```
+Measured results: [docs/metrics.md](docs/metrics.md).
 
 ---
 

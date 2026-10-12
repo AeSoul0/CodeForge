@@ -1,6 +1,3 @@
-## `docs/accessibility.md`
-
-````md
 # CodeForge Accessibility
 
 ## 1. Purpose
@@ -295,10 +292,7 @@ Playwright includes keyboard accessibility coverage.
 
 Latest E2E execution:
 
-```text
-Running 12 tests using 6 workers
-12 passed
-```
+Current numbers: see [metrics.md](metrics.md).
 
 The suite includes keyboard navigation scenarios.
 
@@ -325,12 +319,7 @@ This provides regression protection against common accessibility defects.
 
 Latest production homepage:
 
-| Category       |      Result |
-| -------------- | ----------: |
-| Accessibility  | **100/100** |
-| Performance    |  **93/100** |
-| Best Practices | **100/100** |
-| SEO            | **100/100** |
+Current numbers: see [metrics.md](metrics.md).
 
 The accessibility result exceeds the roadmap target:
 
@@ -463,6 +452,3 @@ Screen-reader behavior
 
 The goal is to preserve the current `100/100` automated accessibility baseline
 as the application evolves.
-
-```
-```

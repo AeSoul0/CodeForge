@@ -1,6 +1,3 @@
-# `docs/api.md`
-
-````md
 # CodeForge API Documentation
 
 ## 1. Overview
@@ -114,11 +111,40 @@ Authentication failure:
 401 Unauthorized
 ```
 
-Repeated excessive authentication attempts:
+Invalid payload (missing field, non-string value, username > 100 or
+password > 200 characters):
+
+```text
+400 Bad Request
+```
+
+Request from an origin outside the CORS allowlist:
+
+```text
+403 Forbidden   (CSRF_ORIGIN_REJECTED)
+```
+
+Repeated excessive authentication attempts (5 per minute per client):
 
 ```text
 429 Too Many Requests
 ```
+
+## CSRF requirements for authenticated mutations
+
+Every POST/PUT/PATCH/DELETE that sends the session cookie must include:
+
+```http
+X-Requested-With: CodeForge
+```
+
+and, when sent by a browser, come from an allowed origin. Otherwise the API
+answers `403` with `CSRF_HEADER_MISSING` or `CSRF_ORIGIN_REJECTED`.
+
+## Pagination
+
+`GET /api/projects` and `GET /api/experiences` accept `page` (1–10000,
+default 1) and `limit` (1–100, default 10). Out-of-range values return `400`.
 
 ---
 
@@ -531,10 +557,7 @@ tests.
 
 Latest result:
 
-```text
-21 test files passed
-161 tests passed
-```
+Current numbers: see [metrics.md](metrics.md).
 
 API domains currently covered include:
 
@@ -684,19 +707,10 @@ The CodeForge API currently demonstrates:
 
 The latest local backend verification reports:
 
-```text
-161/161 tests passed
-95.08% statements coverage
-85.05% branch coverage
-95.29% function coverage
-95.05% line coverage
-```
+Current numbers: see [metrics.md](metrics.md).
 
 The API therefore satisfies the current roadmap's core backend quality
 requirements.
 
 The remaining API-related work is primarily documentation maintenance and
 keeping the OpenAPI contract synchronized with future endpoint changes.
-
-```
-```

@@ -1,0 +1,13 @@
+{
+    "date": "2026-08-27",
+    "url": "https://www.aesoul0.com/",
+    "tool": "manual Lighthouse run, recorded in commit e32a177",
+    "scores": {
+        "Performance": { "desktop": "99/100", "mobile": "90/100" },
+        "Accessibility": { "desktop": "100/100", "mobile": "100/100" },
+        "Best Practices": { "desktop": "100/100", "mobile": "100/100" },
+        "SEO": { "desktop": "100/100", "mobile": "100/100" },
+        "LCP": { "desktop": "0.4 s", "mobile": "1.6 s" },
+        "CLS": { "desktop": "0", "mobile": "0" }
+    }
+}

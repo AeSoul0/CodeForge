@@ -1,54 +1,89 @@
 # Testing
 
+Current results and coverage: [metrics.md](metrics.md).
+
 ## Strategy
-CodeForge ensures code quality via automated unit and integration tests, as well as frontend End-to-End (E2E) testing. The CI/CD pipeline enforces strict testing thresholds.
 
-## Tools
-- **Vitest:** Fast Vite-native test runner for backend unit and API integration tests.
-- **Supertest:** For HTTP route integration testing.
-- **V8 Coverage:** Code coverage metrics.
-- **Playwright:** E2E testing for the Astro frontend.
-
-## Running Tests
-Run tests locally using:
-```bash
-npm run test
+```text
+Static checks   eslint · tsc (backend) · astro check (frontend)
+      ↓
+Unit / API      Vitest (backend, real MongoDB) · Vitest (frontend)
+      ↓
+Build           tsc · astro build
+      ↓
+E2E             Playwright against the real backend + Astro dev server
+      ↓
+Audit           npm audit · CodeQL
 ```
-For coverage:
+
+## Backend (`backend/tests`)
+
+- **Unit**: services, repositories, controllers, middleware (auth, CSRF,
+  metrics, error handler), configuration.
+- **API**: Fastify `inject()` against a real MongoDB database
+  (`codeforge_test`), covering authentication, validation, security headers,
+  CSRF rejection and rate limiting.
+- Thresholds (V8): statements 85%, branches 80%, functions 85%, lines 85%.
+
 ```bash
+cd backend
+npm test          # uses .env.test
+npm run test:cov  # with coverage thresholds
+```
+
+## Frontend (`frontend/tests`)
+
+| Folder | Environment | What it covers |
+|---|---|---|
+| `unit/` | Node / happy-dom | API client, DOM helpers, formatting, safe Markdown, content loaders, particle animation, page effects, project filter |
+| `admin/` | `happy-dom-ssr` | Every admin page: the real page is rendered with the Astro Container API, mounted into happy-dom, then its client module runs against mocked `fetch` |
+| `render/` | Node | Public pages and components rendered with the Container API (home, project detail incl. 404/503, case study, layout, `/api/health`) |
+
+`happy-dom-ssr` (`tests/environments/happy-dom-ssr.ts`) provides DOM globals
+while keeping Vite's SSR transform, which `.astro` rendering needs.
+
+Thresholds (V8, over `src/**/*.{ts,astro}`): 90% statements, branches,
+functions and lines.
+
+```bash
+cd frontend
+npm test
 npm run test:cov
 ```
-For E2E (Frontend):
+
+## E2E (`frontend/e2e`)
+
+| Spec | Scope |
+|---|---|
+| `home.spec.ts`, `api-errors.spec.ts` | Public pages, backend failure handling |
+| `auth.spec.ts` | Login, invalid login, protected routes, logout |
+| `admin.spec.ts` | Project and experience CRUD (with logo upload), search, validation, API playground, system status, mobile navigation, axe scans of every admin page and dialog |
+| `accessibility.spec.ts`, `keyboard.spec.ts` | axe scans and keyboard focus on public pages |
+
+Playwright starts a fresh backend (`E2E=true`) and the Astro dev server.
+`LOGIN_RATE_LIMIT_MAX` and `RATE_LIMIT_MAX` are raised for the E2E backend
+only, because six parallel workers share one IP.
+
 ```bash
-npx playwright test
+cd frontend
+npm run test:e2e
+# with a preinstalled Chromium:
+PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/path/to/chrome npm run test:e2e
 ```
 
-## Coverage Thresholds (Enforced via CI)
-- **Statements**: >= 85%
-- **Branches**: >= 80%
-- **Functions**: >= 85%
-- **Lines**: >= 85%
+## Production build with CSP
 
-## Implemented Suites
+`astro dev` does not emit the CSP. To check it in a browser:
 
-### Unit Tests
-- `AdminService`
-- `ExperienceService`
-- `ProjectService`
+```bash
+cd frontend
+npm run build && npm run serve:build   # http://127.0.0.1:4322
+```
 
-### API Integration Tests
-- **Projects**: `GET /api/projects`, `POST /api/projects`, `PATCH /api/projects/:name`, `DELETE /api/projects/:name`
-- **Experiences**: `GET /api/experiences`, `POST /api/experiences`
-- **Auth**: `POST /api/auth/login`, `POST /api/auth/logout`
+## Regenerating metrics
 
-### Security Validation Tests
-- `401 Unauthorized` without JWT
-- `401 Unauthorized` with invalid/expired JWT
-- `403 Forbidden` if JWT lacks admin role
-- `429 Too Many Requests` for brute force login attempts
-- `400 Bad Request` for malformed JSON bodies
-- `400 Bad Request` for strict schema manipulation (e.g., extra properties)
-
-### Frontend E2E (Playwright)
-- Homepage load validation
-- Admin Login UI presence
+```bash
+(cd backend && npm run test:ci)    # needs the .env.test variables
+(cd frontend && npm run test:ci && npm run test:e2e)
+npm run metrics                     # writes docs/metrics.md
+```

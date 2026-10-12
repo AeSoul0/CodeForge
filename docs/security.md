@@ -1,6 +1,3 @@
-# `docs/security.md`
-
-````md
 # CodeForge Security Architecture
 
 ## 1. Purpose
@@ -18,74 +15,7 @@ their behavior through automated tests and dependency audits.
 
 The security model can be represented as:
 
-```text
-Internet
-   │
-   ▼
-Vercel / Render
-   │
-   ▼
-HTTP Security
-   │
-   ├── CSP
-   ├── HSTS
-   ├── Clickjacking protection
-   ├── CORS
-   └── Rate limiting
-   │
-   ▼
-Authentication
-   │
-   ├── JWT
-   ├── Issuer
-   ├── Audience
-   ├── Expiration
-   └── Secure HttpOnly Cookie
-   │
-   ▼
-Authorization
-   │
-   ▼
-Request Validation
-   │
-   ▼
-Controllers / Services
-   │
-   ▼
-Repositories
-   │
-   ▼
-MongoDB
-````
-
-Each layer provides an independent security boundary.
-
----
-
-# 3. Dependency Governance
-
-Dependency security is continuously reviewed through:
-
-* `npm audit`;
-* Dependabot;
-* GitHub dependency review;
-* CodeQL where configured.
-
-## Severity Policy
-
-| Severity | Policy                            |
-| -------- | --------------------------------- |
-| Critical | Must be remediated before release |
-| High     | Immediate review and remediation  |
-| Moderate | Review during maintenance         |
-| Low      | Review during maintenance         |
-
-## Latest Local Audit
-
-```text
-Frontend: 0 vulnerabilities
-Backend:  0 vulnerabilities
-```
+Current numbers: see [metrics.md](metrics.md).
 
 Current local dependency status:
 
@@ -132,11 +62,22 @@ Current controls include:
 
 ## Content Security Policy
 
-The CSP restricts executable resources and helps reduce the impact of XSS
-attacks.
+Neither policy allows `'unsafe-inline'`.
 
-Any future third-party integration must be reviewed against the existing
-policy instead of broadly weakening CSP directives.
+- **API** (`@fastify/helmet`): JSON responses use
+  `default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'`.
+  Swagger UI (development only) sends its own hash-based policy
+  (`staticCSP: true`).
+- **Frontend** (`astro.config.mjs`, `security.csp`): Astro hashes every
+  script and style it emits and sends them in the `Content-Security-Policy`
+  header together with `default-src 'self'`, `connect-src 'self' <API origin>`,
+  `object-src 'none'`, `base-uri 'self'`, `form-action 'self'` and
+  `frame-ancestors 'none'`. All client code is bundled from modules; there are
+  no inline event handlers or `style` attributes. The policy only applies to
+  production builds (`astro dev` does not emit it).
+
+Any future third-party integration must be reviewed against these policies
+instead of broadly weakening them.
 
 ---
 
@@ -240,28 +181,40 @@ or security context from being accepted accidentally.
 
 # 11. Cookie Security
 
-Authentication tokens are stored in cookies configured for browser security.
-
-Important properties include:
+Authentication tokens are stored in a cookie configured for browser security:
 
 ```text
 HttpOnly
-Secure in production
-SameSite=Strict
+Secure                 production
+SameSite=None          production (frontend and API are different sites)
+SameSite=Lax           development / test
+Max-Age=24h            matches the JWT expiry
 ```
 
 ## HttpOnly
 
-Prevents normal client-side JavaScript from directly reading the authentication
-cookie.
+Prevents client-side JavaScript from reading the authentication cookie.
 
 ## Secure
 
 Ensures the cookie is transmitted over HTTPS in production.
 
-## SameSite
+## SameSite and CSRF
 
-Provides additional cross-site request protection.
+Because the production cookie must be `SameSite=None`, the browser attaches it
+to cross-site requests. `backend/src/middlewares/csrf.ts` therefore checks
+every state-changing request (POST/PUT/PATCH/DELETE) that carries the cookie:
+
+1. **Origin check** – the `Origin` header (or the `Referer` origin as a
+   fallback) must be in the CORS allowlist; otherwise `403 CSRF_ORIGIN_REJECTED`.
+2. **Custom header** – `X-Requested-With: CodeForge` must be present;
+   otherwise `403 CSRF_HEADER_MISSING`. Cross-site pages cannot add a custom
+   header without a successful CORS preflight, which the allowlist rejects.
+
+`POST /api/auth/login` is origin-checked even without a cookie to prevent
+login CSRF. Requests without the session cookie are not exposed to CSRF and
+are not affected. The frontend API client (`frontend/src/lib/api.ts`) adds the
+header automatically.
 
 ---
 
@@ -476,10 +429,7 @@ External-service failures are isolated inside service-level integration paths.
 
 The latest local backend test execution reported:
 
-```text
-21 test files passed
-161 tests passed
-```
+Current numbers: see [metrics.md](metrics.md).
 
 Security-focused scenarios include:
 
@@ -499,10 +449,13 @@ checking that authentication middleware exists.
 
 The frontend is protected through:
 
-* CSP;
-* secure authentication cookies;
-* server-side handling of protected state;
-* strict request validation at the backend;
+* a hash-based CSP without `'unsafe-inline'`;
+* secure authentication cookies plus the anti-CSRF header on every mutation;
+* DOM rendering of API data with `textContent`/attributes only – the admin
+  dashboard never builds HTML strings from data (`frontend/src/lib/dom.ts`);
+* safe Markdown for project documentation (`frontend/src/lib/markdown.ts`):
+  raw HTML is escaped and only `http(s)`, `mailto`, relative and fragment URLs
+  become links or images;
 * avoidance of exposing secrets to browser JavaScript.
 
 Administrative functionality is not considered trusted merely because it is
@@ -514,13 +467,7 @@ rendered by the frontend; authorization remains a backend responsibility.
 
 Latest local results:
 
-```text
-Frontend:
-0 vulnerabilities
-
-Backend:
-0 vulnerabilities
-```
+Current numbers: see [metrics.md](metrics.md).
 
 This supersedes older audit results recorded before dependency upgrades.
 
@@ -558,7 +505,7 @@ Sensitive information disclosure
 * [x] Expiration enforced
 * [x] HttpOnly cookie
 * [x] Secure production cookie
-* [x] SameSite protection
+* [x] SameSite cookie policy plus origin and custom-header CSRF checks
 
 ## Authorization
 
@@ -594,7 +541,7 @@ Sensitive information disclosure
 * [x] Dependabot configuration
 * [x] Dependency review
 * [x] CodeQL where configured
-* [x] Current local audit reports 0 vulnerabilities
+* [x] `npm audit --audit-level=high` runs for both packages in CI
 
 ## Operational Security
 
@@ -622,15 +569,11 @@ Secret handling
 
 The latest local dependency audits report:
 
-```text
-0 vulnerabilities
-```
+Current numbers: see [metrics.md](metrics.md).
 
 The backend security test suite passes as part of the complete:
 
-```text
-161/161 tests
-```
+Current numbers: see [metrics.md](metrics.md).
 
 The repository-level security evidence is fully verified via local execution and green remote GitHub Actions workflows.
 
@@ -674,6 +617,3 @@ Secure cookies:        Implemented
 ```
 
 Final remote CI verification remains pending.
-
-```
-```
