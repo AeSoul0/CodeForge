@@ -85,18 +85,5 @@ The service and repository layers remain independently testable.
 
 ## Evidence
 
-Latest backend verification:
-
-```text
-21 test files passed
-161 tests passed
-```
-
-Coverage:
-
-```text
-Statements: 95.08%
-Branches:   85.05%
-Functions:  95.29%
-Lines:      95.05%
-```
+The backend tests, coverage and thresholds (85/80/85/85) are tracked in
+[metrics.md](../metrics.md).

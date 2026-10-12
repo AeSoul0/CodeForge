@@ -3,7 +3,8 @@
 **Repository:** `AeSoul0/CodeForge`  
 **Baseline:** 82/100  
 **Target:** 90+/100  
-**Approach:** milestone-based, evidence-driven, without artificial time constraints
+**Approach:** milestone-based, evidence-driven, without artificial time constraints  
+**Status:** ✅ Complete (2026-10-12); only field INP evidence pending
 
 ---
 
@@ -49,7 +50,7 @@ CI/CD
 Maintainability
 Documentation
 Evidence
-````
+```
 
 ---
 
@@ -170,7 +171,7 @@ No token
 Invalid token
 Expired/tampered authentication
 Valid authentication
-Insufficient privilege
+Missing CSRF header / foreign origin
 Protected operations
 ```
 
@@ -231,11 +232,16 @@ Invalid login
 Valid login
 Protected route
 Authenticated dashboard
+Project and experience CRUD (with logo upload)
+API playground and system status
 Logout
 API failure
-Accessibility
+Accessibility (public and admin pages)
 Keyboard navigation
 ```
+
+Frontend unit, admin and rendering tests (Vitest, 90% coverage thresholds)
+were added in 2026-10 ([testing.md](testing.md)).
 
 Latest result:
 
@@ -261,7 +267,7 @@ Status:
 
 Status:
 
-✅ Achieved locally
+✅ Achieved, enforced in CI
 
 ---
 
@@ -323,11 +329,16 @@ Status:
 Implemented controls include:
 
 ```text
-Content-Security-Policy
+Content-Security-Policy (hash-based, no 'unsafe-inline')
 Strict-Transport-Security
 Clickjacking protection
 Referrer-Policy
 ```
+
+Because the production cookie must be `SameSite=None` (frontend and API are
+different sites), a CSRF guard checks the origin and requires the
+`X-Requested-With: CodeForge` header on every authenticated mutation
+([ADR 003 amendment](adr/003-jwt-cookie-auth.md)).
 
 Status:
 
@@ -337,9 +348,8 @@ Status:
 
 ## 5.5 Dependency Governance
 
-Current local audit:
-
-Current numbers: see [metrics.md](metrics.md).
+Current audit: [security.md § 3](security.md#3-dependency-status) (no high or
+critical advisories).
 
 Policy:
 
@@ -352,7 +362,7 @@ Low      → maintenance review
 
 Status:
 
-✅ Complete locally
+✅ Complete
 
 ---
 
@@ -381,7 +391,8 @@ Status:
 * [x] Security headers implemented
 * [x] CORS documented
 * [x] Rate limiting tested
-* [x] Dependency audit clean
+* [x] CSRF guard tested
+* [x] Dependency audit clean (no high/critical)
 * [x] Security policy documented
 
 ## Target
@@ -390,7 +401,7 @@ Status:
 
 Status:
 
-✅ Strong local evidence
+✅ Achieved
 
 ---
 
@@ -664,9 +675,12 @@ Vercel ISR introduced:
 Expiration: 300 seconds
 ```
 
-Measured impact:
+Measured impact (desktop):
 
-Current numbers: see [metrics.md](metrics.md).
+```text
+Performance: 88 → 96
+LCP:         3.0 s → 2.2 s
+```
 
 Status:
 
@@ -676,21 +690,24 @@ Status:
 
 ## 8.4 INP
 
-Current captured Lighthouse run did not provide a reportable INP value.
+INP is a field metric; Lighthouse lab runs cannot report it. The lab proxy
+(Total Blocking Time) is 0–40 ms. A field value needs real-user data (CrUX or
+Vercel Speed Insights).
 
 Status:
 
-⚠️ Pending
+⚠️ Pending (field data)
 
 ---
 
 ## 8.5 Mobile Performance
 
-Mobile Lighthouse is recorded in [metrics.md](metrics.md).
+Re-measured on 2026-10-12 after the 2026-10 frontend changes (median of 3
+runs); results in [metrics.md](metrics.md).
 
 Status:
 
-✅ Recorded (re-run after the 2026-10 frontend changes)
+✅ Recorded
 
 ---
 
@@ -712,7 +729,7 @@ Status:
 
 Status:
 
-✅ Target achieved for current desktop measurement
+✅ Target achieved on desktop and mobile
 
 ---
 
@@ -753,6 +770,8 @@ Current local results:
 ```text
 Frontend lint       PASS
 Frontend typecheck  PASS
+Frontend tests      PASS
+Frontend coverage   PASS
 Frontend build      PASS
 
 Backend lint        PASS
@@ -766,7 +785,7 @@ Dependency audits   PASS
 
 Status:
 
-✅ Complete locally
+✅ Complete
 
 ---
 
@@ -820,12 +839,16 @@ Current documentation includes:
 
 ```text
 docs/
-├── adr/
+├── adr/                 ADR 001–006
+├── case-studies/
+├── accessibility.md
 ├── api.md
 ├── architecture.md
 ├── deployment.md
+├── developer-experience.md
 ├── engineering-scorecard.md
 ├── evidence.md
+├── metrics.md           generated, single source of numbers
 ├── performance.md
 ├── roadmap.md
 ├── security.md
@@ -834,7 +857,7 @@ docs/
 
 Status:
 
-✅ Complete core documentation set
+✅ Complete; reconciled with the code on 2026-10-12
 
 ---
 
@@ -881,9 +904,11 @@ Status:
 Optional:
 
 * production screenshots;
-* architecture diagram image;
-* additional case studies;
 * manual accessibility evidence.
+
+The README carries a Mermaid architecture diagram, and the CodeForge case
+study is published on the site (`/projects/codeforge`) and in
+`docs/case-studies/`.
 
 Status:
 
@@ -905,7 +930,9 @@ Status:
 
 ## Environment Documentation
 
-The repository uses environment-specific configuration.
+The repository uses environment-specific configuration, with committed
+templates (`backend/.env.example`, `backend/.env.test.example`) and a complete
+reference in [deployment.md § 7](deployment.md#7-environment-variables).
 
 Important variables include:
 
@@ -992,7 +1019,8 @@ Status:
 * [x] Rate limiting
 * [x] Audit logging
 * [x] Dependency audit
-* [x] 0 local vulnerabilities
+* [x] 0 high/critical vulnerabilities
+* [x] CSRF guard
 
 ## Frontend
 
@@ -1015,7 +1043,7 @@ Status:
 
 ## Performance
 
-* [x] Lighthouse Performance 99
+* [x] Lighthouse Performance ≥ 90 (desktop and mobile)
 * [x] LCP within target (see [metrics.md](metrics.md))
 * [x] CLS 0
 * [x] ISR
@@ -1046,7 +1074,9 @@ Status:
 
 # 14. Current Roadmap Position
 
-The implementation has completed the majority of the original 90/100 roadmap.
+The implementation has completed the original 90/100 roadmap: every
+engineering milestone is implemented, tested in CI and measured in
+production.
 
 The strongest verified evidence is:
 
@@ -1079,7 +1109,7 @@ The 90/100 roadmap is considered fully closed when:
 * [x] Local backend quality gates pass.
 * [x] Backend coverage exceeds thresholds.
 * [x] E2E passes with six workers.
-* [x] Local dependency audits report zero vulnerabilities.
+* [x] Dependency audits report no high or critical vulnerabilities.
 * [x] Lighthouse Performance exceeds 90.
 * [x] Lighthouse Accessibility exceeds 90.
 * [x] Lighthouse Best Practices exceeds 90.
@@ -1112,5 +1142,6 @@ Evidence freshness
 
 rather than broad feature expansion.
 
-The next engineering work should close the remaining CI and measurement gaps
-before introducing additional architectural or product complexity.
+The CI and Lighthouse gaps are closed. Field INP will be recorded once real
+users generate data; new architectural or product complexity should only be
+introduced with a measurable requirement.

@@ -30,10 +30,12 @@ CodeForge/
 │
 ├── frontend/
 │   ├── src/
+│   ├── tests/
 │   └── e2e/
 │
 ├── docs/
 │   ├── adr/
+│   ├── case-studies/
 │   ├── api.md
 │   ├── architecture.md
 │   ├── accessibility.md
@@ -41,16 +43,20 @@ CodeForge/
 │   ├── developer-experience.md
 │   ├── engineering-scorecard.md
 │   ├── evidence.md
+│   ├── metrics.md            generated
+│   ├── metrics-lighthouse.json
 │   ├── performance.md
 │   ├── roadmap.md
 │   ├── security.md
 │   └── testing.md
 │
 ├── scripts/
+│   └── collect-metrics.mjs
 │
 └── .github/
+    ├── dependabot.yml
     └── workflows/
-````
+```
 
 The structure separates:
 
@@ -72,21 +78,25 @@ The backend uses:
 Node.js 24.x
 TypeScript
 ESLint
-Vitest
-Supertest
+Vitest (+ Fastify inject() for API tests)
 V8 Coverage
+MongoDB (local instance for development and tests)
 ```
 
 The frontend uses:
 
 ```text
-Node.js
+Node.js 24.x
 Astro
 TypeScript
 ESLint
-Playwright
+Vitest + happy-dom + Astro Container API
+Playwright + axe-core
 Tailwind CSS
 ```
+
+The Node.js version is pinned in `.nvmrc` and in both `engines` fields; CI
+uses the same major version.
 
 The exact dependency versions are controlled through the committed package
 manifests and lockfiles.
@@ -97,14 +107,14 @@ manifests and lockfiles.
 
 ## Backend
 
-```bash id="f64gcx"
+```bash
 cd backend
 npm ci
 ```
 
 ## Frontend
 
-```bash id="sn4cgt"
+```bash
 cd frontend
 npm ci
 ```
@@ -115,9 +125,15 @@ npm ci
 
 # 5. Environment Configuration
 
-The application uses environment-specific configuration.
+The application uses environment-specific configuration. Start from the
+committed templates:
 
-Important variable categories include:
+```bash
+cp backend/.env.example backend/.env
+cp backend/.env.test.example backend/.env.test
+```
+
+Important variables:
 
 ```text
 MONGODB_URI
@@ -125,9 +141,11 @@ JWT_SECRET
 ADMIN_API_KEY
 FRONTEND_URL
 PUBLIC_API_URL
+OPENAI_API_KEY / GEMINI_API_KEY
 ```
 
-External provider credentials are also environment-dependent where required.
+The complete list, with defaults and effects, is in
+[deployment.md § 7](deployment.md#7-environment-variables).
 
 Production secrets must never be committed to the repository.
 
@@ -137,14 +155,14 @@ Production secrets must never be committed to the repository.
 
 ## Backend
 
-```bash id="f6wlkk"
+```bash
 cd backend
 npm run dev
 ```
 
 ## Frontend
 
-```bash id="u49pga"
+```bash
 cd frontend
 npm run dev
 ```
@@ -179,7 +197,7 @@ Dependency Audit
 
 # 8. Backend Quality Commands
 
-```bash id="e0n2k2"
+```bash
 npm run lint
 npm run typecheck
 npm run test
@@ -341,6 +359,12 @@ Architectural decisions should be recorded in:
 docs/adr/
 ```
 
+Test, coverage and Lighthouse numbers live only in the generated:
+
+```text
+docs/metrics.md   (npm run metrics; Lighthouse from docs/metrics-lighthouse.json)
+```
+
 Engineering evidence should be recorded in:
 
 ```text
@@ -405,13 +429,12 @@ Dependencies should be:
 
 The standard check is:
 
-```bash id="9xycwt"
+```bash
 npm audit --audit-level=high
 ```
 
-Current local result:
-
-Current numbers: see [metrics.md](metrics.md).
+Current result: [security.md § 3](security.md#3-dependency-status).
+Dependabot opens weekly update PRs.
 
 Dependency changes should be accompanied by appropriate test and build
 verification.
@@ -447,18 +470,20 @@ evolves.
 
 The current architecture separates frontend and backend development services.
 
-Typical local endpoints:
+Local endpoints:
 
 ```text
-Frontend:
-http://127.0.0.1:4321
+Frontend (npm run dev):      http://localhost:2003
+Backend (PORT in .env):      http://127.0.0.1:3002
+Production build preview:    http://127.0.0.1:4322 (npm run serve:build)
 
-Backend:
-http://127.0.0.1:3002
+Playwright:
+Frontend (Astro dev server): http://127.0.0.1:4321
+Backend (test database):     http://127.0.0.1:3002
+MongoDB:                     mongodb://127.0.0.1:27017
 ```
 
-These values are used by the automated E2E environment and should remain
-consistent with the Playwright configuration.
+The Playwright values must stay consistent with `frontend/playwright.config.ts`.
 
 ---
 
@@ -644,11 +669,8 @@ Security audit
 Architecture documentation
 ```
 
-The current local engineering gates are passing.
-
-The main remaining DX-related concern is not local development functionality,
-but ensuring that the remote CI environment behaves consistently with the
-local workflow.
+The engineering gates pass locally and in GitHub Actions, which runs the same
+commands on the same Node.js major version.
 
 ---
 

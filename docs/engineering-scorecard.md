@@ -4,7 +4,7 @@
 
 **Repository:** `AeSoul0/CodeForge`
 **Review scope:** Architecture, Backend, Frontend, Security, Testing & QA, CI/CD, Performance, Maintainability, Documentation, UX/Accessibility
-**Status:** Final local verification phase
+**Status:** Roadmap complete (2026-10-12); only field INP evidence pending
 **Target:** 90+/100
 
 ---
@@ -56,7 +56,7 @@ This scorecard intentionally distinguishes verified evidence from pending eviden
 | UX / Accessibility           |        7.0 |        **9.0** |
 | **Roadmap Target**           | **82/100** |   **90.7/100** |
 
-> The numerical category scores above are roadmap targets, not automatically awarded final scores. Final scoring should only be assigned after the remaining evidence gaps are closed.
+> The numerical category scores above are roadmap targets, not automatically awarded final scores. Every engineering item behind them is now implemented and verified; the only open evidence is field INP (real-user data) and a manual screen-reader review.
 
 ---
 
@@ -200,7 +200,7 @@ Verified:
 * ESLint;
 * TypeScript typecheck;
 * Vitest;
-* Supertest;
+* Fastify `inject()` API tests;
 * V8 coverage;
 * schema validation;
 * authentication tests;
@@ -239,6 +239,11 @@ PASS
 ```
 
 ```text
+npm run test:cov   (unit, admin and rendering tests, 90% thresholds)
+PASS
+```
+
+```text
 npm run build
 PASS
 ```
@@ -251,7 +256,8 @@ The frontend uses Astro SSR for dynamic functionality and Vercel ISR to reduce r
 
 The frontend contains:
 
-* lightweight Astro islands;
+* small bundled TypeScript modules instead of a UI framework runtime;
+* a hash-based CSP without `'unsafe-inline'`;
 * optimized decorative Canvas rendering;
 * reduced-motion support;
 * visibility-aware animation;
@@ -296,7 +302,8 @@ Implemented controls include:
 * HSTS;
 * X-Frame-Options/clickjacking protection;
 * Referrer Policy;
-* CORS restrictions.
+* CORS restrictions;
+* CSRF guard (origin check + `X-Requested-With` header).
 
 ## Rate Limiting
 
@@ -327,21 +334,21 @@ Critical domain operations are recorded through the audit logger.
 Examples include:
 
 ```text
-LOGIN_ATTEMPT
 CREATE_PROJECT
+UPDATE_EXPERIENCE_IMAGE
+DELETE_PROJECT
 ```
 
 ## Dependency Security
 
-Latest local audits:
-
-Current numbers: see [metrics.md](metrics.md).
+Latest audits: [security.md § 3](security.md#3-dependency-status) (no high or
+critical advisories).
 
 ## Target Assessment
 
 **Security target: 9.2/10**
 
-Status: ✅ Strong locally
+Status: ✅ Strong
 
 Remote CI security verification: ✅ runs in CI (security tests, CodeQL, audits)
 
@@ -373,10 +380,18 @@ The Playwright suite verifies:
 * valid authentication;
 * protected routes;
 * authenticated dashboard;
+* project and experience CRUD, including logo upload;
+* API playground and system status;
 * logout;
 * API failure handling;
-* accessibility;
+* accessibility of public and admin pages;
 * keyboard navigation.
+
+## Frontend Unit and Rendering Tests
+
+Client modules run against happy-dom; `.astro` pages and components are
+rendered with the Astro Container API; admin tests mount the real page markup.
+Coverage thresholds are 90% on all four metrics ([testing.md](testing.md)).
 
 ## Accessibility Automation
 
@@ -404,7 +419,7 @@ Browser E2E
 
 **Testing & QA target: 9.2/10**
 
-Status: ✅ Strong locally
+Status: ✅ Strong, enforced in CI
 
 ---
 
@@ -484,7 +499,10 @@ CLS:         0
 
 After introducing Vercel ISR:
 
-Current numbers: see [metrics.md](metrics.md).
+```text
+Performance: 96/100
+LCP:         2.2 s
+```
 
 Measured improvement:
 
@@ -501,13 +519,11 @@ The target of:
 Performance >= 90
 ```
 
-is satisfied.
+is satisfied on desktop and mobile (2026-10-12, median of 3 runs).
 
-The remaining improvement opportunities are:
+The remaining opportunities are:
 
-* INP measurement;
-* mobile performance measurement;
-* TTFB optimization;
+* field INP measurement (real-user data);
 * image/bundle trend monitoring.
 
 ## Target Assessment
@@ -557,8 +573,8 @@ Run E2E
 
 ## Remaining Improvements
 
-* complete remote CI verification;
-* maintain environment documentation;
+* maintain environment documentation (`backend/.env.example`,
+  [deployment.md § 7](deployment.md#7-environment-variables));
 * keep evidence synchronized with current measurements;
 * maintain ADRs as architectural decisions evolve.
 
@@ -578,12 +594,17 @@ The repository contains:
 
 ```text
 docs/
-├── adr/
+├── adr/                       ADR 001–006
+├── case-studies/codeforge.md
+├── accessibility.md
 ├── api.md
 ├── architecture.md
 ├── deployment.md
+├── developer-experience.md
 ├── engineering-scorecard.md
 ├── evidence.md
+├── metrics.md                 generated: tests, coverage, Lighthouse
+├── metrics-lighthouse.json
 ├── performance.md
 ├── roadmap.md
 ├── security.md
@@ -605,11 +626,11 @@ This prevents target values from being presented as actual measurements.
 
 ## Remaining Documentation Work
 
-* replace any remaining stale placeholders;
-* add final screenshots where desired;
-* record final CI workflow evidence;
-* record INP/mobile Lighthouse results;
+* record field INP once real-user data exists;
 * keep documentation synchronized with future releases.
+
+The 2026-10-12 review reconciled every document with the code (API
+reference, environment variables, CI runtime, Lighthouse results).
 
 ## Target Assessment
 
@@ -716,7 +737,8 @@ Current numbers: see [metrics.md](metrics.md).
 * [x] Rate limiting
 * [x] Audit logging
 * [x] Dependency audits
-* [x] 0 current local vulnerabilities
+* [x] 0 high/critical vulnerabilities
+* [x] CSRF guard
 
 ## Frontend
 
@@ -762,8 +784,8 @@ Current numbers: see [metrics.md](metrics.md).
 * [x] Roadmap
 * [x] Final CI evidence
 * [x] Final mobile Lighthouse evidence
-* [x] Final INP evidence
-* [x] Remaining README screenshots where appropriate
+* [ ] Final INP evidence (Pending field data)
+* [x] README architecture diagram
 
 ---
 
