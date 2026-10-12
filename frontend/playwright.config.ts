@@ -74,6 +74,17 @@ export default defineConfig({
             },
         ],
         ['line'],
+        [
+            'json',
+            {
+                // Read by scripts/collect-metrics.mjs.
+                outputFile:
+                    path.resolve(
+                        __dirname,
+                        '../.playwright-results/results.json',
+                    ),
+            },
+        ],
     ],
 
     use: {
@@ -145,6 +156,16 @@ export default defineConfig({
 
                 FRONTEND_URL:
                     frontendUrl,
+
+                /**
+                 * Six parallel workers share one IP; the production
+                 * default (5/min) would turn logins into 429s.
+                 */
+                LOGIN_RATE_LIMIT_MAX:
+                    '100',
+
+                RATE_LIMIT_MAX:
+                    '5000',
             },
         },
 
@@ -177,6 +198,16 @@ export default defineConfig({
 
                 PUBLIC_E2E:
                     'true',
+
+                /**
+                 * Astro 7 auto-detects AI agent environments and moves
+                 * `astro dev` to a detached background process, which
+                 * Playwright reports as "exited early". A non-empty value
+                 * disables the detection and keeps the server in the
+                 * foreground.
+                 */
+                ASTRO_DEV_BACKGROUND:
+                    '0',
             },
         },
     ],
@@ -190,6 +221,17 @@ export default defineConfig({
                 ...devices[
                     'Desktop Chrome'
                 ],
+
+                /**
+                 * Optional override for environments that ship a
+                 * preinstalled Chromium instead of the build pinned by
+                 * this Playwright release.
+                 */
+                launchOptions: {
+                    executablePath:
+                        process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ||
+                        undefined,
+                },
             },
         },
     ],
