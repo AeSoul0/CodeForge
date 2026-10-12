@@ -41,52 +41,41 @@ Current numbers: see [metrics.md](metrics.md).
 
 # 4. Core Performance Metrics
 
-Latest captured homepage measurement:
+Scores, LCP and CLS (desktop and mobile, median of 3 runs):
+[metrics.md](metrics.md).
 
-Current numbers: see [metrics.md](metrics.md).
+Details of the 2026-10-12 audit (Lighthouse 13.4.1, 3 desktop + 3 mobile
+runs) that `metrics.md` does not list:
+
+| Metric | Desktop runs | Mobile runs |
+|---|---|---|
+| TTFB (server response) | 58–213 ms | 75–107 ms |
+| Total Blocking Time | 0–40 ms | 0–20 ms |
+| First Contentful Paint | 0.5–0.6 s | 1.8–1.9 s |
 
 ## LCP
 
-Current:
-
-```text
-2.2 seconds
-```
-
-The result is below the roadmap target of 2.5 seconds for a strong production
-experience.
+Below the 2.5 s target on both form factors. The mobile value is dominated by
+Lighthouse's simulated slow-4G throttling, not by server time.
 
 ## CLS
 
-Current:
-
-```text
-0
-```
-
-This indicates no measurable layout-shift contribution in the captured run.
+0 in every run: no measurable layout shift.
 
 ## TTFB
 
-Current captured value:
-
-```text
-770 ms
-```
-
-TTFB remains an optimization opportunity.
-
-However, TTFB varies between Lighthouse captures and should not be judged from
-a single sample in isolation.
+The earlier single samples (680 ms and 770 ms) were not representative;
+across six runs with ISR the server response stayed between 58 and 213 ms.
 
 ## INP
 
-The captured Lighthouse JSON did not expose a reportable INP display value.
-
-Therefore:
+INP is a field metric: Lighthouse lab runs cannot measure it. The lab proxy,
+Total Blocking Time, is 0–40 ms. A field INP value requires real-user data
+(Chrome UX Report once the site has enough traffic, or Vercel Speed
+Insights), so:
 
 ```text
-INP: PENDING
+INP: PENDING (field data)
 ```
 
 No estimated INP value is published.
@@ -134,9 +123,15 @@ Performance: 88/100
 LCP:         3.0 s
 ```
 
-After ISR:
+After ISR (desktop, same session):
 
-Current numbers: see [metrics.md](metrics.md).
+```text
+Performance: 96/100
+LCP:         2.2 s
+```
+
+Later changes raised desktop Performance further; current values are in
+[metrics.md](metrics.md).
 
 Measured difference:
 
@@ -298,9 +293,15 @@ content visibility.
 
 # 15. Performance Quality Gates
 
-Current performance requirements:
+Current performance requirements (production homepage, desktop and mobile):
 
-Current numbers: see [metrics.md](metrics.md).
+```text
+Lighthouse Performance   ≥ 90
+LCP                      ≤ 2.5 s
+CLS                      ≤ 0.1
+```
+
+All three are met: [metrics.md](metrics.md).
 
 ---
 
@@ -313,50 +314,24 @@ optimization.
 
 ## INP
 
-Capture a fresh INP measurement using a representative interaction flow.
-
-Recommended interactions include:
+Record a field INP value once real-user data is available (CrUX or Vercel
+Speed Insights). Representative interactions:
 
 ```text
 Navigation
 Primary CTA interaction
 Menu interaction
-Admin login interaction
+Project filter
 ```
 
 ## Mobile Lighthouse
 
-Run the homepage under mobile Lighthouse conditions and record:
-
-```text
-Performance
-Accessibility
-Best Practices
-SEO
-LCP
-INP
-CLS
-TTFB
-```
+Done on 2026-10-12 (median of 3 runs): see [metrics.md](metrics.md).
 
 ## TTFB
 
-Continue monitoring TTFB across multiple production measurements.
-
-The current:
-
-```text
-770 ms
-```
-
-should be treated as an optimization signal rather than a hard regression
-because the previous captured run reported:
-
-```text
-680 ms
-```
-
-while overall Performance and LCP improved substantially after ISR.
+Repeated benchmarking done on 2026-10-12: 58–213 ms over six runs. Re-check
+after backend or rendering changes.
 
 ---
 
@@ -383,25 +358,31 @@ measurements rather than a single sample.
 
 For reproducible Lighthouse measurements:
 
-```powershell
-npx lighthouse https://www.aesoul0.com `
-  --output json `
-  --output-path .\lighthouse-home.json `
-  --chrome-flags="--headless"
+```bash
+# desktop
+npx lighthouse https://www.aesoul0.com/ --preset=desktop --output=json \
+  --output-path=./lighthouse-desktop.json --chrome-flags="--headless"
+
+# mobile (the CLI default)
+npx lighthouse https://www.aesoul0.com/ --output=json \
+  --output-path=./lighthouse-mobile.json --chrome-flags="--headless"
 ```
 
-Extract:
+Run each 2–3 times and use the median, because TTFB on Render/Vercel varies.
+Report files (`lighthouse*.json`) are git-ignored.
+
+Extract from each report:
 
 ```text
-Performance
-Accessibility
-Best Practices
-SEO
-LCP
-INP
-CLS
-TTFB
+categories.<id>.score × 100             Performance, Accessibility,
+                                        Best Practices, SEO
+audits['largest-contentful-paint']      LCP
+audits['cumulative-layout-shift']       CLS
+audits['server-response-time']          TTFB
+audits['total-blocking-time']           TBT
 ```
+
+and update `docs/metrics-lighthouse.json`.
 
 Record:
 
@@ -426,19 +407,25 @@ LCP: 3.0s
 CLS: 0
 ```
 
-## Current
+## After ISR
 
-Current numbers: see [metrics.md](metrics.md).
+```text
+Performance: 96
+LCP: 2.2s
+```
 
-## Improvement
+## Improvement from ISR
 
 ```text
 Performance: +8 points
 LCP: -0.8 seconds
 ```
 
-This is the current strongest measurable performance improvement in the
-project.
+## Current (2026-10-12)
+
+See [metrics.md](metrics.md). The 2026-10 frontend changes (bundled scripts,
+single particle canvas, hash-based CSP) raised mobile Performance from 90 to
+95 with no regression on desktop.
 
 ---
 
@@ -450,12 +437,11 @@ The current production homepage demonstrates:
 
 Current numbers: see [metrics.md](metrics.md).
 
-The principal remaining performance evidence gaps are:
+Mobile Lighthouse and repeated TTFB benchmarking were completed on
+2026-10-12. The only remaining performance evidence gap is:
 
 ```text
-INP measurement
-Mobile Lighthouse measurement
-Repeated TTFB benchmarking
+Field INP measurement (requires real-user data)
 ```
 
 No further speculative performance changes should be introduced unless fresh

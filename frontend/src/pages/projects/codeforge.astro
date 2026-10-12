@@ -7,37 +7,39 @@
 import Layout from "../../layouts/Layout.astro";
 import "../../styles/global.css";
 
+const METRICS_URL = "https://github.com/AeSoul0/CodeForge/blob/main/docs/metrics.md";
+
 const engineeringAreas = [
     {
         label: "Architecture",
-        value: "Controller → Service → Repository"
+        value: "Routes → Controllers → Services → Repositories"
     },
     {
         label: "Security",
-        value: "JWT · HTTP-only Cookies · CSP · Rate Limiting"
+        value: "JWT Cookie · CSRF Guard · Hash-based CSP · Rate Limiting"
     },
     {
         label: "Testing",
-        value: "Vitest · Supertest · V8 Coverage"
+        value: "Vitest · Astro Container API · Playwright · axe-core"
     },
     {
         label: "Delivery",
-        value: "Docker · GitHub Actions · TypeScript"
+        value: "GitHub Actions · Vercel ISR · Render · MongoDB Atlas"
     }
 ];
 
 const platformCapabilities = [
     {
         label: "Frontend",
-        value: "Astro + React + Tailwind CSS"
+        value: "Astro + Tailwind CSS + TypeScript modules"
     },
     {
         label: "Backend",
-        value: "Fastify + TypeScript"
+        value: "Fastify + TypeScript on Node.js 24"
     },
     {
         label: "Persistence",
-        value: "MongoDB + Mongoose"
+        value: "MongoDB Atlas + Mongoose"
     },
     {
         label: "AI Documentation",
@@ -46,16 +48,53 @@ const platformCapabilities = [
 ];
 
 const qualityChecks = [
-    "ESLint",
-    "TypeScript typechecking",
-    "Backend build verification",
-    "Vitest unit tests",
-    "Supertest HTTP integration tests",
-    "GitHub Actions CI"
+    "ESLint and TypeScript (tsc, astro check)",
+    "Backend Vitest against a real MongoDB",
+    "Frontend unit and rendering tests (90% coverage gate)",
+    "Playwright E2E with six parallel workers",
+    "axe-core scans of public and admin pages",
+    "npm audit, CodeQL and Dependency Review"
+];
+
+const securityModel = [
+    {
+        label: "Authentication",
+        text: "JWT (HS256, issuer and audience checked, 24 h expiry) in an HttpOnly, Secure cookie; bcrypt-hashed admin password."
+    },
+    {
+        label: "CSRF Protection",
+        text: "Every authenticated mutation must come from an allowed origin and carry an X-Requested-With header that cross-site pages cannot send."
+    },
+    {
+        label: "HTTP Protection",
+        text: "Helmet, HSTS, frame-ancestors 'none', referrer policy and a hash-based CSP without 'unsafe-inline' on both the site and the API."
+    },
+    {
+        label: "Abuse Prevention",
+        text: "Global per-client rate limiting plus a stricter limit of five login attempts per minute."
+    },
+    {
+        label: "Input Safety",
+        text: "Fastify JSON schemas reject unknown fields, oversized values and malformed ids before any business logic runs."
+    },
+    {
+        label: "Output Safety",
+        text: "API data reaches the DOM only through textContent and attributes; project Markdown is escaped and its links are allow-listed."
+    }
+];
+
+const measuredResults = [
+    { label: "Performance", value: "99 / 95" },
+    { label: "Accessibility", value: "100 / 100" },
+    { label: "Best Practices", value: "100 / 100" },
+    { label: "SEO", value: "100 / 100" }
 ];
 ---
 
-<Layout title="CodeForge Case Study | ÆSoul">
+<Layout
+    title="CodeForge Case Study | ÆSoul"
+    description="How CodeForge separates portfolio presentation from content management with an Astro frontend, a secured Fastify API and repository-grounded AI documentation."
+>
 
     <div class="pointer-events-none fixed inset-x-0 top-0 z-0 h-[420px] bg-gradient-to-b from-cyan-500/[0.07] via-transparent to-transparent"></div>
 
@@ -96,10 +135,11 @@ const qualityChecks = [
 
             <div class="prose prose-invert max-w-none prose-p:text-xl prose-p:leading-relaxed prose-p:text-slate-300">
                 <p>
-                    <strong class="text-white">CodeForge</strong> is a full-stack portfolio platform built to
-                    separate portfolio presentation from content management while providing an
+                    <strong class="text-white">CodeForge</strong> is the platform behind this portfolio: an Astro
+                    site and a protected admin dashboard backed by a Fastify API, with an
                     <span class="text-cyan-400"> evidence-driven AI documentation workflow </span>
-                    grounded in public GitHub repository context.
+                    grounded in each project's public GitHub repository. The system itself is the case study:
+                    every claim on this page is backed by code, tests or a production measurement.
                 </p>
             </div>
 
@@ -127,7 +167,7 @@ const qualityChecks = [
                         Stack
                     </h3>
                     <p class="text-sm font-medium text-slate-300">
-                        Astro · React · Fastify · TypeScript · MongoDB · Mongoose · Docker
+                        Astro · Tailwind CSS · Fastify · TypeScript · MongoDB · Vercel · Render
                     </p>
                 </div>
             </div>
@@ -148,14 +188,14 @@ const qualityChecks = [
                 <p class="mb-4 text-lg text-slate-300">
                     A personal portfolio has to solve two separate engineering problems:
                     presenting technical work clearly and maintaining the content behind it.
-                    Hard-coded project pages make updates repetitive and couple content management
+                    Hard-coded project pages make every update a code change and couple content management
                     too tightly to the frontend.
                 </p>
 
                 <p class="text-lg text-slate-300">
-                    At the same time, a GitHub repository alone rarely provides enough context for a
-                    technical reviewer to quickly understand the architecture, engineering decisions,
-                    security controls, testing strategy, and implementation details of a project.
+                    At the same time, a GitHub repository alone rarely gives a technical reviewer enough context
+                    to understand a project's architecture, decisions, security controls and testing strategy
+                    quickly. And a portfolio that only claims engineering quality, without evidence, is easy to dismiss.
                 </p>
             </div>
 
@@ -166,21 +206,25 @@ const qualityChecks = [
             <ul>
                 <li>
                     <strong>Separate content from presentation:</strong>{" "}
-                    project and experience data should be managed independently from the frontend.
+                    projects and experiences are managed from an admin dashboard and stored in a database,
+                    not in the frontend source.
                 </li>
                 <li>
                     <strong>Provide technical depth:</strong>{" "}
-                    projects should expose architecture, implementation decisions, and engineering evidence.
+                    every project page exposes architecture, implementation decisions and engineering context.
                 </li>
                 <li>
                     <strong>Automate documentation:</strong>{" "}
-                    generating project documentation should rely on repository evidence rather than manually
-                    recreating technical context.
+                    generate project documentation from repository evidence instead of rewriting it by hand.
                 </li>
                 <li>
-                    <strong>Keep the platform production-oriented:</strong>{" "}
-                    authentication, validation, testing, CI, deployment, and observability should be treated
-                    as first-class concerns.
+                    <strong>Treat production concerns as features:</strong>{" "}
+                    authentication, validation, testing, CI, deployment and observability are part of the scope.
+                </li>
+                <li>
+                    <strong>Prove it with numbers:</strong>{" "}
+                    quality is measured (coverage gates, E2E results, production Lighthouse) and published,
+                    not asserted.
                 </li>
             </ul>
 
@@ -189,9 +233,9 @@ const qualityChecks = [
             <h2>03. Solution Overview</h2>
 
             <p>
-                CodeForge uses a split frontend/backend architecture. The Astro frontend is responsible
-                for presentation and routing, while a Fastify API manages portfolio data, authentication,
-                business logic, persistence, and AI-assisted documentation.
+                CodeForge uses a split frontend/backend architecture. The Astro frontend, deployed on Vercel,
+                renders the public site and the admin dashboard. A Fastify API on Render owns portfolio data,
+                authentication, business logic, persistence in MongoDB Atlas and the AI-assisted documentation.
             </p>
 
             <div class="not-prose my-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -215,44 +259,36 @@ const qualityChecks = [
 
             <p>
                 The backend follows a
-                <strong> Controller → Service → Repository</strong>
-                architecture to keep HTTP concerns, business logic, and persistence responsibilities separate.
-                Fastify application configuration is also isolated from server bootstrap, which allows the
-                configured application to be imported directly by the test suite without starting a network listener.
+                <strong> Routes → Controllers → Services → Repositories</strong>
+                architecture to keep HTTP concerns, business logic and persistence separate.
+                The Fastify application is built separately from the server bootstrap, so the test suite imports
+                the fully configured app and exercises it with <code>inject()</code> without opening a network port.
             </p>
 
             <div class="not-prose my-8 rounded-2xl border border-white/10 bg-black/40 p-6">
                 <pre class="overflow-x-auto text-sm leading-relaxed text-slate-300"><code>{`Browser
+   │  HTTPS · HSTS · hash-based CSP
+   ▼
+Vercel ── Astro SSR + ISR (300 s)
+   │      bundled TypeScript modules
+   │  REST · HttpOnly cookie
+   ▼
+Render ── Fastify API
+   │
+   ├── CORS allowlist · CSRF guard
+   ├── JWT verification · JSON schemas
+   ▼
+Controllers → Services → Repositories
    │
    ▼
-Astro + React Frontend
-   │
-   ▼
-Fastify API
-   │
-   ├── Authentication / Validation
-   │
-   ▼
-Controllers
-   │
-   ▼
-Services
-   │
-   ▼
-Repositories
-   │
-   ▼
-MongoDB / Mongoose
+MongoDB Atlas (Mongoose)
 
-AI Documentation
+AI Documentation (background)
    │
-   ├── Public GitHub Repository Context
-   ├── OpenAI / Gemini
+   ├── GitHub API: metadata, README, package.json
+   ├── OpenAI, falling back to Gemini
    ▼
-Persisted Markdown
-   │
-   ▼
-Project Case Study`}</code></pre>
+Persisted Markdown → Project Case Study`}</code></pre>
             </div>
 
             <div class="h-4 md:h-6"></div>
@@ -262,19 +298,21 @@ Project Case Study`}</code></pre>
             <div class="not-prose my-8 space-y-6">
                 <div class="rounded-2xl border border-white/5 bg-white/[0.02] p-6">
                     <h3 class="mb-2 text-lg font-bold text-white">
-                        Frontend: Astro + React
+                        Frontend: Astro without a UI framework runtime
                     </h3>
 
                     <p class="mb-4 text-sm text-slate-400">
                         <strong class="text-slate-200">Decision:</strong>{" "}
-                        Use Astro for the application shell and content-heavy routes while retaining
-                        React integration where interactive UI behaviour is useful.
+                        Render every page with Astro and implement interactivity (admin dashboard, project filter,
+                        particle background) as small TypeScript modules bundled by Astro.
                     </p>
 
                     <p class="text-sm text-slate-400">
                         <strong class="text-slate-200">Reasoning:</strong>{" "}
-                        The portfolio is primarily content-oriented, so the architecture prioritizes
-                        lightweight rendering while keeping component-level interactivity available when needed.
+                        The site is content-first, so shipping a component framework would add JavaScript without
+                        adding value. Bundled modules are unit-testable and let Astro hash every script, which is
+                        what makes a CSP without <code>'unsafe-inline'</code> possible. An unused React integration
+                        was removed for the same reason.
                     </p>
                 </div>
 
@@ -285,30 +323,32 @@ Project Case Study`}</code></pre>
 
                     <p class="mb-4 text-sm text-slate-400">
                         <strong class="text-slate-200">Decision:</strong>{" "}
-                        Keep transport handling, application logic, and persistence in separate layers.
+                        Keep transport handling, application logic and persistence in separate layers.
                     </p>
 
                     <p class="text-sm text-slate-400">
                         <strong class="text-slate-200">Reasoning:</strong>{" "}
-                        This makes the backend easier to test, reason about, and extend without coupling
-                        HTTP handlers directly to MongoDB operations.
+                        Each layer is tested on its own and HTTP handlers never touch MongoDB directly, so the
+                        backend stays easy to reason about and extend.
                     </p>
                 </div>
 
                 <div class="rounded-2xl border border-white/5 bg-white/[0.02] p-6">
                     <h3 class="mb-2 text-lg font-bold text-white">
-                        Security: Protected Administrative API
+                        Security: cookies across two sites
                     </h3>
 
                     <p class="mb-4 text-sm text-slate-400">
                         <strong class="text-slate-200">Decision:</strong>{" "}
-                        Administrative mutations require JWT authentication stored in an HTTP-only cookie.
+                        Keep the session JWT in an HttpOnly cookie and add an explicit CSRF guard.
                     </p>
 
                     <p class="text-sm text-slate-400">
-                        <strong class="text-slate-200">Implementation:</strong>{" "}
-                        Helmet-based protections, restricted CORS, CSP/HSTS configuration, bcrypt password hashing,
-                        request rate limiting, schema validation, and production-safe error responses.
+                        <strong class="text-slate-200">Reasoning:</strong>{" "}
+                        Frontend and API live on different sites, so the cookie must be <code>SameSite=None</code>,
+                        which removes SameSite's built-in CSRF protection. The API therefore checks the request
+                        origin and requires a custom header on every authenticated mutation, and login itself is
+                        origin-checked.
                     </p>
                 </div>
 
@@ -325,9 +365,27 @@ Project Case Study`}</code></pre>
 
                     <p class="text-sm text-slate-400">
                         <strong class="text-slate-200">Implementation:</strong>{" "}
-                        CodeForge collects repository metadata, README content, and available project metadata,
-                        then supplies that context to an OpenAI or Gemini provider. Generated Markdown is normalized,
-                        bounded, persisted, and rendered by the portfolio.
+                        CodeForge collects repository metadata, the README and <code>package.json</code>, then
+                        supplies that context to OpenAI, falling back to Gemini. Generation runs in the background,
+                        so a provider failure never blocks saving a project; the Markdown is normalized, persisted and
+                        rendered through a safe Markdown renderer. Existing documentation is only replaced on request.
+                    </p>
+                </div>
+
+                <div class="rounded-2xl border border-white/5 bg-white/[0.02] p-6">
+                    <h3 class="mb-2 text-lg font-bold text-white">
+                        Performance: measure, then cache
+                    </h3>
+
+                    <p class="mb-4 text-sm text-slate-400">
+                        <strong class="text-slate-200">Decision:</strong>{" "}
+                        Serve public pages with Vercel ISR (300-second expiration) instead of rendering every request.
+                    </p>
+
+                    <p class="text-sm text-slate-400">
+                        <strong class="text-slate-200">Evidence:</strong>{" "}
+                        The change was made after a Lighthouse baseline and measured afterwards: Performance went
+                        from 88 to 96 and LCP from 3.0 s to 2.2 s, without turning the site into a static build.
                     </p>
                 </div>
             </div>
@@ -344,27 +402,31 @@ Project Case Study`}</code></pre>
             <ul>
                 <li>
                     <strong>Fastify API:</strong>{" "}
-                    typed REST endpoints with explicit request schemas and centralized error handling.
+                    typed REST endpoints with JSON request schemas, one error format and centralized error handling.
                 </li>
                 <li>
                     <strong>Persistence:</strong>{" "}
-                    MongoDB with Mongoose models and repository-level data access.
+                    MongoDB with Mongoose models behind repositories; experience logos are stored in the database
+                    and served by the API, so there is no separate file storage.
                 </li>
                 <li>
-                    <strong>Authentication:</strong>{" "}
-                    JWT-based administrative authentication using HTTP-only cookies and secure production settings.
+                    <strong>Admin dashboard:</strong>{" "}
+                    overview, project and experience management with logo upload, an API playground and a system
+                    page with liveness, readiness and request metrics.
                 </li>
                 <li>
                     <strong>AI workflow:</strong>{" "}
-                    asynchronous repository-aware documentation generation with persisted Markdown output.
+                    background, repository-aware documentation generation, triggered on creation or on demand.
                 </li>
                 <li>
                     <strong>Observability:</strong>{" "}
-                    structured Fastify logging and in-process request metrics for runtime visibility.
+                    structured request logs with request ids, an audit log for every content change, and
+                    <code>/live</code>, <code>/ready</code> and <code>/metrics</code> endpoints.
                 </li>
                 <li>
                     <strong>Deployment:</strong>{" "}
-                    Docker and Docker Compose definitions for reproducible multi-service environments.
+                    Vercel for the frontend, Render for the API and MongoDB Atlas for data, with the same Node.js
+                    version pinned locally, in CI and in production.
                 </li>
             </ul>
 
@@ -373,8 +435,9 @@ Project Case Study`}</code></pre>
             <h2>07. Testing & Engineering Quality</h2>
 
             <p>
-                Instead of presenting unverified performance or coverage numbers, the project documents the
-                concrete verification mechanisms currently implemented in the repository.
+                Every push and pull request runs the same quality gates in GitHub Actions. A build fails when
+                coverage drops below its threshold, when an accessibility scan finds a violation, or when a
+                high-severity dependency advisory appears.
             </p>
 
             <div class="not-prose my-10 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -391,8 +454,11 @@ Project Case Study`}</code></pre>
             </div>
 
             <p>
-                Backend verification combines unit-level tests with HTTP integration testing, while the CI
-                workflow provides automated checks for the repository before changes are considered complete.
+                Frontend tests render the real <code>.astro</code> pages with the Astro Container API, and the
+                admin tests mount that markup before running the client code, so templates and scripts cannot
+                silently drift apart. Test counts and coverage are not copied into prose: CI regenerates them on
+                every run in a single{" "}
+                <a href={METRICS_URL} target="_blank" rel="noreferrer">metrics file</a>.
             </p>
 
             <div class="h-4 md:h-6"></div>
@@ -400,48 +466,19 @@ Project Case Study`}</code></pre>
             <h2>08. Security Model</h2>
 
             <div class="not-prose my-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div class="rounded-2xl border border-white/5 bg-white/[0.02] p-6">
-                    <span class="mb-3 block text-xs font-semibold uppercase tracking-widest text-slate-500">
-                        Authentication
-                    </span>
+                {
+                    securityModel.map((item) => (
+                        <div class="rounded-2xl border border-white/5 bg-white/[0.02] p-6">
+                            <span class="mb-3 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                                {item.label}
+                            </span>
 
-                    <p class="text-sm leading-relaxed text-slate-300">
-                        JWT authentication, HTTP-only cookies, secure production configuration,
-                        and bcrypt password hashing.
-                    </p>
-                </div>
-
-                <div class="rounded-2xl border border-white/5 bg-white/[0.02] p-6">
-                    <span class="mb-3 block text-xs font-semibold uppercase tracking-widest text-slate-500">
-                        HTTP Protection
-                    </span>
-
-                    <p class="text-sm leading-relaxed text-slate-300">
-                        Helmet, CSP, HSTS, restricted CORS, frame protection, referrer policy,
-                        and cross-origin resource policy configuration.
-                    </p>
-                </div>
-
-                <div class="rounded-2xl border border-white/5 bg-white/[0.02] p-6">
-                    <span class="mb-3 block text-xs font-semibold uppercase tracking-widest text-slate-500">
-                        Abuse Prevention
-                    </span>
-
-                    <p class="text-sm leading-relaxed text-slate-300">
-                        Global request rate limiting together with stricter rate limiting around authentication.
-                    </p>
-                </div>
-
-                <div class="rounded-2xl border border-white/5 bg-white/[0.02] p-6">
-                    <span class="mb-3 block text-xs font-semibold uppercase tracking-widest text-slate-500">
-                        Input Safety
-                    </span>
-
-                    <p class="text-sm leading-relaxed text-slate-300">
-                        Fastify JSON schema validation with explicit request boundaries and
-                        production-safe error responses.
-                    </p>
-                </div>
+                            <p class="text-sm leading-relaxed text-slate-300">
+                                {item.text}
+                            </p>
+                        </div>
+                    ))
+                }
             </div>
 
             <div class="h-4 md:h-6"></div>
@@ -449,8 +486,29 @@ Project Case Study`}</code></pre>
             <h2>09. Results</h2>
 
             <p>
-                The final result is a portfolio platform that demonstrates full-stack engineering through the
-                system itself rather than relying only on project screenshots.
+                The result is a portfolio platform that demonstrates full-stack engineering through the system
+                itself rather than through screenshots. Production Lighthouse audit of the homepage on
+                12 October 2026 (desktop / mobile, median of three runs):
+            </p>
+
+            <div class="not-prose my-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                {
+                    measuredResults.map((item) => (
+                        <div class="rounded-2xl border border-white/5 bg-white/[0.02] p-6">
+                            <span class="mb-2 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                                {item.label}
+                            </span>
+                            <span class="text-lg font-bold text-white">
+                                {item.value}
+                            </span>
+                        </div>
+                    ))
+                }
+            </div>
+
+            <p>
+                Layout shift is zero on both form factors and LCP stays under the 2.5-second target. The platform
+                that delivers those numbers is built from:
             </p>
 
             <div class="not-prose my-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -469,10 +527,10 @@ Project Case Study`}</code></pre>
             </div>
 
             <p>
-                More importantly, CodeForge became an engineering evidence platform: portfolio content is
-                stored as application data, the administrative workflow is protected, the backend is testable,
-                the system is containerized, CI validates changes, and technical documentation can be generated
-                from repository evidence.
+                More importantly, CodeForge became an engineering evidence platform: portfolio content is stored
+                as application data, the administrative workflow is protected against both authentication and
+                CSRF attacks, every layer is tested, CI blocks regressions, and technical documentation is
+                generated from repository evidence.
             </p>
 
             <div class="h-14 md:h-20"></div>
@@ -482,13 +540,18 @@ Project Case Study`}</code></pre>
             <ul>
                 <li>
                     <strong>Architecture matters at project scale:</strong>{" "}
-                    separating transport, business logic, and persistence makes the system substantially easier
-                    to evolve.
+                    separating transport, business logic and persistence makes the system substantially easier
+                    to test and evolve.
                 </li>
                 <li>
-                    <strong>Security must be designed into the application:</strong>{" "}
-                    authentication, validation, rate limiting, cookie policy, and HTTP protections cannot be
-                    treated as final-stage additions.
+                    <strong>Deployment shapes the threat model:</strong>{" "}
+                    splitting frontend and API across two sites forced <code>SameSite=None</code> cookies, and
+                    with them an explicit CSRF defence. Security has to follow the real topology.
+                </li>
+                <li>
+                    <strong>Measure before optimizing:</strong>{" "}
+                    ISR was justified by a baseline, and a single slow TTFB sample turned out to be noise once
+                    the audit was repeated. One measurement is not evidence.
                 </li>
                 <li>
                     <strong>AI output needs evidence:</strong>{" "}
@@ -497,7 +560,7 @@ Project Case Study`}</code></pre>
                 </li>
                 <li>
                     <strong>Engineering quality is broader than features:</strong>{" "}
-                    testing, CI, deployment, observability, and operational boundaries are part of the product.
+                    testing, CI, deployment, observability and documentation are part of the product.
                 </li>
             </ul>
 
@@ -506,9 +569,10 @@ Project Case Study`}</code></pre>
             <h2>11. Future Improvements</h2>
 
             <p>
-                The project is intentionally extensible. Potential future work includes deeper automated
-                repository analysis, richer documentation generation, stronger observability, expanded frontend
-                testing, and additional deployment automation.
+                The engineering roadmap is complete; what remains is evidence that needs real users and
+                deliberate trade-offs. Next steps are recording field INP from real-user monitoring, a manual
+                screen-reader review to complement the automated accessibility scans, server-side token
+                revocation for the 24-hour sessions, and deeper repository analysis for richer AI documentation.
             </p>
         </article>
 

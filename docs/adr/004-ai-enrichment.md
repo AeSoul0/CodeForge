@@ -39,6 +39,22 @@ Validated application result
 
 Provider credentials remain server-side.
 
+## Implementation
+
+`backend/src/utils/ai.ts`:
+
+1. reads the project's GitHub repository (metadata, README, `package.json`)
+   through the GitHub API (`GITHUB_TOKEN` optional, for rate limits);
+2. asks OpenAI (`OPENAI_API_KEY`) first and falls back to Gemini
+   (`GEMINI_API_KEY`);
+3. stores the generated Markdown in the project's `descrizioneLunga`.
+
+Generation runs in the background after a project is created without
+documentation, at startup for any project still missing it, or on demand (`POST /api/projects/:id/generate-ai`,
+`regenerateAI: true` on update, both answering `202 Accepted`). Existing
+documentation is never overwritten unless regeneration is requested. AI calls
+are disabled when `NODE_ENV=test`.
+
 ## Alternatives Considered
 
 ### Calling the AI provider directly from the browser

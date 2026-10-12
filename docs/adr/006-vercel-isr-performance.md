@@ -61,9 +61,11 @@ LCP: 3.0s
 After ISR:
 
 ```text
-Performance: 93
+Performance: 96
 LCP: 2.2s
 ```
+
+Later measurements: [metrics.md](../metrics.md).
 
 Measured improvement:
 

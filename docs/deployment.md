@@ -37,7 +37,7 @@ CodeForge uses a separated production deployment architecture:
                     ┌──────────────────────┐
                     │    MongoDB Atlas     │
                     └──────────────────────┘
-````
+```
 
 The separation provides clear operational boundaries between:
 
@@ -160,25 +160,23 @@ Typical environment-sensitive values include:
 
 Sensitive environment variables must never be committed with real values.
 
-Typical categories:
+Complete list (templates: `backend/.env.example`, `backend/.env.test.example`):
 
-```text
-MONGODB_URI
-JWT_SECRET
-ADMIN_API_KEY
-FRONTEND_URL
-PUBLIC_API_URL
-AI provider credentials
-deployment credentials
-```
-
-Variables with security impact beyond their name:
-
-| Variable | Where | Effect |
-|---|---|---|
-| `FRONTEND_URL` | backend | Added to the CORS allowlist **and** to the origins accepted by the CSRF guard. A frontend origin missing from the list cannot log in or change data. |
-| `PUBLIC_API_URL` | frontend, **build time** | API base URL for SSR and the browser, and the only API origin allowed by the CSP `connect-src`. Changing the API host requires a rebuild. |
-| `RATE_LIMIT_MAX`, `LOGIN_RATE_LIMIT_MAX` | backend, optional | Per-client limits per minute (defaults 100 and 5). Only the Playwright backend raises them. |
+| Variable | Where | Required | Effect |
+|---|---|---|---|
+| `MONGODB_URI` | backend | yes | MongoDB connection string (Atlas in production). |
+| `JWT_SECRET` | backend | yes | Signs the session JWT. |
+| `ADMIN_API_KEY` | backend | yes | Password of the `admin` account; it is hashed and seeded (or re-synchronized) at every startup. |
+| `FRONTEND_URL` | backend | no | Extra origin added to the CORS allowlist **and** to the origins accepted by the CSRF guard. `https://www.aesoul0.com`, `https://aesoul0.com` and the local dev origins (ports 2003 and 4321) are always allowed. |
+| `PORT`, `HOST` | backend | no | Listen address (defaults `3000`, `0.0.0.0`). |
+| `LOG_LEVEL` | backend | no | Audit logger level (default `info`). |
+| `RATE_LIMIT_MAX`, `LOGIN_RATE_LIMIT_MAX` | backend | no | Per-client limits per minute (defaults 100 and 5). Only the Playwright backend raises them. |
+| `OPENAI_API_KEY`, `OPENAI_MODEL` | backend | one AI key | OpenAI provider for AI documentation, tried first (default model `gpt-4o-mini`). |
+| `GEMINI_API_KEY`, `GEMINI_MODEL` | backend | one AI key | Gemini provider, used when OpenAI is not configured or fails. |
+| `GITHUB_TOKEN` | backend | no | Higher GitHub API rate limit when the AI service reads a repository. |
+| `VERCEL_DEPLOY_HOOK_URL` | backend | no | Deploy hook triggered after project/experience changes; skipped when unset. |
+| `DEV_BYPASS_AUTH` | backend | no | `true` skips JWT checks, but only when `NODE_ENV=development`. Never set it in production. |
+| `PUBLIC_API_URL` | frontend, **build time** | no | API base URL for SSR and the browser, and the only API origin allowed by the CSP `connect-src`. Defaults to the production backend; changing the API host requires a rebuild. |
 
 Development and test environments use dedicated configuration files.
 
@@ -218,9 +216,12 @@ The backend is compiled from TypeScript into its production output.
 
 # 9. Local Development
 
+Requirements: Node.js 24.x (`.nvmrc`) and a MongoDB instance, either a local
+`mongod` on `localhost:27017` or an Atlas connection string.
+
 ## Backend
 
-Typical development command:
+Copy `backend/.env.example` to `backend/.env`, then:
 
 ```bash
 npm run dev
@@ -241,7 +242,9 @@ through the configured API URL.
 
 # 10. Testing Environment
 
-Backend tests use a dedicated test environment.
+Backend tests use a dedicated test environment: copy
+`backend/.env.test.example` to `backend/.env.test` and start MongoDB on
+`localhost:27017`.
 
 Typical commands:
 
@@ -252,7 +255,10 @@ npm run test:cov
 
 The test environment should never use production database credentials.
 
-Playwright runs against a dedicated local frontend/backend setup.
+Playwright starts its own servers: the compiled backend (`npm run start` in
+`backend/`, so run `npm run build` there first) on port 3002 with
+`NODE_ENV=test` and the test database, and the Astro dev server on port 4321.
+It only needs the local MongoDB instance.
 
 ---
 
@@ -594,7 +600,5 @@ improvement through ISR and currently reports:
 
 Current numbers: see [metrics.md](metrics.md).
 
-The remaining deployment-level gap is remote CI verification.
-
-No production architecture change is currently required solely for the
-90/100 roadmap target.
+The remote GitHub Actions workflow is green on `main`, so no deployment-level
+gap remains for the 90/100 roadmap target.
