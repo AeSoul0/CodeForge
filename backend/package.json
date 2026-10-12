@@ -13,7 +13,6 @@
     "dev": "dotenvx run -f .env -- tsx watch src/index.ts",
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/index.js",
-    "add-project": "tsx src/services/scripts/add-project.ts",
     "test": "cross-env NODE_ENV=test dotenvx run -f .env.test --overload -- vitest run",
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",

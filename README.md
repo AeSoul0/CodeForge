@@ -618,8 +618,7 @@ CodeForge/
 │   └── case-studies/
 │
 ├── scripts/
-│   ├── collect-metrics.mjs     builds docs/metrics.md
-│   ├── projects/  experiences/ content CLI scripts
+│   └── collect-metrics.mjs     builds docs/metrics.md
 │
 └── .github/
     └── workflows/              ci.yml, security.yml
@@ -685,16 +684,10 @@ complete.
 
 Known open items:
 
-1. Re-run Lighthouse on production after the 2026-10 frontend changes
-   (scripts moved to modules, duplicate particle canvas removed) and update
-   `docs/metrics-lighthouse.json`.
-2. Record a production INP measurement (requires real-user field data).
-3. The content CLI scripts in `scripts/projects` and `scripts/experiences`
-   send an `x-api-key` header the backend does not check, so their writes
-   are rejected; they need to log in (cookie + `X-Requested-With`) instead.
-4. Two moderate advisories remain in `@tailwindcss/typography` (build-time
+1. Record a production INP measurement (requires real-user field data).
+2. Two moderate advisories remain in `@tailwindcss/typography` (build-time
    only; the fix requires a breaking downgrade). No high/critical advisories.
-5. JWTs cannot be revoked before their 24 h expiry.
+3. JWTs cannot be revoked before their 24 h expiry.
 
 ---
 
