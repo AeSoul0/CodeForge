@@ -100,6 +100,9 @@ describe('Project API', () => {
             cookies: {
                 token,
             },
+            headers: {
+                'x-requested-with': 'CodeForge',
+            },
             payload: {
                 titolo: 'API Test Project',
                 descrizione: 'This is an API test description',

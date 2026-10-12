@@ -24,7 +24,8 @@ describe('Security API Tests', () => {
             url: '/api/projects/test',
             cookies: {
                 token: 'invalid.jwt.token'
-            }
+            },
+            headers: { 'x-requested-with': 'CodeForge' }
         });
         expect(response.statusCode).toBe(401);
     });
@@ -76,6 +77,7 @@ describe('Security API Tests', () => {
             method: 'POST',
             url: '/api/experiences',
             cookies: { token },
+            headers: { 'x-requested-with': 'CodeForge' },
             payload: {
                 role: 'Dev',
                 company: 'Corp',
@@ -85,5 +87,53 @@ describe('Security API Tests', () => {
             }
         });
         expect([201, 400]).toContain(response.statusCode);
+    });
+
+    it('should reject cookie-authenticated mutations without the anti-CSRF header', async () => {
+        const token = app.jwt.sign({ id: 'test', username: 'admin', role: 'admin' });
+        const response = await app.inject({
+            method: 'DELETE',
+            url: '/api/projects/test',
+            cookies: { token },
+        });
+        expect(response.statusCode).toBe(403);
+        expect(JSON.parse(response.payload).error.code).toBe('CSRF_HEADER_MISSING');
+    });
+
+    it('should reject cookie-authenticated mutations from untrusted origins', async () => {
+        const token = app.jwt.sign({ id: 'test', username: 'admin', role: 'admin' });
+        const response = await app.inject({
+            method: 'DELETE',
+            url: '/api/projects/test',
+            cookies: { token },
+            headers: {
+                origin: 'https://evil.example',
+                'x-requested-with': 'CodeForge',
+            },
+        });
+        expect(response.statusCode).toBe(403);
+        expect(JSON.parse(response.payload).error.code).toBe('CSRF_ORIGIN_REJECTED');
+    });
+
+    it('should reject login attempts from untrusted origins', async () => {
+        const response = await app.inject({
+            method: 'POST',
+            url: '/api/auth/login',
+            headers: { referer: 'https://evil.example/phish' },
+            payload: { username: 'admin', password: 'x' },
+        });
+        expect(response.statusCode).toBe(403);
+    });
+
+    it('should serve a strict CSP without unsafe-inline', async () => {
+        const response = await app.inject({ method: 'GET', url: '/' });
+        const csp = String(response.headers['content-security-policy']);
+        expect(csp).toContain("default-src 'none'");
+        expect(csp).not.toContain('unsafe-inline');
+    });
+
+    it('should reject out-of-range pagination', async () => {
+        const response = await app.inject({ method: 'GET', url: '/api/projects?limit=1000' });
+        expect(response.statusCode).toBe(400);
     });
 });

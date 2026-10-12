@@ -19,7 +19,8 @@
     "test:cov": "vitest run --coverage",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
-    "env:test:check": "dotenvx run -f=.env.test -- node .env-check.cjs"
+    "env:test:check": "dotenvx run -f=.env.test -- node .env-check.cjs",
+    "test:ci": "vitest run --coverage --reporter=default --reporter=json --outputFile.json=test-results.json"
   },
   "keywords": [
     "fastify",

@@ -15,6 +15,7 @@ import {
 
 import Experience from "../models/Experiences";
 import { authenticateAdmin } from "../middlewares/auth";
+import { paginationQuerySchema } from "./paginationSchema";
 import type { CreateExperienceDTO, UpdateExperienceDTO } from '../dtos/ExperienceDTO.ts';
 
 /**
@@ -75,6 +76,9 @@ export default async function experienceRoutes(
 
     fastify.get(
         "/",
+        {
+            schema: paginationQuerySchema,
+        },
         getExperiences,
     );
 
