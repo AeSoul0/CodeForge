@@ -195,9 +195,11 @@ Current numbers: see [metrics.md](metrics.md).
 
 # 9. Frontend Quality Commands
 
-```bash id="yq9u1t"
+```bash
 npm run lint
-npm run typecheck
+npm run typecheck     # astro check (covers .astro files)
+npm test              # Vitest unit + rendering tests
+npm run test:cov      # with 90% coverage thresholds
 npm run build
 npm run test:e2e
 npm audit --audit-level=high
@@ -220,6 +222,15 @@ The current configuration intentionally runs:
 ```
 
 This validates real concurrent browser execution.
+
+Because the six workers share one IP, the Playwright backend raises
+`LOGIN_RATE_LIMIT_MAX` and `RATE_LIMIT_MAX`; production keeps the defaults
+(5 logins and 100 requests per minute per client).
+
+`astro dev` is started with `ASTRO_DEV_BACKGROUND=0` so Astro 7 does not move
+it to a background process in agent/CI environments. If the installed
+Chromium does not match the Playwright release, set
+`PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`.
 
 Playwright reports and test artifacts are stored outside the Astro/Vite watched
 directory to prevent test artifacts from triggering development-server reloads.

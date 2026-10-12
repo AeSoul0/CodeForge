@@ -63,8 +63,11 @@ graph TD
 * Vercel SSR
 * Vercel ISR
 
-The application uses Astro as the primary rendering layer and React only where
-interactive behavior benefits from it.
+Astro renders every page. Client-side behaviour (admin dashboard, particle
+background, project filter) lives in small TypeScript modules in
+`frontend/src/lib` and `frontend/src/scripts`, bundled by Astro. The React
+integration is configured for future interactive islands but no React
+components are currently used.
 
 The current ISR configuration uses a:
 
@@ -159,7 +162,8 @@ axe-core
 
 ```text
 Helmet
-CSP
+Hash-based CSP (no 'unsafe-inline')
+CSRF guard (origin + custom header)
 HSTS
 CORS
 JWT
@@ -354,14 +358,15 @@ Full performance documentation:
 
 CodeForge is designed around automated quality gates.
 
-The intended pipeline is:
+The pipeline (`.github/workflows/ci.yml`) runs on pushes to `main` and on
+pull requests targeting `main`:
 
 ```text
-Validate
+Validate (lint, tsc, astro check)
    ↓
-Backend Tests
+Backend Tests + Coverage
    ↓
-Coverage
+Frontend Tests + Coverage
    ↓
 Build
    ↓
@@ -455,10 +460,14 @@ Important configuration categories include:
 ```text
 MONGODB_URI
 JWT_SECRET
-ADMIN_API_KEY
-FRONTEND_URL
-PUBLIC_API_URL
+ADMIN_API_KEY          # also the seeded admin password
+FRONTEND_URL           # CORS + CSRF allowed origin
+PUBLIC_API_URL         # frontend, build time: API URL and CSP connect-src
+RATE_LIMIT_MAX         # optional, default 100 req/min per client
+LOGIN_RATE_LIMIT_MAX   # optional, default 5 logins/min per client
 ```
+
+See [Deployment](docs/deployment.md#7-environment-variables) for details.
 
 Never commit real production credentials.
 
@@ -568,9 +577,12 @@ Critical application operations are recorded through the audit logger.
 Examples include:
 
 ```text
-LOGIN_ATTEMPT
 CREATE_PROJECT
+UPDATE_EXPERIENCE
+DELETE_PROJECT
 ```
+
+Rejected CSRF and authentication attempts are logged as warnings.
 
 The observability layer is intentionally lightweight and designed to provide
 useful diagnostics without introducing unnecessary infrastructure complexity.
@@ -583,28 +595,37 @@ useful diagnostics without introducing unnecessary infrastructure complexity.
 CodeForge/
 ├── backend/
 │   ├── src/
-│   └── tests/
+│   │   ├── controllers/  routes/  services/  repositories/  models/
+│   │   ├── middlewares/        auth, CSRF guard, metrics
+│   │   └── utils/
+│   └── tests/                  unit/ and api/ (Vitest)
 │
 ├── frontend/
 │   ├── src/
-│   └── e2e/
+│   │   ├── pages/              public pages, /admin, /api/health
+│   │   ├── components/  layouts/
+│   │   ├── lib/                API client, DOM/format/Markdown helpers
+│   │   │   └── admin/          admin dashboard modules
+│   │   └── scripts/            public-page client modules
+│   ├── tests/                  unit/, admin/, render/ (Vitest)
+│   ├── e2e/                    Playwright
+│   └── scripts/serve-build.mjs serve the production build locally
 │
 ├── docs/
-│   ├── adr/
-│   ├── api.md
-│   ├── architecture.md
-│   ├── deployment.md
-│   ├── engineering-scorecard.md
-│   ├── evidence.md
-│   ├── performance.md
-│   ├── roadmap.md
-│   ├── security.md
-│   └── testing.md
+│   ├── adr/                    ADR 001–006
+│   ├── metrics.md              generated: tests, coverage, Lighthouse
+│   ├── metrics-lighthouse.json manual Lighthouse record
+│   ├── accessibility.md  api.md  architecture.md  deployment.md
+│   ├── developer-experience.md  engineering-scorecard.md  evidence.md
+│   ├── performance.md  roadmap.md  security.md  testing.md
+│   └── case-studies/
 │
 ├── scripts/
+│   ├── collect-metrics.mjs     builds docs/metrics.md
+│   ├── projects/  experiences/ content CLI scripts
 │
 └── .github/
-    └── workflows/
+    └── workflows/              ci.yml, security.yml
 ```
 
 ---
@@ -665,12 +686,18 @@ Measured results: [docs/metrics.md](docs/metrics.md).
 The core application engineering work for the 90/100 roadmap is substantially
 complete.
 
-The remaining items are primarily evidence and infrastructure verification:
+Known open items:
 
-1. Record a production INP measurement (requires sufficient real-user field data).
-2. Keep engineering evidence synchronized with future releases.
-
-No broad feature expansion is required to address these items.
+1. Re-run Lighthouse on production after the 2026-10 frontend changes
+   (scripts moved to modules, duplicate particle canvas removed) and update
+   `docs/metrics-lighthouse.json`.
+2. Record a production INP measurement (requires real-user field data).
+3. The content CLI scripts in `scripts/projects` and `scripts/experiences`
+   send an `x-api-key` header the backend does not check, so their writes
+   are rejected; they need to log in (cookie + `X-Requested-With`) instead.
+4. Two moderate advisories remain in `@tailwindcss/typography` (build-time
+   only; the fix requires a breaking downgrade). No high/critical advisories.
+5. JWTs cannot be revoked before their 24 h expiry.
 
 ---
 

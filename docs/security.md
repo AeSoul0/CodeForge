@@ -616,4 +616,4 @@ Audit logging:         Implemented
 Secure cookies:        Implemented
 ```
 
-Final remote CI verification remains pending.
+These checks run in CI on every pull request and push to `main`.

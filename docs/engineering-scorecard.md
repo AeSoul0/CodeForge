@@ -344,7 +344,7 @@ Current numbers: see [metrics.md](metrics.md).
 
 Status: ✅ Strong locally
 
-Remote CI security verification: ⚠️ Pending
+Remote CI security verification: ✅ runs in CI (security tests, CodeQL, audits)
 
 ---
 
@@ -457,7 +457,7 @@ Remote CI gate:      PASS
 
 **CI/CD target: 9.2/10**
 
-Status: ⚠️ Pending final remote verification
+Status: ✅ Remote workflow green on `main`; frontend unit tests added to the pipeline (2026-10)
 
 ---
 

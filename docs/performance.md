@@ -280,8 +280,8 @@ JavaScript only where needed
 
 This reduces initial client-side execution requirements.
 
-Interactive behavior remains available through targeted React or browser-side
-components rather than requiring a fully client-rendered application.
+Interactive behavior is provided by small bundled TypeScript modules
+rather than a fully client-rendered application.
 
 ---
 

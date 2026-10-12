@@ -35,7 +35,7 @@ The architecture prioritizes:
                     │  Admin UI                      │
                     │  SSR                           │
                     │  ISR Cache                     │
-                    │  React Islands                 │
+                    │  Bundled TS client modules     │
                     └───────────────┬────────────────┘
                                     │
                                   REST
@@ -74,7 +74,7 @@ The architecture prioritizes:
 The frontend is built with:
 
 * Astro;
-* React where interactive components are required;
+* TypeScript client modules (`src/lib`, `src/scripts`) for interactivity; React is configured but not currently used;
 * Tailwind CSS;
 * TypeScript;
 * native browser APIs.
@@ -146,7 +146,9 @@ The frontend is divided into:
 * administrative interfaces;
 * visual/decorative components.
 
-React is used only where component-level interactivity provides value.
+Client-side behaviour lives in TypeScript modules imported by bundled
+`<script>` tags; React is available for future islands but no React
+components are currently used.
 
 Astro remains responsible for the majority of page rendering.
 
@@ -167,6 +169,20 @@ JavaScript where interaction requires it
 
 The project intentionally avoids unnecessary client-side JavaScript.
 
+Client code is organised as:
+
+```text
+src/lib/            shared logic: API client, DOM helpers, formatting,
+                    safe Markdown, content loaders
+src/lib/admin/      admin dashboard (session, pages, dialogs, toasts)
+src/scripts/        public-page behaviour (particles, loader, scroll
+                    reveal, project filter)
+```
+
+Pages import these modules from bundled `<script>` tags; there are no
+`is:inline` scripts. This keeps the code unit-testable and allows the
+hash-based CSP without `'unsafe-inline'`.
+
 The particle system is treated as decorative functionality rather than as a
 dependency for application content.
 
@@ -183,7 +199,9 @@ The implementation is designed around controlled rendering work:
 * animation-frame scheduling;
 * reduced work when the component is not visible;
 * reduced-motion support;
-* E2E-specific handling.
+* E2E-specific handling;
+* a single canvas per page, rendered by `Layout.astro`
+  (`src/scripts/particles.ts`, unit-tested).
 
 The visual layer must never block or determine whether critical content can be
 displayed.

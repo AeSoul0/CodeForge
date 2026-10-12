@@ -687,11 +687,11 @@ Status:
 
 ## 8.5 Mobile Performance
 
-Mobile Lighthouse measurement has not yet been recorded in the final evidence.
+Mobile Lighthouse is recorded in [metrics.md](metrics.md).
 
 Status:
 
-⚠️ Pending
+✅ Recorded (re-run after the 2026-10 frontend changes)
 
 ---
 
@@ -1061,9 +1061,12 @@ Only a small number of evidence items remain before the review can be treated
 as fully closed:
 
 ```text
-1. Obtain a fully green remote CI run (pending push).
-2. Record INP (requires sufficient real-user field data).
+1. Record INP (requires sufficient real-user field data).
+2. Re-run Lighthouse after the 2026-10 frontend changes.
 ```
+
+The remote CI workflow is green on `main`. Additional open items are listed
+in the README under "Remaining Engineering Work".
 
 These remaining items are primarily evidence and infrastructure validation,
 not missing core application functionality.

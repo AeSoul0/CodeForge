@@ -1,17 +1,102 @@
-# Architecture Decision Record: Fastify + MongoDB API
+# ADR 002 — Use Fastify for the Backend API
+
+- **Status:** Accepted
+- **Date:** 2026-08-26
+- **Decision:** Use Fastify as the primary backend HTTP framework.
 
 ## Context
-CodeForge required a robust backend for managing portfolio content and securely handling administrative workflows.
+
+CodeForge requires a backend API supporting:
+
+- authentication;
+- authorization;
+- validation;
+- projects;
+- experiences;
+- administrative operations;
+- external services;
+- MongoDB persistence;
+- structured logging;
+- security middleware.
+
+The backend should remain explicit, lightweight and easy to test.
 
 ## Decision
-We chose **Fastify** as the web framework and **MongoDB** for the database.
 
-## Rationale
-- **Fastify**: Offers high performance, extremely low overhead, and a great developer experience with built-in schema validation (JSON Schema) which improves both security and performance.
-- **MongoDB**: Provides flexible document storage well-suited for project data and experiences, which naturally have variable fields (e.g. arrays of technologies).
-- **Authentication**: JWT stored in a secure, `HttpOnly` cookie to protect against XSS and simplify client requests.
+Use Fastify with TypeScript.
+
+Structure the backend using:
+
+```text
+Routes
+  ↓
+Controllers
+  ↓
+Services
+  ↓
+Repositories
+```
+
+Use Fastify plugins for:
+
+* JWT;
+* cookies;
+* CORS;
+* Helmet;
+* rate limiting;
+* Swagger/OpenAPI.
+
+## Alternatives Considered
+
+### Express
+
+Rejected because Fastify provides a stronger fit for the desired explicit
+plugin-based architecture and performance-oriented HTTP layer.
+
+### NestJS
+
+Rejected because the application does not require the additional abstraction
+and framework conventions at its current size.
+
+## Trade-offs
+
+### Benefits
+
+* lightweight HTTP stack;
+* strong TypeScript support;
+* explicit plugin model;
+* easy test integration;
+* good separation of HTTP concerns;
+* suitable security middleware ecosystem.
+
+### Costs
+
+* more architectural conventions must be deliberately maintained by the team;
+* fewer high-level defaults than a heavily opinionated framework.
 
 ## Consequences
-- Fast response times and easy-to-read route schemas.
-- Need to strictly enforce data validation at the Fastify level.
-- Highly scalable foundation for future expansions like generative AI.
+
+Business logic remains independent of Fastify where practical.
+
+The HTTP framework should remain concentrated around transport, middleware and
+routing concerns.
+
+The service and repository layers remain independently testable.
+
+## Evidence
+
+Latest backend verification:
+
+```text
+21 test files passed
+161 tests passed
+```
+
+Coverage:
+
+```text
+Statements: 95.08%
+Branches:   85.05%
+Functions:  95.29%
+Lines:      95.05%
+```

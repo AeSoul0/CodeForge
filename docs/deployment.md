@@ -172,6 +172,14 @@ AI provider credentials
 deployment credentials
 ```
 
+Variables with security impact beyond their name:
+
+| Variable | Where | Effect |
+|---|---|---|
+| `FRONTEND_URL` | backend | Added to the CORS allowlist **and** to the origins accepted by the CSRF guard. A frontend origin missing from the list cannot log in or change data. |
+| `PUBLIC_API_URL` | frontend, **build time** | API base URL for SSR and the browser, and the only API origin allowed by the CSP `connect-src`. Changing the API host requires a rebuild. |
+| `RATE_LIMIT_MAX`, `LOGIN_RATE_LIMIT_MAX` | backend, optional | Per-client limits per minute (defaults 100 and 5). Only the Playwright backend raises them. |
+
 Development and test environments use dedicated configuration files.
 
 Production values must be stored through platform secret management.
@@ -389,6 +397,8 @@ Backend tests
    ↓
 Coverage
    ↓
+Frontend unit + rendering tests (coverage ≥ 90%)
+   ↓
 Backend build
    ↓
 Frontend build
@@ -412,28 +422,13 @@ should be retained for failed or important workflow runs.
 
 # 17. Current CI Status
 
-The local quality gate is currently passing.
+The MongoDB service-container failure (`invalid reference format`) recorded
+in earlier runs has been resolved; the `CodeForge CI Pipeline` workflow has
+run green on `main` and on pull requests since then.
 
-The latest recorded remote workflow, however, failed before reaching the project
-validation stages.
-
-Observed infrastructure error:
-
-```text
-invalid reference format
-```
-
-The failure occurred while creating the MongoDB service container.
-
-Therefore:
-
-```text
-Local validation: PASS
-Remote CI validation: PENDING
-```
-
-This must be resolved before the deployment pipeline can be considered fully
-verified.
+The workflow runs on pushes to `main` and on pull requests targeting `main`.
+Each run publishes `docs/metrics.md` in its job summary; the authoritative
+status is the latest run in the repository's Actions tab.
 
 ---
 
