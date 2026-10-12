@@ -79,6 +79,4 @@ export const env = {
     host: process.env.HOST?.trim() || '0.0.0.0',
 
     jwtSecret: process.env.JWT_SECRET?.trim(),
-
-    cookieSecret: process.env.COOKIE_SECRET?.trim(),
 } as const;

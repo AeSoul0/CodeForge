@@ -26,7 +26,6 @@
     "@astrojs/vercel": "^11.0.8",
     "@tailwindcss/typography": "^0.5.20",
     "@tailwindcss/vite": "^4.3.3",
-    "@vercel/speed-insights": "^2.0.0",
     "astro": "^7.2.8",
     "marked": "^18.0.11",
     "tailwindcss": "^4.3.3"
