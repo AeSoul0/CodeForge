@@ -97,8 +97,9 @@ cacheable where appropriate.
 
 ## Amendment — 2026-10-12: client-side code
 
-No React components are currently used; the React integration stays
-configured for future interactive islands. Client behaviour (admin
+The React integration was removed because no React component was ever
+used; it can be added back with `astro add react` if an interactive island
+needs it. Client behaviour (admin
 dashboard, particle animation, page effects, project filter) lives in
 TypeScript modules under `frontend/src/lib` and `frontend/src/scripts`,
 imported by bundled `<script>` tags. This keeps scripts unit-testable and

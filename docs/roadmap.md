@@ -14,7 +14,6 @@ CodeForge already provides a strong technical foundation:
 - layered full-stack architecture;
 - TypeScript;
 - Astro;
-- React;
 - Fastify;
 - MongoDB/Mongoose;
 - JWT authentication;

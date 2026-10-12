@@ -74,7 +74,7 @@ The architecture prioritizes:
 The frontend is built with:
 
 * Astro;
-* TypeScript client modules (`src/lib`, `src/scripts`) for interactivity; React is configured but not currently used;
+* TypeScript client modules (`src/lib`, `src/scripts`) for interactivity;
 * Tailwind CSS;
 * TypeScript;
 * native browser APIs.
@@ -147,8 +147,8 @@ The frontend is divided into:
 * visual/decorative components.
 
 Client-side behaviour lives in TypeScript modules imported by bundled
-`<script>` tags; React is available for future islands but no React
-components are currently used.
+`<script>` tags; no UI framework runtime (React was removed in 2026-10
+because it was unused).
 
 Astro remains responsible for the majority of page rendering.
 

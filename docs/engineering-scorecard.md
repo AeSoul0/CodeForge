@@ -77,7 +77,7 @@ Browser
    │
    │ HTTPS
    ▼
-Astro / React
+Astro
    │
    │ REST
    ▼
@@ -109,7 +109,7 @@ Database
 ## Frontend Architecture
 
 * Astro
-* React where interactivity is required
+* TypeScript modules where interactivity is required
 * Tailwind CSS
 * TypeScript
 * Vercel adapter
@@ -221,7 +221,6 @@ Status: ✅ Strong
 ## Technology
 
 * Astro
-* React
 * Tailwind CSS
 * TypeScript
 * Vercel

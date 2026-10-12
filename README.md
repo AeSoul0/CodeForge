@@ -38,7 +38,7 @@ in the CI job summary, so no other document repeats them.
 ```mermaid
 graph TD
     Browser[Browser] -->|HTTPS| Vercel[Vercel / Astro]
-    Vercel -->|SSR / ISR| Frontend[Astro + React]
+    Vercel -->|SSR / ISR| Frontend[Astro]
     Frontend -->|REST| API[Fastify API]
 
     subgraph Backend
@@ -57,7 +57,6 @@ graph TD
 ## Frontend
 
 * Astro
-* React
 * Tailwind CSS
 * TypeScript
 * Vercel SSR
@@ -65,9 +64,8 @@ graph TD
 
 Astro renders every page. Client-side behaviour (admin dashboard, particle
 background, project filter) lives in small TypeScript modules in
-`frontend/src/lib` and `frontend/src/scripts`, bundled by Astro. The React
-integration is configured for future interactive islands but no React
-components are currently used.
+`frontend/src/lib` and `frontend/src/scripts`, bundled by Astro. No UI
+framework runtime is shipped to the browser.
 
 The current ISR configuration uses a:
 
@@ -125,7 +123,6 @@ Additional architecture documentation:
 
 ```text
 Astro
-React
 Tailwind CSS
 TypeScript
 Vercel

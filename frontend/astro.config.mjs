@@ -3,7 +3,6 @@
 import { defineConfig } from 'astro/config';
 import { loadEnv } from 'vite';
 
-import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
 import vercel from '@astrojs/vercel';
 
@@ -60,10 +59,6 @@ export default defineConfig({
     markdown: {
         syntaxHighlight: false,
     },
-
-    integrations: [
-        react(),
-    ],
 
     redirects: {
         '/docs':
