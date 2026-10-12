@@ -314,3 +314,4 @@ frontend/lh-report*.json
 # oppure per ignorarli ovunque
 *lh-report*.json
 runs.json
+test-results.json

@@ -287,18 +287,8 @@
 	}
 </style>
 
-<script is:inline>
-	document.addEventListener("DOMContentLoaded", () => {
-		const hero = document.getElementById("hero-section");
+<script>
+	import { onReady, revealHero } from "../scripts/page-effects";
 
-		if (!hero) return;
-
-		/*
-		 * Do not make the hero depend on the loader anymore.
-		 * It is already visible and paintable before this runs.
-		 */
-		requestAnimationFrame(() => {
-			hero.classList.add("is-loaded");
-		});
-	});
+	onReady(() => revealHero());
 </script>

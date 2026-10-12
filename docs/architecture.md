@@ -1,6 +1,3 @@
-# `docs/architecture.md`
-
-````md
 # CodeForge Architecture
 
 ## Overview
@@ -38,7 +35,7 @@ The architecture prioritizes:
                     │  Admin UI                      │
                     │  SSR                           │
                     │  ISR Cache                     │
-                    │  React Islands                 │
+                    │  Bundled TS client modules     │
                     └───────────────┬────────────────┘
                                     │
                                   REST
@@ -77,7 +74,7 @@ The architecture prioritizes:
 The frontend is built with:
 
 * Astro;
-* React where interactive components are required;
+* TypeScript client modules (`src/lib`, `src/scripts`) for interactivity;
 * Tailwind CSS;
 * TypeScript;
 * native browser APIs.
@@ -124,9 +121,7 @@ The homepage Lighthouse Performance score improved from:
 
 to:
 
-```text
-93/100
-```
+Current numbers: see [metrics.md](metrics.md).
 
 and the captured LCP improved from:
 
@@ -136,9 +131,7 @@ and the captured LCP improved from:
 
 to:
 
-```text
-2.2s
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ---
 
@@ -153,7 +146,9 @@ The frontend is divided into:
 * administrative interfaces;
 * visual/decorative components.
 
-React is used only where component-level interactivity provides value.
+Client-side behaviour lives in TypeScript modules imported by bundled
+`<script>` tags; no UI framework runtime (React was removed in 2026-10
+because it was unused).
 
 Astro remains responsible for the majority of page rendering.
 
@@ -174,6 +169,20 @@ JavaScript where interaction requires it
 
 The project intentionally avoids unnecessary client-side JavaScript.
 
+Client code is organised as:
+
+```text
+src/lib/            shared logic: API client, DOM helpers, formatting,
+                    safe Markdown, content loaders
+src/lib/admin/      admin dashboard (session, pages, dialogs, toasts)
+src/scripts/        public-page behaviour (particles, loader, scroll
+                    reveal, project filter)
+```
+
+Pages import these modules from bundled `<script>` tags; there are no
+`is:inline` scripts. This keeps the code unit-testable and allows the
+hash-based CSP without `'unsafe-inline'`.
+
 The particle system is treated as decorative functionality rather than as a
 dependency for application content.
 
@@ -190,7 +199,9 @@ The implementation is designed around controlled rendering work:
 * animation-frame scheduling;
 * reduced work when the component is not visible;
 * reduced-motion support;
-* E2E-specific handling.
+* E2E-specific handling;
+* a single canvas per page, rendered by `Layout.astro`
+  (`src/scripts/particles.ts`, unit-tested).
 
 The visual layer must never block or determine whether critical content can be
 displayed.
@@ -539,28 +550,15 @@ E2E
 
 Latest verified backend result:
 
-```text
-21 test files
-161 tests
-161 passed
-```
+Current numbers: see [metrics.md](metrics.md).
 
 Latest verified Playwright result:
 
-```text
-12 tests
-6 workers
-12 passed
-```
+Current numbers: see [metrics.md](metrics.md).
 
 Coverage:
 
-```text
-Statements: 95.08%
-Branches:   85.05%
-Functions:  95.29%
-Lines:      95.05%
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ---
 
@@ -580,14 +578,7 @@ Current mechanisms include:
 
 Latest production homepage measurement:
 
-```text
-Performance: 99/100 (Desktop) / 90/100 (Mobile)
-Accessibility: 100/100
-Best Practices: 100/100
-SEO:            100/100
-LCP: 0.4s (Desktop) / 1.6s (Mobile)
-CLS:             0
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ---
 
@@ -769,6 +760,3 @@ Remaining work should focus on:
 
 The project should avoid introducing additional architectural complexity
 without a measurable engineering requirement.
-
-```
-```

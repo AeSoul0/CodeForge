@@ -20,6 +20,7 @@ import {
 } from '../dtos/ProjectDTO';
 
 import { authenticateAdmin } from '../middlewares/auth';
+import { paginationQuerySchema } from './paginationSchema';
 
 import {
     getProjects,
@@ -44,6 +45,9 @@ export default async function projectRoutes(
      */
     fastify.get(
         '/',
+        {
+            schema: paginationQuerySchema,
+        },
         getProjects,
     );
 

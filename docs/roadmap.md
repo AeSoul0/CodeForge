@@ -1,6 +1,3 @@
-# `docs/roadmap.md`
-
-````md
 # CodeForge — Professional Engineering Roadmap
 
 **Repository:** `AeSoul0/CodeForge`  
@@ -17,7 +14,6 @@ CodeForge already provides a strong technical foundation:
 - layered full-stack architecture;
 - TypeScript;
 - Astro;
-- React;
 - Fastify;
 - MongoDB/Mongoose;
 - JWT authentication;
@@ -136,11 +132,7 @@ This milestone has been one of the highest-return engineering improvements.
 
 Latest verified result:
 
-```text
-21 test files
-161 tests
-161 passed
-```
+Current numbers: see [metrics.md](metrics.md).
 
 Status:
 
@@ -161,12 +153,7 @@ Lines      >= 85%
 
 Latest result:
 
-```text
-Statements: 95.08%
-Branches:   85.05%
-Functions:  95.29%
-Lines:      95.05%
-```
+Current numbers: see [metrics.md](metrics.md).
 
 Status:
 
@@ -252,10 +239,7 @@ Keyboard navigation
 
 Latest result:
 
-```text
-Running 12 tests using 6 workers
-12 passed
-```
+Current numbers: see [metrics.md](metrics.md).
 
 Status:
 
@@ -355,10 +339,7 @@ Status:
 
 Current local audit:
 
-```text
-Frontend: 0 vulnerabilities
-Backend:  0 vulnerabilities
-```
+Current numbers: see [metrics.md](metrics.md).
 
 Policy:
 
@@ -655,12 +636,7 @@ Move Performance toward 9.0 with measurable evidence.
 
 Latest homepage:
 
-```text
-Performance: 99/100 (Desktop) / 90/100 (Mobile)
-Accessibility: 100/100
-Best Practices: 100/100
-SEO:            100/100
-```
+Current numbers: see [metrics.md](metrics.md).
 
 Status:
 
@@ -672,10 +648,7 @@ Status:
 
 Latest captured values:
 
-```text
-LCP: 0.4s (Desktop) / 1.6s (Mobile)
-CLS: 0
-```
+Current numbers: see [metrics.md](metrics.md).
 
 Status:
 
@@ -693,10 +666,7 @@ Expiration: 300 seconds
 
 Measured impact:
 
-```text
-Performance: 88 → 96
-LCP:         3.0s → 2.2s
-```
+Current numbers: see [metrics.md](metrics.md).
 
 Status:
 
@@ -716,11 +686,11 @@ Status:
 
 ## 8.5 Mobile Performance
 
-Mobile Lighthouse measurement has not yet been recorded in the final evidence.
+Mobile Lighthouse is recorded in [metrics.md](metrics.md).
 
 Status:
 
-⚠️ Pending
+✅ Recorded (re-run after the 2026-10 frontend changes)
 
 ---
 
@@ -1009,7 +979,7 @@ Status:
 * [x] Authorization
 * [x] Error handling
 * [x] Database abstraction
-* [x] 161/161 tests
+* [x] All backend tests passing (see [metrics.md](metrics.md))
 * [x] Coverage thresholds met
 
 ## Security
@@ -1046,7 +1016,7 @@ Status:
 ## Performance
 
 * [x] Lighthouse Performance 99
-* [x] LCP 0.4s
+* [x] LCP within target (see [metrics.md](metrics.md))
 * [x] CLS 0
 * [x] ISR
 * [ ] INP (Pending CrUX data)
@@ -1080,26 +1050,7 @@ The implementation has completed the majority of the original 90/100 roadmap.
 
 The strongest verified evidence is:
 
-```text
-161/161 backend tests
-95.08% statements
-85.05% branches
-95.29% functions
-95.05% lines
-
-12/12 Playwright E2E
-6 workers
-
-0 dependency vulnerabilities
-
-Lighthouse Performance 99
-Lighthouse Accessibility 100
-Lighthouse Best Practices 100
-Lighthouse SEO 100
-
-LCP 0.4s
-CLS 0
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ---
 
@@ -1109,9 +1060,12 @@ Only a small number of evidence items remain before the review can be treated
 as fully closed:
 
 ```text
-1. Obtain a fully green remote CI run (pending push).
-2. Record INP (requires sufficient real-user field data).
+1. Record INP (requires sufficient real-user field data).
+2. Re-run Lighthouse after the 2026-10 frontend changes.
 ```
+
+The remote CI workflow is green on `main`. Additional open items are listed
+in the README under "Remaining Engineering Work".
 
 These remaining items are primarily evidence and infrastructure validation,
 not missing core application functionality.
@@ -1161,5 +1115,3 @@ rather than broad feature expansion.
 
 The next engineering work should close the remaining CI and measurement gaps
 before introducing additional architectural or product complexity.
-
-```

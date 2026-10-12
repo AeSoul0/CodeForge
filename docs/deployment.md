@@ -1,6 +1,3 @@
-# `docs/deployment.md`
-
-````md
 # CodeForge Deployment Strategy
 
 ## 1. Overview
@@ -85,13 +82,7 @@ full server-side rendering for every request.
 
 The optimization produced a measurable improvement in Lighthouse:
 
-```text
-Previous Performance: 88/100
-Current Performance: 99/100 (Desktop) / 90/100 (Mobile)
-
-Previous LCP: 3.0s
-Current LCP: 0.4s (Desktop) / 1.6s (Mobile)
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ISR should therefore be considered part of the production performance
 architecture.
@@ -180,6 +171,14 @@ PUBLIC_API_URL
 AI provider credentials
 deployment credentials
 ```
+
+Variables with security impact beyond their name:
+
+| Variable | Where | Effect |
+|---|---|---|
+| `FRONTEND_URL` | backend | Added to the CORS allowlist **and** to the origins accepted by the CSRF guard. A frontend origin missing from the list cannot log in or change data. |
+| `PUBLIC_API_URL` | frontend, **build time** | API base URL for SSR and the browser, and the only API origin allowed by the CSP `connect-src`. Changing the API host requires a rebuild. |
+| `RATE_LIMIT_MAX`, `LOGIN_RATE_LIMIT_MAX` | backend, optional | Per-client limits per minute (defaults 100 and 5). Only the Playwright backend raises them. |
 
 Development and test environments use dedicated configuration files.
 
@@ -313,14 +312,7 @@ domain.
 
 Current homepage result:
 
-```text
-Performance: 99/100 (Desktop) / 90/100 (Mobile)
-Accessibility: 100/100
-Best Practices: 100/100
-SEO:            100/100
-LCP: 0.4s (Desktop) / 1.6s (Mobile)
-CLS:             0
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ---
 
@@ -405,6 +397,8 @@ Backend tests
    ↓
 Coverage
    ↓
+Frontend unit + rendering tests (coverage ≥ 90%)
+   ↓
 Backend build
    ↓
 Frontend build
@@ -428,28 +422,13 @@ should be retained for failed or important workflow runs.
 
 # 17. Current CI Status
 
-The local quality gate is currently passing.
+The MongoDB service-container failure (`invalid reference format`) recorded
+in earlier runs has been resolved; the `CodeForge CI Pipeline` workflow has
+run green on `main` and on pull requests since then.
 
-The latest recorded remote workflow, however, failed before reaching the project
-validation stages.
-
-Observed infrastructure error:
-
-```text
-invalid reference format
-```
-
-The failure occurred while creating the MongoDB service container.
-
-Therefore:
-
-```text
-Local validation: PASS
-Remote CI validation: PENDING
-```
-
-This must be resolved before the deployment pipeline can be considered fully
-verified.
+The workflow runs on pushes to `main` and on pull requests targeting `main`.
+Each run publishes `docs/metrics.md` in its job summary; the authoritative
+status is the latest run in the repository's Actions tab.
 
 ---
 
@@ -544,10 +523,7 @@ LCP: 3.0s
 
 After:
 
-```text
-Performance: 99 (Desktop)
-LCP: 0.4s (Desktop) / 1.6s (Mobile)
-```
+Current numbers: see [metrics.md](metrics.md).
 
 The current production frontend therefore meets the roadmap Performance target.
 
@@ -616,16 +592,9 @@ MongoDB Atlas
 The frontend production deployment has demonstrated a measurable performance
 improvement through ISR and currently reports:
 
-```text
-Performance: 99/100 (Desktop) / 90/100 (Mobile)
-LCP: 0.4s (Desktop) / 1.6s (Mobile)
-CLS: 0
-```
+Current numbers: see [metrics.md](metrics.md).
 
 The remaining deployment-level gap is remote CI verification.
 
 No production architecture change is currently required solely for the
 90/100 roadmap target.
-
-```
-```

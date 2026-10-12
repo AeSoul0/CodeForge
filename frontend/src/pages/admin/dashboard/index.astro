@@ -3,12 +3,42 @@
  * @file frontend/src/pages/admin/dashboard/index.astro
  * @description Protected administrator dashboard overview.
  *
- * The dashboard verifies the real backend administrator session before
- * exposing protected content. The JWT remains HttpOnly and is never read
- * from client-side JavaScript.
+ * The session is verified by AdminLayout against the backend before any
+ * data is requested. The JWT remains HttpOnly and is never read from
+ * client-side JavaScript.
  */
 
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+
+const stats = [
+    { id: 'stat-projects', label: 'Projects', href: '/admin/dashboard/projects' },
+    { id: 'stat-experiences', label: 'Experiences', href: '/admin/dashboard/experiences' },
+    { id: 'stat-ai', label: 'Awaiting AI docs', href: '/admin/dashboard/projects' },
+    { id: 'stat-backend', label: 'Backend', href: '/admin/dashboard/system' },
+];
+
+const sections = [
+    {
+        href: '/admin/dashboard/projects',
+        title: 'Projects',
+        text: 'Manage portfolio projects and generate AI descriptions.',
+    },
+    {
+        href: '/admin/dashboard/experiences',
+        title: 'Experiences',
+        text: 'Manage work history, roles and organisation logos.',
+    },
+    {
+        href: '/admin/dashboard/api',
+        title: 'API Playground',
+        text: 'Test endpoints directly from the browser.',
+    },
+    {
+        href: '/admin/dashboard/system',
+        title: 'System Status',
+        text: 'Check backend, database health and runtime metrics.',
+    },
+];
 ---
 
 <AdminLayout title="Dashboard | Admin">
@@ -16,108 +46,53 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
         Dashboard Overview
     </h1>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <a
-            href="/admin/dashboard/projects"
-            class="block p-6 glass-card hover-glow group relative overflow-hidden"
-        >
-            <div class="absolute inset-0 bg-cyan-500/5 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300"></div>
+    <section aria-labelledby="statsHeading" class="mb-10">
+        <h2 id="statsHeading" class="sr-only">Key figures</h2>
 
-            <h2 class="text-xl font-bold text-white mb-2 relative z-10 tracking-tight group-hover:text-cyan-300 transition-colors">
-                Projects
-            </h2>
+        <ul class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {stats.map((stat) => (
+                <li>
+                    <a href={stat.href} class="glass-card hover-glow p-5 block h-full">
+                        <span class="admin-label">{stat.label}</span>
+                        <span id={stat.id} class="block text-3xl font-black text-white mt-2">…</span>
+                    </a>
+                </li>
+            ))}
+        </ul>
+    </section>
 
-            <p class="text-slate-300 text-sm relative z-10">
-                Manage portfolio projects and generate AI descriptions.
-            </p>
-        </a>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <section class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6" aria-label="Sections">
+            {sections.map((section) => (
+                <a
+                    href={section.href}
+                    class="block p-6 glass-card hover-glow group relative overflow-hidden"
+                >
+                    <div class="absolute inset-0 bg-cyan-500/5 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300"></div>
 
-        <a
-            href="/admin/dashboard/experiences"
-            class="block p-6 glass-card hover-glow group relative overflow-hidden"
-        >
-            <div class="absolute inset-0 bg-cyan-500/5 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300"></div>
+                    <h2 class="text-xl font-bold text-white mb-2 relative z-10 tracking-tight group-hover:text-cyan-300 transition-colors">
+                        {section.title}
+                    </h2>
 
-            <h2 class="text-xl font-bold text-white mb-2 relative z-10 tracking-tight group-hover:text-cyan-300 transition-colors">
-                Experiences
-            </h2>
+                    <p class="text-slate-300 text-sm relative z-10">
+                        {section.text}
+                    </p>
+                </a>
+            ))}
+        </section>
 
-            <p class="text-slate-300 text-sm relative z-10">
-                Manage work history and roles.
-            </p>
-        </a>
-
-        <a
-            href="/admin/dashboard/api"
-            class="block p-6 glass-card hover-glow group relative overflow-hidden"
-        >
-            <div class="absolute inset-0 bg-cyan-500/5 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300"></div>
-
-            <h2 class="text-xl font-bold text-white mb-2 relative z-10 tracking-tight group-hover:text-cyan-300 transition-colors">
-                API Playground
-            </h2>
-
-            <p class="text-slate-300 text-sm relative z-10">
-                Test endpoints directly from the browser.
-            </p>
-        </a>
-
-        <a
-            href="/admin/dashboard/system"
-            class="block p-6 glass-card hover-glow group relative overflow-hidden"
-        >
-            <div class="absolute inset-0 bg-cyan-500/5 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300"></div>
-
-            <h2 class="text-xl font-bold text-white mb-2 relative z-10 tracking-tight group-hover:text-cyan-300 transition-colors">
-                System Status
-            </h2>
-
-            <p class="text-slate-300 text-sm relative z-10">
-                Check backend and database health.
-            </p>
-        </a>
+        <section class="glass-card p-6" aria-labelledby="recentHeading">
+            <h2 id="recentHeading" class="text-lg font-bold text-white mb-4">Recently updated</h2>
+            <ul id="recentProjects">
+                <li class="text-sm text-slate-400">Loading…</li>
+            </ul>
+        </section>
     </div>
 </AdminLayout>
 
 <script>
-    /**
-     * Verify the HttpOnly JWT through the backend.
-     *
-     * The cookie itself cannot be read by JavaScript, but fetch with
-     * credentials: include allows the browser to send it to the backend.
-     */
-    async function verifyAuth(): Promise<void> {
-        try {
-            const apiUrl =
-                import.meta.env.PUBLIC_API_URL?.replace(
-                    /\/$/,
-                    '',
-                ) ||
-                'http://127.0.0.1:3002';
+    import { whenAuthenticated } from '../../../lib/admin/boot';
+    import { initOverview } from '../../../lib/admin/overview';
 
-            const response =
-                await fetch(
-                    `${apiUrl}/api/auth/me`,
-                    {
-                        method: 'GET',
-                        credentials:
-                            'include',
-                    },
-                );
-
-            if (
-                !response.ok
-            ) {
-                window.location.replace(
-                    '/admin/login',
-                );
-            }
-        } catch {
-            window.location.replace(
-                '/admin/login',
-            );
-        }
-    }
-
-    void verifyAuth();
+    void whenAuthenticated(() => initOverview());
 </script>

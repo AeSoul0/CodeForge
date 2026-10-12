@@ -18,11 +18,13 @@
  * - repository actions
  */
 
-import { marked } from "marked";
 
 import Layout from "../../layouts/Layout.astro";
-import ParticleCanvas from "../../components/ParticleCanvas.astro";
 import "../../styles/global.css";
+import { getApiUrl } from "../../lib/api";
+import { fetchProjects } from "../../lib/content";
+import { getProjectCategories, resolveImageUrl, slugify } from "../../lib/format";
+import { renderMarkdown } from "../../lib/markdown";
 
 /**
  * Render this route on-demand.
@@ -48,30 +50,12 @@ interface Project {
 }
 
 /**
- * Convert a project title into a stable URL slug.
- *
- * Examples:
- * "Città Digitale" -> "citta-digitale"
- * "My Project" -> "my-project"
- */
-function slugify(value: string): string {
-	return value
-		.toLowerCase()
-		.normalize("NFD")
-		.replace(/[\u0300-\u036f]/g, "")
-		.replace(/[^a-z0-9]+/g, "-")
-		.replace(/(^-|-$)+/g, "");
-}
-
-/**
  * Backend API base URL.
  *
  * PUBLIC_API_URL is used when configured.
  * Render remains the production fallback.
  */
-const apiUrl =
-	import.meta.env.PUBLIC_API_URL?.replace(/\/+$/, "") ||
-	"https://codeforge-ukq5.onrender.com";
+const apiUrl = getApiUrl();
 
 /**
  * Slug received from the current route.
@@ -89,27 +73,13 @@ let projectFetchFailed = false;
  * rebuilding the frontend.
  */
 try {
-	const response = await fetch(`${apiUrl}/api/projects`, {
+	const projects = await fetchProjects<Project>(apiUrl, fetch, {
 		cache: "no-store",
 		headers: {
 			Accept: "application/json",
 			"Cache-Control": "no-cache",
 		},
 	});
-
-	if (!response.ok) {
-		throw new Error(
-			`Project API request failed with status ${response.status}`,
-		);
-	}
-
-	const responseBody = await response.json();
-
-	const projects: Project[] = Array.isArray(responseBody?.data)
-		? responseBody.data
-		: Array.isArray(responseBody)
-			? responseBody
-			: [];
 
 	project =
 		projects.find(
@@ -141,12 +111,8 @@ if (!project) {
  * Normalize the category structure so both the current `categorie` field
  * and the legacy `categoria` field remain supported.
  */
-const categories =
-	Array.isArray(project?.categorie) && project.categorie.length > 0
-		? project.categorie
-		: project?.categoria
-			? [project.categoria]
-			: ["Other"];
+const projectCategories = project ? getProjectCategories(project) : [];
+const categories = projectCategories.length > 0 ? projectCategories : ["Other"];
 
 /**
  * Resolve the most appropriate project image.
@@ -154,28 +120,7 @@ const categories =
 const rawDisplayImage =
 	project?.image || project?.experienceImage || null;
 
-const componentApiUrl =
-	import.meta.env.PUBLIC_API_URL?.replace(/\/+$/, "") ||
-	"https://codeforge-ukq5.onrender.com";
-
-const displayImage = rawDisplayImage?.startsWith("/")
-	? `${componentApiUrl}${rawDisplayImage}`
-	: rawDisplayImage;
-
-/**
- * Convert project Markdown into HTML.
- *
- * `sanitize-html` is deliberately NOT used here because its current
- * dependency chain causes an ESM/CommonJS incompatibility on Vercel.
- *
- * Raw HTML is disabled in marked so Markdown cannot inject arbitrary HTML.
- */
-async function renderMarkdown(markdown: string): Promise<string> {
-	return marked.parse(markdown, {
-		gfm: true,
-		breaks: false,
-	});
-}
+const displayImage = resolveImageUrl(rawDisplayImage, apiUrl);
 
 /**
  * Determine whether a valid AI-generated description is available.
@@ -192,7 +137,7 @@ const hasAiDescription =
  */
 const renderedDescription =
 	hasAiDescription && project
-		? await renderMarkdown(project.descrizioneLunga!)
+		? renderMarkdown(project.descrizioneLunga!)
 		: "";
 ---
 
@@ -209,7 +154,6 @@ const renderedDescription =
 	     AMBIENT BACKGROUND
 	     ============================================================== -->
 
-	<ParticleCanvas />
 
 	<div
 		class="pointer-events-none fixed inset-x-0 top-0 z-0 h-[420px] bg-gradient-to-b from-cyan-500/[0.07] via-transparent to-transparent"

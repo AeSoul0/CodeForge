@@ -1,4 +1,8 @@
 {
+  "private": true,
+  "scripts": {
+    "metrics": "node scripts/collect-metrics.mjs"
+  },
   "devDependencies": {
     "lighthouse": "^13.4.1"
   }

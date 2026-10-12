@@ -408,7 +408,23 @@ describe(
 
                 expect(
                     route.options,
-                ).toBeUndefined();
+                ).toMatchObject({
+                    schema: {
+                        querystring: {
+                            properties: {
+                                limit: {
+                                    maximum: 100,
+                                },
+                            },
+                        },
+                    },
+                });
+
+                expect(
+                    route.options,
+                ).not.toHaveProperty(
+                    'preHandler',
+                );
             },
         );
 

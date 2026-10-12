@@ -8,6 +8,7 @@
 # - backend/frontend type safety;
 # - backend unit and integration tests;
 # - backend coverage thresholds;
+# - frontend unit and component-rendering tests with coverage thresholds;
 # - backend/frontend production builds;
 # - Playwright end-to-end tests;
 # - dependency security audits.
@@ -129,7 +130,7 @@ jobs:
 
       - name: Run backend tests with coverage
         working-directory: ./backend
-        run: npm run test:cov
+        run: npm run test:ci
 
       - name: Upload backend coverage report
         if: always()
@@ -138,6 +139,24 @@ jobs:
           name: backend-coverage
           path: |
             backend/coverage/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      # ------------------------------------------------------------------------
+      # Frontend tests and coverage
+      # ------------------------------------------------------------------------
+
+      - name: Run frontend tests with coverage
+        working-directory: ./frontend
+        run: npm run test:ci
+
+      - name: Upload frontend coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: |
+            frontend/coverage/
           if-no-files-found: ignore
           retention-days: 14
 
@@ -175,9 +194,27 @@ jobs:
         with:
           name: playwright-report
           path: |
-            frontend/playwright-report/
+            .playwright-report/
           if-no-files-found: ignore
           retention-days: 14
+
+      # ------------------------------------------------------------------------
+      # Metrics (single source of truth: docs/metrics.md)
+      # ------------------------------------------------------------------------
+
+      - name: Publish quality metrics
+        if: always()
+        run: |
+          node scripts/collect-metrics.mjs
+          cat docs/metrics.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload quality metrics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-metrics
+          path: docs/metrics.md
+          retention-days: 30
 
       # ------------------------------------------------------------------------
       # Dependency security
@@ -203,8 +240,8 @@ jobs:
           echo "=========================================="
           echo "Lint:         PASSED"
           echo "Typecheck:    PASSED"
-          echo "Tests:        PASSED"
-          echo "Coverage:     PASSED"
+          echo "Tests:        PASSED (backend + frontend)"
+          echo "Coverage:     PASSED (backend + frontend)"
           echo "Builds:       PASSED"
           echo "E2E:          PASSED"
           echo "Security:     PASSED"

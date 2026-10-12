@@ -1,227 +1,113 @@
 ---
+/**
+ * @file frontend/src/pages/admin/dashboard/experiences.astro
+ * @description Experience management: list, create, edit, logo upload and
+ * deletion. Behaviour lives in src/lib/admin/experiences.ts.
+ */
+
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 ---
 
 <AdminLayout title="Experiences | Admin">
-    <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-black tracking-tight text-white">Experiences</h1>
-        <button id="newExpBtn" class="bg-cyan-500/20 hover:bg-cyan-500/40 border border-cyan-500/50 text-cyan-50 px-5 py-2 rounded-full font-medium transition-all hover-glow shadow-[0_0_15px_rgba(34,211,238,0.2)]">
+    <div class="flex flex-wrap gap-4 justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-black tracking-tight text-white">Experiences</h1>
+            <p id="expCount" class="text-sm text-slate-400 mt-1" aria-live="polite"></p>
+        </div>
+
+        <button id="newExpBtn" type="button" class="admin-btn-primary">
             + New Experience
         </button>
     </div>
-    
-    <div class="glass-card overflow-hidden">
+
+    <div class="glass-card overflow-x-auto">
         <table class="w-full text-left text-sm text-slate-300">
+            <caption class="sr-only">Professional experiences</caption>
             <thead class="text-xs text-slate-300 uppercase bg-black/30 border-b border-white/10">
                 <tr>
+                    <th scope="col" class="px-6 py-4 font-medium"><span class="sr-only">Logo</span></th>
                     <th scope="col" class="px-6 py-4 font-medium">Role / Company</th>
-                    <th scope="col" class="px-6 py-4 font-medium">Dates</th>
+                    <th scope="col" class="px-6 py-4 font-medium">Period</th>
                     <th scope="col" class="px-6 py-4 font-medium text-right">Actions</th>
                 </tr>
             </thead>
             <tbody id="expTableBody">
                 <tr>
-                    <td colspan="3" class="px-6 py-4 text-center">Loading experiences...</td>
+                    <td colspan="4" class="px-6 py-6 text-center text-slate-400">Loading experiences…</td>
                 </tr>
             </tbody>
         </table>
     </div>
 
-    <!-- Modal for Create/Edit -->
-    <div id="expModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" class="fixed inset-0 bg-black/60 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-md overflow-y-auto">
-        <div class="glass-card w-full max-w-2xl my-8 relative overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-transparent pointer-events-none"></div>
-            
-            <div class="flex justify-between items-center p-6 border-b border-white/10 relative z-10">
-                <h2 id="modalTitle" class="text-xl font-bold text-white tracking-tight">New Experience</h2>
-                <button id="closeModalBtn" aria-label="Close Modal" class="text-slate-400 hover:text-white transition-colors">&times;</button>
+    <dialog id="expDialog" class="admin-dialog" aria-labelledby="expDialogTitle">
+        <form id="expForm" class="glass-card relative overflow-hidden" novalidate>
+            <div class="flex justify-between items-center p-6 border-b border-white/10">
+                <h2 id="expDialogTitle" class="text-xl font-bold text-white tracking-tight">New Experience</h2>
+                <button type="button" data-dialog-close aria-label="Close dialog" class="text-2xl leading-none text-slate-400 hover:text-white">&times;</button>
             </div>
-            
-            <form id="expForm" class="p-6 space-y-4 relative z-10">
-                <input type="hidden" id="expId" />
-                
+
+            <div class="p-6 space-y-4 max-h-[65dvh] overflow-y-auto">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-1">Role</label>
-                        <input type="text" id="e-role" required class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-400/50 focus:bg-white/5 transition-all outline-none">
+                        <label for="e-role" class="admin-label">Role *</label>
+                        <input id="e-role" type="text" required minlength="2" maxlength="100" class="admin-field" />
                     </div>
                     <div>
-                        <label class="block text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-1">Company</label>
-                        <input type="text" id="e-company" required class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-400/50 focus:bg-white/5 transition-all outline-none">
+                        <label for="e-company" class="admin-label">Company *</label>
+                        <input id="e-company" type="text" required minlength="2" maxlength="100" class="admin-field" />
                     </div>
                 </div>
-                
+
                 <div>
-                    <label class="block text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-1">Description</label>
-                    <textarea id="e-description" required rows="4" class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-400/50 focus:bg-white/5 transition-all outline-none"></textarea>
+                    <label for="e-description" class="admin-label">Description *</label>
+                    <textarea id="e-description" required minlength="10" maxlength="5000" rows="4" class="admin-field"></textarea>
                 </div>
-                
+
                 <div>
-                    <label class="block text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-1">Technologies (comma separated)</label>
-                    <input type="text" id="e-technologies" class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-400/50 focus:bg-white/5 transition-all outline-none">
+                    <label for="e-technologies" class="admin-label">Technologies (comma separated)</label>
+                    <input id="e-technologies" type="text" class="admin-field" />
                 </div>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-1">Start Date</label>
-                        <input type="text" id="e-startDate" required placeholder="MM/YYYY" class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-400/50 focus:bg-white/5 transition-all outline-none">
+                        <label for="e-startDate" class="admin-label">Start month *</label>
+                        <input id="e-startDate" type="month" required class="admin-field" />
                     </div>
                     <div>
-                        <label class="block text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-1">End Date</label>
-                        <input type="text" id="e-endDate" placeholder="MM/YYYY or Present" class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-400/50 focus:bg-white/5 transition-all outline-none">
+                        <label for="e-endDate" class="admin-label">End month</label>
+                        <input id="e-endDate" type="month" class="admin-field" />
                     </div>
                 </div>
-                
-                <div class="flex items-center gap-2 mt-2">
-                    <input type="checkbox" id="e-current" class="w-4 h-4 text-cyan-400 bg-black/50 border-white/10 rounded focus:ring-cyan-400 focus:ring-2">
+
+                <div class="flex items-center gap-2">
+                    <input id="e-current" type="checkbox" class="w-4 h-4" />
                     <label for="e-current" class="text-sm font-medium text-slate-300">I currently work here</label>
                 </div>
-                
-                <div id="modalError" class="text-red-400 text-sm hidden bg-red-500/10 border border-red-500/20 p-3 rounded-lg"></div>
-                
-                <div class="flex justify-end gap-3 pt-4 border-t border-white/10">
-                    <button type="button" id="cancelBtn" class="px-5 py-2 rounded-full text-slate-300 hover:bg-white/5 transition-colors text-sm font-medium">Cancel</button>
-                    <button type="submit" id="saveBtn" class="bg-cyan-500/20 hover:bg-cyan-500/40 border border-cyan-500/50 text-cyan-50 px-6 py-2 rounded-full text-sm font-medium transition-all shadow-[0_0_15px_rgba(34,211,238,0.2)]">Save</button>
+
+                <div>
+                    <label for="e-image" class="admin-label">Organisation logo (JPEG, PNG or WebP, max 7 MB)</label>
+                    <input id="e-image" type="file" accept="image/jpeg,image/png,image/webp" class="admin-field text-xs" />
                 </div>
-            </form>
-        </div>
-    </div>
+
+                <div data-remove-image class="hidden flex items-center gap-2">
+                    <input id="e-removeImage" type="checkbox" class="w-4 h-4" />
+                    <label for="e-removeImage" class="text-sm text-slate-300">Remove current logo</label>
+                </div>
+
+                <div id="expFormError" role="alert" class="hidden text-red-300 text-sm bg-red-500/10 border border-red-500/20 p-3 rounded-lg"></div>
+            </div>
+
+            <div class="flex justify-end gap-3 p-6 border-t border-white/10">
+                <button type="button" data-dialog-close class="admin-btn-ghost">Cancel</button>
+                <button type="submit" id="expSaveBtn" class="admin-btn-primary">Save</button>
+            </div>
+        </form>
+    </dialog>
 </AdminLayout>
 
 <script>
-    const baseUrl = import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") || 'https://codeforge-ukq5.onrender.com';
-    
-    const tableBody = document.getElementById('expTableBody');
-    const modal = document.getElementById('expModal');
-    const expForm = document.getElementById('expForm') as HTMLFormElement;
-    let expData: any[] = [];
-    
-    async function loadExperiences() {
-        try {
-            const res = await fetch(`${baseUrl}/api/experiences`, { credentials: 'include' });
-            const json = await res.json();
-            expData = json.data || [];
-            renderTable();
-        } catch (e) {
-            tableBody!.innerHTML = `<tr><td colspan="3" class="px-6 py-4 text-center text-red-400">Failed to load experiences</td></tr>`;
-        }
-    }
-    
-    function renderTable() {
-        if (!expData.length) {
-            tableBody!.innerHTML = `<tr><td colspan="3" class="px-6 py-4 text-center">No experiences found</td></tr>`;
-            return;
-        }
-        
-        tableBody!.innerHTML = expData.map(e => `
-            <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
-                <td class="px-6 py-4">
-                    <div class="font-medium text-white">${e.role}</div>
-                    <div class="text-xs text-slate-500">${e.company}</div>
-                </td>
-                <td class="px-6 py-4">
-                    ${e.startDate} - ${e.current ? 'Present' : (e.endDate || '')}
-                </td>
-                <td class="px-6 py-4 text-right">
-                    <button class="text-emerald-400 hover:text-emerald-300 mr-3 preview-btn" data-id="${e._id}">Preview</button>
-                    <button class="text-blue-400 hover:text-blue-300 mr-3 edit-btn" data-id="${e._id}">Edit</button>
-                    <button class="text-red-400 hover:text-red-300 delete-btn" data-id="${e._id}">Delete</button>
-                </td>
-            </tr>
-        `).join('');
-        
-        document.querySelectorAll('.preview-btn').forEach(btn => btn.addEventListener('click', () => {
-            window.open('/#experience', '_blank');
-        }));
+    import { whenAuthenticated } from '../../../lib/admin/boot';
+    import { initExperiencesPage } from '../../../lib/admin/experiences';
 
-        document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', (e) => {
-            const id = (e.target as HTMLButtonElement).dataset.id;
-            const exp = expData.find(x => x._id === id);
-            if(exp) openModal(exp);
-        }));
-        
-        document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', async (e) => {
-            const id = (e.target as HTMLButtonElement).dataset.id;
-            if(confirm('Are you sure you want to delete this experience?')) {
-                try {
-                    await fetch(`${baseUrl}/api/experiences/${id}`, { method: 'DELETE', credentials: 'include' });
-                    loadExperiences();
-                } catch(err) {
-                    alert('Error deleting experience');
-                }
-            }
-        }));
-    }
-    
-    function openModal(exp: any = null) {
-        expForm.reset();
-        document.getElementById('modalError')!.classList.add('hidden');
-        
-        if (exp) {
-            document.getElementById('modalTitle')!.textContent = 'Edit Experience';
-            (document.getElementById('expId') as HTMLInputElement).value = exp._id;
-            (document.getElementById('e-role') as HTMLInputElement).value = exp.role || '';
-            (document.getElementById('e-company') as HTMLInputElement).value = exp.company || '';
-            (document.getElementById('e-description') as HTMLTextAreaElement).value = exp.description || '';
-            (document.getElementById('e-technologies') as HTMLInputElement).value = (exp.technologies || []).join(', ');
-            (document.getElementById('e-startDate') as HTMLInputElement).value = exp.startDate || '';
-            (document.getElementById('e-endDate') as HTMLInputElement).value = exp.endDate || '';
-            (document.getElementById('e-current') as HTMLInputElement).checked = !!exp.current;
-        } else {
-            document.getElementById('modalTitle')!.textContent = 'New Experience';
-            (document.getElementById('expId') as HTMLInputElement).value = '';
-        }
-        
-        modal!.classList.remove('hidden');
-    }
-    
-    document.getElementById('newExpBtn')?.addEventListener('click', () => openModal());
-    document.getElementById('closeModalBtn')?.addEventListener('click', () => modal!.classList.add('hidden'));
-    document.getElementById('cancelBtn')?.addEventListener('click', () => modal!.classList.add('hidden'));
-    
-    expForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const id = (document.getElementById('expId') as HTMLInputElement).value;
-        const current = (document.getElementById('e-current') as HTMLInputElement).checked;
-        const endDateVal = (document.getElementById('e-endDate') as HTMLInputElement).value;
-
-        const payload = {
-            role: (document.getElementById('e-role') as HTMLInputElement).value,
-            company: (document.getElementById('e-company') as HTMLInputElement).value,
-            description: (document.getElementById('e-description') as HTMLInputElement).value,
-            technologies: (document.getElementById('e-technologies') as HTMLInputElement).value.split(',').map(s=>s.trim()).filter(Boolean),
-            startDate: (document.getElementById('e-startDate') as HTMLInputElement).value,
-            endDate: current ? null : (endDateVal || null),
-            current
-        };
-        
-        const method = id ? 'PATCH' : 'POST';
-        const url = id ? `${baseUrl}/api/experiences/${id}` : `${baseUrl}/api/experiences`;
-        
-        try {
-            const res = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify(payload)
-            });
-            const result = await res.json();
-            
-            if (result.success) {
-                modal!.classList.add('hidden');
-                loadExperiences();
-            } else {
-                const err = document.getElementById('modalError')!;
-                err.textContent = result.message || 'Error saving experience';
-                err.classList.remove('hidden');
-            }
-        } catch (err) {
-            const errEl = document.getElementById('modalError')!;
-            errEl.textContent = 'Network error.';
-            errEl.classList.remove('hidden');
-        }
-    });
-
-    loadExperiences();
+    void whenAuthenticated(() => initExperiencesPage().reload());
 </script>

@@ -9,7 +9,7 @@ Gestione manuale dei contenuti del portfolio tramite modifiche del codice, con c
 - Gestione dati strutturata.
 
 ## Architecture
-Architettura divisa in Frontend (Astro + React Islands) e Backend REST API (Fastify + MongoDB) con una Admin Dashboard autenticata.
+Architettura divisa in Frontend (Astro con moduli TypeScript) e Backend REST API (Fastify + MongoDB) con una Admin Dashboard autenticata.
 
 ## Implementation
 - **Frontend**: TailwindCSS, ParticleCanvas interattivo.

@@ -28,6 +28,8 @@ import experienceRoutes from './routes/experienceRoutes';
 import healthRoutes from './routes/healthRoutes';
 
 import { metricsHook } from './middlewares/metrics';
+import { createCsrfGuard } from './middlewares/csrf';
+import { positiveInteger } from './utils/settings';
 
 type FastifyApplicationError = {
     name?: unknown;
@@ -116,6 +118,9 @@ async function configureApp(
                 routePrefix:
                     '/api-docs',
 
+                staticCSP:
+                    true,
+
                 uiConfig: {
                     docExpansion:
                         'full',
@@ -143,43 +148,27 @@ async function configureApp(
     await app.register(helmet, {
         global: true,
 
+        /**
+         * The API only serves JSON, so documents it returns never need to
+         * load scripts, styles or other subresources. Swagger UI (disabled
+         * in production) sends its own hash-based policy via staticCSP.
+         * No directive allows 'unsafe-inline'.
+         */
         contentSecurityPolicy: {
+            useDefaults:
+                false,
+
             directives: {
                 defaultSrc: [
-                    "'self'",
-                ],
-
-                scriptSrc: [
-                    "'self'",
-                ],
-
-                styleSrc: [
-                    "'self'",
-                    "'unsafe-inline'",
-                ],
-
-                imgSrc: [
-                    "'self'",
-                    'data:',
-                    'https:',
-                ],
-
-                connectSrc: [
-                    "'self'",
-                    process.env.FRONTEND_URL ||
-                        'http://localhost:2003',
-                ],
-
-                objectSrc: [
                     "'none'",
                 ],
 
                 baseUri: [
-                    "'self'",
+                    "'none'",
                 ],
 
                 formAction: [
-                    "'self'",
+                    "'none'",
                 ],
 
                 frameAncestors: [
@@ -282,8 +271,15 @@ async function configureApp(
     await app.register(
         rateLimit,
         {
+            /**
+             * Requests per client per minute. RATE_LIMIT_MAX exists so the
+             * Playwright backend (six workers, one IP) can raise it.
+             */
             max:
-                100,
+                positiveInteger(
+                    process.env.RATE_LIMIT_MAX,
+                    100,
+                ),
 
             timeWindow:
                 '1 minute',
@@ -338,6 +334,13 @@ async function configureApp(
             credentials:
                 true,
         },
+    );
+
+    app.addHook(
+        'onRequest',
+        createCsrfGuard(
+            allowedOrigins,
+        ),
     );
 
     // ============================================================

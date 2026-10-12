@@ -5,13 +5,23 @@
  * multi-category filtering.
  */
 
+import {
+	collectCategories,
+	getCategoryLabel,
+	getProjectCategories,
+	normalizeCategory,
+	slugify,
+} from "../lib/format";
+
 export interface Project {
-	_id: string;
+	id?: string;
+	_id?: string;
 	titolo: string;
 	role?: string;
 	descrizione: string;
 	tecnologie: string[];
-	categorie: string[];
+	categorie?: string[];
+	categoria?: string;
 	image?: string | null;
 	experienceId?: string | null;
 	experienceImage?: string | null;
@@ -25,75 +35,26 @@ interface Props {
 
 const { projects = [], apiError = false } = Astro.props;
 
-/* ======================================================
-   HELPERS
-   ====================================================== */
+const allCategories = collectCategories(projects);
 
-const normalizeCategory = (category?: string) => {
-	const value = (category || "").trim().toLowerCase();
+/**
+ * Fallback role shown when a project has no explicit role.
+ */
+function defaultRole(categories: string[]): string {
+	if (categories.includes("full-stack")) return "Full-stack Engineer";
+	if (categories.includes("embedded")) return "Embedded Systems Engineer";
+	return "Software Engineer";
+}
 
-	if (
-		value === "full-stack" ||
-		value === "full stack" ||
-		value === "fullstack"
-	) {
-		return "full-stack";
-	}
-
-	if (value === "embedded") return "embedded";
-	if (value === "ai") return "ai";
-	if (value === "iot") return "iot";
-	if (value === "data") return "data";
-
-	return value;
-};
-
-const getCategoryLabel = (category: string) => {
-	const normalized = normalizeCategory(category);
-
-	switch (normalized) {
-		case "full-stack":
-			return "Full Stack";
-
-		case "embedded":
-			return "Embedded";
-
-		case "ai":
-			return "AI";
-
-		case "iot":
-			return "IoT";
-
-		case "data":
-			return "Data";
-
-		default:
-			return category;
-	}
-};
-
-const projectCategories = projects.flatMap(
-	(project) => {
-		if (Array.isArray(project.categorie)) return project.categorie;
-		if (typeof project.categoria === 'string') return [project.categoria];
-		return [];
-	}
-);
-
-const normalizedProjectCategories = [
-	...new Set(projectCategories.map(normalizeCategory).filter(Boolean)),
-];
-
-const baseCategories = ["full-stack", "embedded", "ai", "iot", "data"];
-
-const allCategories = [
-	...baseCategories.filter((category) =>
-		normalizedProjectCategories.includes(category),
-	),
-	...normalizedProjectCategories.filter(
-		(category) => !baseCategories.includes(category),
-	),
-];
+/**
+ * Short proof point shown in the card footer.
+ */
+function proofPoint(title: string): string {
+	const value = title.toLowerCase();
+	if (value.includes("codeforge")) return "100/100 Lighthouse";
+	if (value.includes("embedded")) return "Hardware optimized";
+	return "Project";
+}
 ---
 
 <section id="projects&experiences">
@@ -164,15 +125,8 @@ const allCategories = [
 					.filter(p => !p.titolo.toLowerCase().includes('codeforge'))
 					.slice(0, 4) // Show only Tier 2 projects (max 4)
 					.map((project) => {
-					let rawCategories = [];
-					if (Array.isArray(project.categorie)) {
-						rawCategories = project.categorie;
-					} else if (typeof project.categoria === 'string') {
-						rawCategories = [project.categoria];
-					}
-
 					const categories = [
-						...new Set(rawCategories.map(normalizeCategory)),
+						...new Set(getProjectCategories(project).map(normalizeCategory)),
 					].filter(Boolean);
 
 					return (
@@ -223,7 +177,7 @@ const allCategories = [
 								<!-- Role -->
 								<div class="mb-4">
 									<p class="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mb-1">Role</p>
-									<p class="text-sm text-slate-300 font-medium">{project.role || (categories.includes('full-stack') ? 'Full-stack Engineer' : categories.includes('embedded') ? 'Embedded Systems Engineer' : 'Software Engineer')}</p>
+									<p class="text-sm text-slate-300 font-medium">{project.role || defaultRole(categories)}</p>
 								</div>
 
 								<!-- Description -->
@@ -253,14 +207,12 @@ const allCategories = [
 									<div class="flex items-center gap-2">
 										<div class="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]"></div>
 										<span class="text-xs font-semibold text-slate-300">
-											{project.titolo.toLowerCase().includes('codeforge') ? '100/100 Lighthouse' : 
-											 project.titolo.toLowerCase().includes('embedded') ? 'Hardware optimized' : 
-											 'Project'}
+											{proofPoint(project.titolo)}
 										</span>
 									</div>
 
 									{(() => {
-										const slug = project.titolo.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+										const slug = slugify(project.titolo);
 										return (
 											<a href={`/projects/${slug}`} class="text-xs font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors group/link uppercase tracking-wider">
 												View Case Study 
@@ -591,33 +543,7 @@ const allCategories = [
 </style>
 
 <script>
-	const buttons = document.querySelectorAll(".cat-btn");
+	import { initProjectFilter } from "../scripts/project-filter";
 
-	const cards = document.querySelectorAll(".project-card");
-
-	buttons.forEach((button) => {
-		button.addEventListener("click", () => {
-			buttons.forEach((btn) => {
-				const active = btn === button;
-
-				btn.classList.toggle("active", active);
-
-				btn.setAttribute("aria-pressed", String(active));
-			});
-
-			const filter = button.getAttribute("data-filter") || "all";
-
-			cards.forEach((card) => {
-				const categories = (
-					card.getAttribute("data-categories") || ""
-				).split(",");
-
-				const visible =
-					filter === "all" ||
-					categories.includes(filter);
-
-				card.classList.toggle("hidden", !visible);
-			});
-		});
-	});
+	initProjectFilter();
 </script>

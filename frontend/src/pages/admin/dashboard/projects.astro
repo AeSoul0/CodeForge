@@ -1,244 +1,135 @@
 ---
+/**
+ * @file frontend/src/pages/admin/dashboard/projects.astro
+ * @description Project management: list, search, create, edit, AI
+ * regeneration and deletion. Behaviour lives in src/lib/admin/projects.ts.
+ */
+
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 ---
 
 <AdminLayout title="Projects | Admin">
-    <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-black tracking-tight text-white">Projects</h1>
-        <button id="newProjectBtn" class="bg-cyan-500/20 hover:bg-cyan-500/40 border border-cyan-500/50 text-cyan-50 px-5 py-2 rounded-full font-medium transition-all hover-glow shadow-[0_0_15px_rgba(34,211,238,0.2)]">
-            + New Project
-        </button>
+    <div class="flex flex-wrap gap-4 justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-black tracking-tight text-white">Projects</h1>
+            <p id="projectCount" class="text-sm text-slate-400 mt-1" aria-live="polite"></p>
+        </div>
+
+        <div class="flex flex-wrap gap-3 items-center">
+            <label for="projectSearch" class="sr-only">Search projects</label>
+            <input
+                id="projectSearch"
+                type="search"
+                placeholder="Search title, stack, category…"
+                class="admin-field w-64"
+                autocomplete="off"
+            />
+            <button id="newProjectBtn" type="button" class="admin-btn-primary">
+                + New Project
+            </button>
+        </div>
     </div>
-    
-    <div class="glass-card overflow-hidden">
+
+    <div class="glass-card overflow-x-auto">
         <table class="w-full text-left text-sm text-slate-300">
+            <caption class="sr-only">Portfolio projects</caption>
             <thead class="text-xs text-slate-300 uppercase bg-black/30 border-b border-white/10">
                 <tr>
                     <th scope="col" class="px-6 py-4 font-medium">Project</th>
-                    <th scope="col" class="px-6 py-4 font-medium">Category</th>
-                    <th scope="col" class="px-6 py-4 font-medium">Technologies</th>
+                    <th scope="col" class="px-6 py-4 font-medium">Categories</th>
+                    <th scope="col" class="px-6 py-4 font-medium hidden md:table-cell">Technologies</th>
+                    <th scope="col" class="px-6 py-4 font-medium hidden lg:table-cell">Updated</th>
                     <th scope="col" class="px-6 py-4 font-medium text-right">Actions</th>
                 </tr>
             </thead>
             <tbody id="projectsTableBody">
                 <tr>
-                    <td colspan="4" class="px-6 py-4 text-center">Loading projects...</td>
+                    <td colspan="5" class="px-6 py-6 text-center text-slate-400">Loading projects…</td>
                 </tr>
             </tbody>
         </table>
     </div>
 
-    <!-- Modal for Create/Edit -->
-    <div id="projectModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" class="fixed inset-0 bg-black/60 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-md overflow-y-auto">
-        <div class="glass-card w-full max-w-2xl my-8 relative overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-transparent pointer-events-none"></div>
-            
-            <div class="flex justify-between items-center p-6 border-b border-white/10 relative z-10">
-                <h2 id="modalTitle" class="text-xl font-bold text-white tracking-tight">New Project</h2>
-                <button id="closeModalBtn" aria-label="Close Modal" class="text-slate-400 hover:text-white transition-colors">&times;</button>
+    <dialog id="projectDialog" class="admin-dialog" aria-labelledby="projectDialogTitle">
+        <form id="projectForm" class="glass-card relative overflow-hidden" novalidate>
+            <div class="flex justify-between items-center p-6 border-b border-white/10">
+                <h2 id="projectDialogTitle" class="text-xl font-bold text-white tracking-tight">New Project</h2>
+                <button type="button" data-dialog-close aria-label="Close dialog" class="text-2xl leading-none text-slate-400 hover:text-white">&times;</button>
             </div>
-            
-            <form id="projectForm" class="p-6 space-y-4 relative z-10">
-                <input type="hidden" id="projectId" />
-                
+
+            <div class="p-6 space-y-4 max-h-[65dvh] overflow-y-auto">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-1">Title</label>
-                        <input type="text" id="p-titolo" required class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-400/50 focus:bg-white/5 transition-all outline-none">
+                        <label for="p-titolo" class="admin-label">Title *</label>
+                        <input id="p-titolo" type="text" required minlength="3" maxlength="100" class="admin-field" />
                     </div>
                     <div>
-                        <label class="block text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-1">Role</label>
-                        <input type="text" id="p-role" class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-400/50 focus:bg-white/5 transition-all outline-none">
+                        <label for="p-role" class="admin-label">Role</label>
+                        <input id="p-role" type="text" maxlength="100" class="admin-field" />
                     </div>
-                </div>
-                
-                <div>
-                    <label class="block text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-1">Description</label>
-                    <textarea id="p-descrizione" required rows="3" class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-400/50 focus:bg-white/5 transition-all outline-none"></textarea>
-                </div>
-                
-                <div>
-                    <label class="block text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-1">Long Description</label>
-                    <textarea id="p-descrizioneLunga" rows="5" class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-400/50 focus:bg-white/5 transition-all outline-none"></textarea>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-1">Category</label>
-                        <input type="text" id="p-categoria" class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-400/50 focus:bg-white/5 transition-all outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-1">Technologies (comma separated)</label>
-                        <input type="text" id="p-tecnologie" required class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-400/50 focus:bg-white/5 transition-all outline-none">
-                    </div>
-                </div>
-                
-                <div>
-                    <label class="block text-[10px] uppercase tracking-widest text-white/50 font-semibold mb-1">GitHub URL</label>
-                    <input type="url" id="p-linkGithub" class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-400/50 focus:bg-white/5 transition-all outline-none">
                 </div>
 
-                <div id="modalError" class="text-red-400 text-sm hidden bg-red-500/10 border border-red-500/20 p-3 rounded-lg"></div>
-                
-                <div class="flex justify-end gap-3 pt-4 border-t border-white/10">
-                    <button type="button" id="cancelBtn" class="px-5 py-2 rounded-full text-slate-300 hover:bg-white/5 transition-colors text-sm font-medium">Cancel</button>
-                    <button type="submit" id="saveBtn" class="bg-cyan-500/20 hover:bg-cyan-500/40 border border-cyan-500/50 text-cyan-50 px-6 py-2 rounded-full text-sm font-medium transition-all shadow-[0_0_15px_rgba(34,211,238,0.2)]">Save</button>
-                    <button type="button" id="aiBtn" class="hidden bg-purple-500/20 hover:bg-purple-500/40 border border-purple-500/50 text-purple-50 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-[0_0_15px_rgba(168,85,247,0.2)]">Generate AI Description</button>
+                <div>
+                    <label for="p-descrizione" class="admin-label">Description *</label>
+                    <textarea id="p-descrizione" required minlength="10" maxlength="5000" rows="3" class="admin-field"></textarea>
                 </div>
-            </form>
-        </div>
-    </div>
+
+                <div>
+                    <label for="p-descrizioneLunga" class="admin-label">Long description (Markdown)</label>
+                    <textarea id="p-descrizioneLunga" rows="6" maxlength="50000" class="admin-field font-mono text-xs" aria-describedby="p-descrizioneLunga-hint"></textarea>
+                    <p id="p-descrizioneLunga-hint" class="text-xs text-slate-400 mt-1">Leave empty to let the AI generate it after saving.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="p-categorie" class="admin-label">Categories (comma separated)</label>
+                        <input id="p-categorie" type="text" list="categorySuggestions" class="admin-field" placeholder="full-stack, ai" />
+                        <datalist id="categorySuggestions">
+                            <option value="full-stack"></option>
+                            <option value="embedded"></option>
+                            <option value="ai"></option>
+                            <option value="iot"></option>
+                            <option value="data"></option>
+                        </datalist>
+                    </div>
+                    <div>
+                        <label for="p-tecnologie" class="admin-label">Technologies * (comma separated)</label>
+                        <input id="p-tecnologie" type="text" required class="admin-field" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="p-linkGithub" class="admin-label">GitHub URL</label>
+                        <input id="p-linkGithub" type="url" maxlength="500" class="admin-field" placeholder="https://github.com/…" />
+                    </div>
+                    <div>
+                        <label for="p-image" class="admin-label">Image URL</label>
+                        <input id="p-image" type="text" maxlength="500" class="admin-field" />
+                    </div>
+                </div>
+
+                <div>
+                    <label for="p-experienceId" class="admin-label">Linked experience</label>
+                    <select id="p-experienceId" class="admin-field">
+                        <option value="">No linked experience</option>
+                    </select>
+                </div>
+
+                <div id="projectFormError" role="alert" class="hidden text-red-300 text-sm bg-red-500/10 border border-red-500/20 p-3 rounded-lg"></div>
+            </div>
+
+            <div class="flex justify-end gap-3 p-6 border-t border-white/10">
+                <button type="button" data-dialog-close class="admin-btn-ghost">Cancel</button>
+                <button type="submit" id="projectSaveBtn" class="admin-btn-primary">Save</button>
+            </div>
+        </form>
+    </dialog>
 </AdminLayout>
 
 <script>
-    const baseUrl = import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") || 'https://codeforge-ukq5.onrender.com';
-    
-    const tableBody = document.getElementById('projectsTableBody');
-    const modal = document.getElementById('projectModal');
-    const projectForm = document.getElementById('projectForm') as HTMLFormElement;
-    let projectsData: any[] = [];
-    
-    async function loadProjects() {
-        try {
-            const res = await fetch(`${baseUrl}/api/projects?limit=50`, { credentials: 'include' });
-            const json = await res.json();
-            projectsData = json.data || [];
-            renderTable();
-        } catch (e) {
-            tableBody!.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-red-400">Failed to load projects</td></tr>`;
-        }
-    }
-    
-    function renderTable() {
-        if (!projectsData.length) {
-            tableBody!.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center">No projects found</td></tr>`;
-            return;
-        }
-        
-        tableBody!.innerHTML = projectsData.map(p => `
-            <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
-                <td class="px-6 py-4 font-medium text-white">${p.titolo}</td>
-                <td class="px-6 py-4">${p.categoria || '-'}</td>
-                <td class="px-6 py-4">${(p.tecnologie || []).join(', ')}</td>
-                <td class="px-6 py-4 text-right">
-                    <button class="text-emerald-400 hover:text-emerald-300 mr-3 preview-btn" data-id="${p._id}">Preview</button>
-                    <button class="text-blue-400 hover:text-blue-300 mr-3 edit-btn" data-id="${p._id}">Edit</button>
-                    <button class="text-red-400 hover:text-red-300 delete-btn" data-id="${p._id}">Delete</button>
-                </td>
-            </tr>
-        `).join('');
+    import { whenAuthenticated } from '../../../lib/admin/boot';
+    import { initProjectsPage } from '../../../lib/admin/projects';
 
-        document.querySelectorAll('.preview-btn').forEach(btn => btn.addEventListener('click', (e) => {
-            const id = (e.target as HTMLButtonElement).dataset.id;
-            const project = projectsData.find(x => x._id === id);
-            if(project) {
-                const slug = project.titolo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
-                window.open(`/projects/${slug}`, '_blank');
-            }
-        }));
-        
-        document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', (e) => {
-            const id = (e.target as HTMLButtonElement).dataset.id;
-            const project = projectsData.find(x => x._id === id);
-            if(project) openModal(project);
-        }));
-        
-        document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', async (e) => {
-            const id = (e.target as HTMLButtonElement).dataset.id;
-            if(confirm('Are you sure you want to delete this project?')) {
-                try {
-                    await fetch(`${baseUrl}/api/projects/${id}`, { method: 'DELETE', credentials: 'include' });
-                    loadProjects();
-                } catch(err) {
-                    alert('Error deleting project');
-                }
-            }
-        }));
-    }
-    
-    function openModal(project: any = null) {
-        projectForm.reset();
-        document.getElementById('modalError')!.classList.add('hidden');
-        const aiBtn = document.getElementById('aiBtn')!;
-        
-        if (project) {
-            document.getElementById('modalTitle')!.textContent = 'Edit Project';
-            (document.getElementById('projectId') as HTMLInputElement).value = project._id;
-            (document.getElementById('p-titolo') as HTMLInputElement).value = project.titolo || '';
-            (document.getElementById('p-role') as HTMLInputElement).value = project.role || '';
-            (document.getElementById('p-descrizione') as HTMLInputElement).value = project.descrizione || '';
-            (document.getElementById('p-descrizioneLunga') as HTMLInputElement).value = project.descrizioneLunga || '';
-            (document.getElementById('p-categoria') as HTMLInputElement).value = project.categoria || '';
-            (document.getElementById('p-tecnologie') as HTMLInputElement).value = (project.tecnologie || []).join(', ');
-            (document.getElementById('p-linkGithub') as HTMLInputElement).value = project.linkGithub || '';
-            
-            aiBtn.classList.remove('hidden');
-            aiBtn.onclick = async () => {
-                aiBtn.textContent = 'Generating...';
-                try {
-                    await fetch(`${baseUrl}/api/projects/${project._id}/generate-ai`, { method: 'POST', credentials: 'include' });
-                    alert('AI Generation triggered!');
-                    loadProjects();
-                    modal!.classList.add('hidden');
-                } catch(e) {
-                    alert('Error generating AI text');
-                } finally {
-                    aiBtn.textContent = 'Generate AI Description';
-                }
-            };
-        } else {
-            document.getElementById('modalTitle')!.textContent = 'New Project';
-            (document.getElementById('projectId') as HTMLInputElement).value = '';
-            aiBtn.classList.add('hidden');
-        }
-        
-        modal!.classList.remove('hidden');
-    }
-    
-    document.getElementById('newProjectBtn')?.addEventListener('click', () => openModal());
-    document.getElementById('closeModalBtn')?.addEventListener('click', () => modal!.classList.add('hidden'));
-    document.getElementById('cancelBtn')?.addEventListener('click', () => modal!.classList.add('hidden'));
-    
-    projectForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const id = (document.getElementById('projectId') as HTMLInputElement).value;
-        const payload = {
-            titolo: (document.getElementById('p-titolo') as HTMLInputElement).value,
-            role: (document.getElementById('p-role') as HTMLInputElement).value,
-            descrizione: (document.getElementById('p-descrizione') as HTMLInputElement).value,
-            descrizioneLunga: (document.getElementById('p-descrizioneLunga') as HTMLInputElement).value,
-            categoria: (document.getElementById('p-categoria') as HTMLInputElement).value,
-            tecnologie: (document.getElementById('p-tecnologie') as HTMLInputElement).value.split(',').map(s=>s.trim()).filter(Boolean),
-            linkGithub: (document.getElementById('p-linkGithub') as HTMLInputElement).value || null
-        };
-        
-        const method = id ? 'PATCH' : 'POST';
-        const url = id ? `${baseUrl}/api/projects/${id}` : `${baseUrl}/api/projects`;
-        
-        try {
-            const res = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify(payload)
-            });
-            const result = await res.json();
-            
-            if (result.success) {
-                modal!.classList.add('hidden');
-                loadProjects();
-            } else {
-                const err = document.getElementById('modalError')!;
-                err.textContent = result.message || 'Error saving project';
-                err.classList.remove('hidden');
-            }
-        } catch (err) {
-            const errEl = document.getElementById('modalError')!;
-            errEl.textContent = 'Network error.';
-            errEl.classList.remove('hidden');
-        }
-    });
-
-    loadProjects();
+    void whenAuthenticated(() => initProjectsPage().reload());
 </script>

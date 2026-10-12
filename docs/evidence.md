@@ -1,6 +1,3 @@
-# `docs/evidence.md`
-
-````md
 # CodeForge Engineering Evidence
 
 ## Purpose
@@ -57,19 +54,13 @@ PASS
 
 Latest local Playwright verification:
 
-```text
-Running 12 tests using 6 workers
-12 passed (35.2s)
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ## Dependency Security
 
 Latest local audits:
 
-```text
-Frontend: 0 vulnerabilities
-Backend:  0 vulnerabilities
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ---
 
@@ -79,12 +70,7 @@ Backend:  0 vulnerabilities
 
 Latest backend coverage run:
 
-```text
-Test Files  21 passed (21)
-Tests       161 passed (161)
-
-Duration    53.72s
-```
+Current numbers: see [metrics.md](metrics.md).
 
 Result:
 
@@ -96,12 +82,7 @@ PASS
 
 Latest V8 coverage:
 
-| Metric     | Result | Required Minimum | Status |
-| ---------- | -----: | ---------------: | ------ |
-| Statements | 95.08% |              85% | ✅ PASS |
-| Branches   | 85.05% |              80% | ✅ PASS |
-| Functions  | 95.29% |              85% | ✅ PASS |
-| Lines      | 95.05% |              85% | ✅ PASS |
+Current numbers: see [metrics.md](metrics.md).
 
 All four configured coverage thresholds are currently satisfied.
 
@@ -189,10 +170,7 @@ CORS restrictions
 
 Latest local results:
 
-```text
-Frontend: 0 vulnerabilities
-Backend:  0 vulnerabilities
-```
+Current numbers: see [metrics.md](metrics.md).
 
 No current High or Critical dependency vulnerability is reported by the
 local audit commands used during the final review.
@@ -205,10 +183,7 @@ local audit commands used during the final review.
 
 Latest result:
 
-```text
-Running 12 tests using 6 workers
-12 passed (35.2s)
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ## Concurrency
 
@@ -240,7 +215,7 @@ The E2E suite currently verifies:
 
 Automated accessibility tests use axe-core through Playwright.
 
-The accessibility scenarios are included in the current 12/12 passing suite.
+The accessibility scenarios run as part of the Playwright suite (results in [metrics.md](metrics.md)).
 
 ---
 
@@ -295,16 +270,7 @@ A manual review remains valuable for:
 
 Latest Lighthouse measurement:
 
-| Metric         |                       Result |
-| -------------- | ---------------------------: |
-| Performance    |                       93/100 |
-| Accessibility  |                      100/100 |
-| Best Practices |                       93/100 |
-| SEO            |                      100/100 |
-| LCP            |                        2.2 s |
-| CLS            |                            0 |
-| TTFB           |                       770 ms |
-| INP            | Not reported by captured run |
+Current numbers: see [metrics.md](metrics.md).
 
 ## Previous Baseline
 
@@ -321,12 +287,7 @@ TTFB:        680 ms
 
 After enabling Vercel ISR:
 
-```text
-Performance: 99/100 (Desktop) / 90/100 (Mobile)
-LCP:         2.2 s
-CLS:         0
-TTFB:        770 ms
-```
+Current numbers: see [metrics.md](metrics.md).
 
 ## Measured Improvement
 
@@ -456,10 +417,7 @@ The performance measurement changed from:
 
 to:
 
-```text
-93/100 Performance
-2.2s LCP
-```
+Current numbers: see [metrics.md](metrics.md).
 
 The optimization therefore has direct measurable evidence.
 
@@ -627,26 +585,7 @@ Dependency Health
 
 The strongest verified results are:
 
-```text
-161/161 backend tests
-95.08% statements
-85.05% branches
-95.29% functions
-95.05% lines
-
-12/12 Playwright E2E
-6 workers
-
-0 dependency vulnerabilities
-
-Lighthouse Performance 99
-Lighthouse Accessibility 100
-Lighthouse Best Practices 100
-Lighthouse SEO 100
-
-LCP 0.4s
-CLS 0
-```
+Current numbers: see [metrics.md](metrics.md).
 
 The remaining evidence gaps are:
 
@@ -659,5 +598,3 @@ The remaining evidence gaps are:
 Until those are completed, the repository should describe itself as having
 strong verified local engineering evidence rather than claiming that every
 remote quality gate is fully green.
-
-```

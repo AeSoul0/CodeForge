@@ -9,7 +9,6 @@
 
 import Layout from "../layouts/Layout.astro";
 import Navbar from "../components/Navbar.astro";
-import ParticleCanvas from "../components/ParticleCanvas.astro";
 import HeroBento from "../components/HeroBento.astro";
 import FeaturedProject from "../components/FeaturedProject.astro";
 import WhatIBring from "../components/WhatIBring.astro";
@@ -21,34 +20,10 @@ import Footer from "../components/Footer.astro";
 
 import "../styles/global.css";
 
-interface Project {
-	_id: string;
-	titolo: string;
-	descrizione: string;
-	tecnologie: string[];
-	categorie: string[];
-	linkGithub?: string;
-}
-
-interface ExperienceItem {
-	_id: string;
-	role: string;
-	company: string;
-	description: string;
-	technologies: string[];
-	startDate: string;
-	endDate?: string | null;
-	current: boolean;
-	image?: string | null;
-}
-
-let projects: Project[] = [];
-let experiences: ExperienceItem[] = [];
-let apiError = false;
-
-const apiUrl =
-	import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") ||
-	"https://codeforge-ukq5.onrender.com";
+import { getApiUrl } from "../lib/api";
+import { loadPortfolioContent } from "../lib/content";
+import type { Project } from "../components/ProjectsGrid.astro";
+import type { ExperienceItem } from "../components/Experience.astro";
 
 /**
  * Cache the SSR-generated homepage at the Vercel edge.
@@ -67,60 +42,13 @@ Astro.response.headers.set(
 	"public, s-maxage=60, stale-while-revalidate=300",
 );
 
-/**
- * Fetch projects and experiences in parallel.
- */
-try {
-	const [projectsResponse, experiencesResponse] = await Promise.all([
-		fetch(`${apiUrl}/api/projects`),
-		fetch(`${apiUrl}/api/experiences`),
-	]);
-
-	if (!projectsResponse.ok) {
-		throw new Error(
-			`Projects API request failed with status ${projectsResponse.status}`,
-		);
-	}
-
-	if (!experiencesResponse.ok) {
-		throw new Error(
-			`Experiences API request failed with status ${experiencesResponse.status}`,
-		);
-	}
-
-	const [projectsBody, experiencesBody]: [any, any] = await Promise.all([
-		projectsResponse.json(),
-		experiencesResponse.json(),
-	]);
-
-	if (projectsBody && Array.isArray(projectsBody.data)) {
-		projects = projectsBody.data as Project[];
-	} else if (Array.isArray(projectsBody)) {
-		projects = projectsBody as Project[];
-	} else {
-		console.warn("[API Warning] Expected an array of projects.");
-	}
-
-	if (experiencesBody && Array.isArray(experiencesBody.data)) {
-		experiences = experiencesBody.data as ExperienceItem[];
-	} else if (Array.isArray(experiencesBody)) {
-		experiences = experiencesBody as ExperienceItem[];
-	} else {
-		console.warn("[API Warning] Expected an array of experiences.");
-	}
-} catch (error) {
-	apiError = true;
-
-	console.error(
-		"[Backend Connection Error] Failed to fetch homepage data:",
-		error,
-	);
-}
+const { projects, experiences, apiError } = await loadPortfolioContent<
+	Project,
+	ExperienceItem
+>(getApiUrl());
 ---
 
 <Layout title="CodeForge | ÆSoul">
-	<ParticleCanvas />
-
 	<Navbar />
 
 	<section

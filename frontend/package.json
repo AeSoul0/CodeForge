@@ -13,22 +13,22 @@
     "preview": "astro preview",
     "astro": "astro",
     "lint": "eslint src/",
-    "typecheck": "tsc --noEmit",
-    "test:e2e": "playwright test"
+    "typecheck": "astro check",
+    "test:e2e": "playwright test",
+    "test": "vitest run",
+    "test:cov": "vitest run --coverage",
+    "test:watch": "vitest",
+    "test:ci": "vitest run --coverage --reporter=default --reporter=json --outputFile.json=test-results.json",
+    "serve:build": "node scripts/serve-build.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
-    "@astrojs/react": "^6.0.4",
     "@astrojs/vercel": "^11.0.8",
     "@tailwindcss/typography": "^0.5.20",
     "@tailwindcss/vite": "^4.3.3",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.5",
     "@vercel/speed-insights": "^2.0.0",
     "astro": "^7.2.8",
     "marked": "^18.0.11",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
@@ -36,9 +36,12 @@
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.62.1",
     "@types/node": "^26.4.0",
+    "@vitest/coverage-v8": "^4.1.11",
     "eslint": "^10.9.1",
+    "happy-dom": "^21.0.1",
     "typescript": "~6.0.3",
-    "typescript-eslint": "^8.68.0"
+    "typescript-eslint": "^8.68.0",
+    "vitest": "^4.1.11"
   },
   "overrides": {
     "path-to-regexp": "6.3.0"

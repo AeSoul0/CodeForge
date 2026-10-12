@@ -21,6 +21,39 @@ import {
     adminService,
 } from '../services/AdminService';
 
+import {
+    positiveInteger,
+} from '../utils/settings';
+
+/**
+ * Login payload validation.
+ *
+ * Bounded lengths stop oversized payloads before bcrypt runs, and
+ * additionalProperties=false rejects unexpected fields.
+ */
+const loginSchema = {
+    body: {
+        type: 'object',
+        additionalProperties: false,
+        required: [
+            'username',
+            'password',
+        ],
+        properties: {
+            username: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 100,
+            },
+            password: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 200,
+            },
+        },
+    },
+} as const;
+
 export default async function authRoutes(
     fastify: FastifyInstance,
 ): Promise<void> {
@@ -32,9 +65,20 @@ export default async function authRoutes(
     }>(
         '/login',
         {
+            schema:
+                loginSchema,
+
             config: {
                 rateLimit: {
-                    max: 5,
+                    /**
+                     * LOGIN_RATE_LIMIT_MAX exists only so the Playwright
+                     * backend, where parallel workers share one IP, can
+                     * raise the production default of 5.
+                     */
+                    max: positiveInteger(
+                        process.env.LOGIN_RATE_LIMIT_MAX,
+                        5,
+                    ),
                     timeWindow:
                         '1 minute',
                 },
