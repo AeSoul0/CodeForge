@@ -9,8 +9,12 @@
  * badges, spacing, and the animated chronological connector.
  */
 
+import { getApiUrl } from "../lib/api";
+import { formatPeriod, resolveImageUrl } from "../lib/format";
+
 export interface ExperienceItem {
-    _id: string;
+    id?: string;
+    _id?: string;
     role: string;
     company: string;
     description: string;
@@ -28,64 +32,7 @@ interface Props {
 
 const { experiences = [], apiError = false } = Astro.props;
 
-
-/**
- * ============================================================
- * DATE FORMATTING
- * ============================================================
- */
-
-/**
- * Formats a date using English month names.
- *
- * Examples:
- * - "Sep 2025"
- * - "Dec 2024"
- */
-const monthFormatter = new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    year: "numeric",
-});
-
-
-/**
- * Builds the human-readable experience period.
- *
- * Examples:
- * - "Sep 2025 - Present"
- * - "Sep 2023 - Dec 2023"
- */
-function formatPeriod(
-    startDate: string,
-    endDate?: string | null,
-    current = false,
-): string {
-    const start = new Date(startDate);
-
-    if (Number.isNaN(start.getTime())) {
-        return "Date unavailable";
-    }
-
-    const startLabel = monthFormatter
-        .format(start)
-        .replace(".", "");
-
-    if (current || !endDate) {
-        return `${startLabel} - Present`;
-    }
-
-    const end = new Date(endDate);
-
-    if (Number.isNaN(end.getTime())) {
-        return `${startLabel} - Present`;
-    }
-
-    const endLabel = monthFormatter
-        .format(end)
-        .replace(".", "");
-
-    return `${startLabel} - ${endLabel}`;
-}
+const apiUrl = getApiUrl();
 ---
 
 <section
@@ -178,22 +125,16 @@ function formatPeriod(
                             </span>
 
 
-                            {exp.image && (() => {
-                                const apiUrl = import.meta.env.PUBLIC_API_URL?.replace(/\/$/, "") || "http://localhost:3002";
-                                const resolvedImage = exp.image.startsWith('/') 
-                                    ? `${apiUrl}${exp.image}` 
-                                    : exp.image;
-                                return (
-                                    <div class="experience-logo-wrapper">
-                                        <img
-                                            src={resolvedImage}
-                                            alt={`${exp.company} logo`}
-                                            class="experience-logo"
-                                            loading="lazy"
-                                        />
-                                    </div>
-                                );
-                            })()}
+                            {exp.image && (
+                                <div class="experience-logo-wrapper">
+                                    <img
+                                        src={resolveImageUrl(exp.image, apiUrl)}
+                                        alt={`${exp.company} logo`}
+                                        class="experience-logo"
+                                        loading="lazy"
+                                    />
+                                </div>
+                            )}
 
                         </div>
                     </div>

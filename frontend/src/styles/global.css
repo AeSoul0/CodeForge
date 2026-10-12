@@ -207,3 +207,99 @@ body {
     transform: none !important;
     filter: none !important;
 }
+/* ======================================================
+   ADMIN DASHBOARD
+   ====================================================== */
+
+.admin-dialog {
+    margin: auto;
+    width: min(100% - 2rem, 42rem);
+    max-height: calc(100dvh - 2rem);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    overflow: visible;
+}
+
+.admin-dialog::backdrop {
+    background: rgb(2 6 23 / 0.7);
+    backdrop-filter: blur(6px);
+}
+
+.admin-field {
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid rgb(255 255 255 / 0.1);
+    background: rgb(0 0 0 / 0.3);
+    padding: 0.5rem 0.75rem;
+    color: #fff;
+    transition: border-color 150ms, background-color 150ms;
+}
+
+.admin-field:focus {
+    outline: none;
+    border-color: rgb(34 211 238 / 0.5);
+    background: rgb(255 255 255 / 0.05);
+}
+
+.admin-field:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.admin-label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgb(203 213 225);
+}
+
+.admin-action {
+    font-weight: 500;
+    transition: color 150ms;
+}
+
+.admin-btn-primary {
+    border-radius: 9999px;
+    border: 1px solid rgb(6 182 212 / 0.5);
+    background: rgb(6 182 212 / 0.2);
+    padding: 0.5rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgb(236 254 255);
+    transition: background-color 150ms;
+}
+
+.admin-btn-primary:hover {
+    background: rgb(6 182 212 / 0.4);
+}
+
+.admin-btn-primary:disabled {
+    opacity: 0.6;
+    cursor: progress;
+}
+
+.admin-btn-ghost {
+    border-radius: 9999px;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgb(203 213 225);
+    transition: background-color 150ms;
+}
+
+.admin-btn-ghost:hover {
+    background: rgb(255 255 255 / 0.05);
+}
+
+.admin-nav-link[aria-current="page"] {
+    color: rgb(103 232 249);
+}
+
+.admin-toast {
+    animation: fade-in-up 200ms ease-out both;
+}

@@ -7,17 +7,16 @@
  * - Collect administrator username and password.
  * - Submit credentials to the backend.
  * - Preserve HttpOnly cookie authentication.
+ * - Skip the form when a valid session already exists.
  * - Display server-side authentication errors.
  * - Redirect authenticated administrators to the dashboard.
  */
 
 import Layout from '../../layouts/Layout.astro';
-import ParticleCanvas from '../../components/ParticleCanvas.astro';
 import '../../styles/global.css';
 ---
 
 <Layout title="Admin Login | CodeForge">
-    <ParticleCanvas />
 
     <div
         class="pointer-events-none fixed inset-x-0 top-0 z-0 h-[420px] bg-gradient-to-b from-cyan-500/[0.07] via-transparent to-transparent"
@@ -115,6 +114,7 @@ import '../../styles/global.css';
                 ></div>
 
                 <button
+                    id="loginSubmit"
                     type="submit"
                     class="w-full bg-cyan-400/10 hover:bg-cyan-400/20 border border-cyan-400/30 text-cyan-200 font-bold tracking-wide py-3 rounded-full mt-2 transition-all duration-300 shadow-[0_0_20px_rgba(34,211,238,0.15)] hover:shadow-[0_0_30px_rgba(34,211,238,0.3)] hover:-translate-y-0.5 uppercase text-xs"
                 >
@@ -126,126 +126,8 @@ import '../../styles/global.css';
 </Layout>
 
 <script>
-    const form =
-        document.getElementById(
-            'loginForm',
-        );
+    import { initLoginForm, redirectIfAuthenticated } from '../../lib/admin/login';
 
-    const errorMsg =
-        document.getElementById(
-            'errorMsg',
-        );
-
-    form?.addEventListener(
-        'submit',
-        async (event) => {
-            event.preventDefault();
-
-            const username =
-                (
-                    document.getElementById(
-                        'username',
-                    ) as HTMLInputElement
-                ).value.trim();
-
-            const password =
-                (
-                    document.getElementById(
-                        'password',
-                    ) as HTMLInputElement
-                ).value;
-
-            const submitBtn =
-                form.querySelector(
-                    'button[type="submit"]',
-                ) as HTMLButtonElement | null;
-
-            if (!submitBtn) {
-                return;
-            }
-
-            submitBtn.disabled =
-                true;
-
-            submitBtn.textContent =
-                'Authenticating...';
-
-            errorMsg?.classList.add(
-                'hidden',
-            );
-
-            try {
-                const apiUrl =
-                    import.meta.env.PUBLIC_API_URL?.replace(
-                        /\/$/,
-                        '',
-                    ) ||
-                    'http://127.0.0.1:3002';
-
-                const response =
-                    await fetch(
-                        `${apiUrl}/api/auth/login`,
-                        {
-                            method: 'POST',
-
-                            headers: {
-                                'Content-Type':
-                                    'application/json',
-                            },
-
-                            credentials:
-                                'include',
-
-                            body:
-                                JSON.stringify({
-                                    username,
-                                    password,
-                                }),
-                        },
-                    );
-
-                const result =
-                    await response.json();
-
-                if (
-                    response.ok &&
-                    result.success
-                ) {
-                    window.location.href =
-                        '/admin/dashboard';
-
-                    return;
-                }
-
-                const message =
-                    result?.message ??
-                    result?.error?.message ??
-                    'Invalid credentials';
-
-                if (errorMsg) {
-                    errorMsg.textContent =
-                        message;
-
-                    errorMsg.classList.remove(
-                        'hidden',
-                    );
-                }
-            } catch {
-                if (errorMsg) {
-                    errorMsg.textContent =
-                        'Network error. Backend might be unreachable.';
-
-                    errorMsg.classList.remove(
-                        'hidden',
-                    );
-                }
-            } finally {
-                submitBtn.disabled =
-                    false;
-
-                submitBtn.textContent =
-                    'Sign In';
-            }
-        },
-    );
+    initLoginForm();
+    void redirectIfAuthenticated();
 </script>
