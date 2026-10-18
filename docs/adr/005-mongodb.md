@@ -74,13 +74,13 @@ Repositories own persistence operations.
 
 ## Testing
 
-Database behavior is included in the backend test suite.
+Database behavior is included in the backend test suite, which runs against
+a real MongoDB instance (a service container in CI). Results:
+[metrics.md](../metrics.md).
 
-The latest backend suite reports:
-
-```text
-161/161 tests passed
-```
+Experience logos are stored as binary data on the experience document and
+served by `GET /api/experiences/:id/image`, so no separate file storage is
+needed.
 
 ## Consequences
 

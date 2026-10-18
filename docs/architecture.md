@@ -63,7 +63,7 @@ The architecture prioritizes:
                     │  AI providers                  │
                     │  Deployment integrations       │
                     └────────────────────────────────┘
-````
+```
 
 ---
 
@@ -394,6 +394,7 @@ The Fastify application uses security middleware for:
 * HSTS;
 * clickjacking protection;
 * CORS;
+* CSRF guard (origin check + `X-Requested-With` header on mutations);
 * rate limiting;
 * authentication.
 
@@ -449,14 +450,16 @@ Important domain events are recorded through the audit logger.
 Examples include:
 
 ```text
-LOGIN_ATTEMPT
 CREATE_PROJECT
+UPDATE_EXPERIENCE_IMAGE
+DELETE_PROJECT
 ```
 
 Request-level logs include request identifiers and response timing.
 
-The metrics layer provides a foundation for monitoring request behavior and
-diagnosing backend performance.
+The metrics middleware counts requests, errors, status-code buckets and
+average latency; `GET /metrics`, `/live` and `/ready` expose them and the
+admin "System" page displays them.
 
 ---
 
@@ -464,10 +467,11 @@ diagnosing backend performance.
 
 The service layer isolates integrations with external systems.
 
-Current integrations include:
+Current integrations (`backend/src/utils/`):
 
-* AI provider functionality;
-* deployment/platform integrations.
+* `ai.ts`: reads a project's GitHub repository and generates its Markdown
+  documentation with OpenAI or Gemini, in the background;
+* `vercel.ts`: calls the optional Vercel deploy hook after content changes.
 
 External dependencies are intentionally isolated from the core persistence and
 HTTP layers.
@@ -526,9 +530,8 @@ Playwright E2E
 Security / dependency checks
 ```
 
-Local execution currently passes these project-level validation stages.
-
-The remote GitHub Actions workflow successfully validates these project-level quality stages on every integration.
+The GitHub Actions workflow (Node.js 24.x, MongoDB service container) runs
+these stages on every push to `main` and every pull request.
 
 ---
 
@@ -627,12 +630,14 @@ Important operations and requests produce structured diagnostic information.
 * strong server rendering;
 * simple content-oriented pages;
 * good SEO;
-* flexible interactive islands.
+* interactivity from small bundled TypeScript modules, no UI framework
+  runtime.
 
 ### Trade-off
 
-Dynamic interactions require deliberate island boundaries and client/server
-coordination.
+Client modules find their elements in server-rendered markup by id, so
+markup and scripts must stay in sync; the admin tests mount the real page
+markup to catch drift.
 
 ---
 
@@ -755,8 +760,7 @@ Remaining work should focus on:
 1. maintaining architecture documentation;
 2. completing ADR coverage for important future decisions;
 3. monitoring database query/index behavior as data grows;
-4. validating the remote CI environment;
-5. preserving the current performance architecture.
+4. preserving the current performance architecture.
 
 The project should avoid introducing additional architectural complexity
 without a measurable engineering requirement.

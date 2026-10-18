@@ -5,7 +5,6 @@
 [![Frontend](https://img.shields.io/badge/frontend-Astro-FF5D01?logo=astro)](https://astro.build/)
 [![Node.js](https://img.shields.io/badge/Node.js-24.x-339933?logo=nodedotjs)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript)](https://www.typescriptlang.org/)
-[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker)](https://www.docker.com/)
 
 A production-oriented full-stack portfolio and administrative platform built
 to demonstrate modern software engineering practices across architecture,
@@ -147,7 +146,7 @@ MongoDB Atlas
 
 ```text
 Vitest
-Supertest
+Fastify inject()
 happy-dom
 Astro Container API
 V8 Coverage
@@ -438,7 +437,9 @@ See:
 
 ## Requirements
 
-The repository uses Node.js 24.x for the backend runtime.
+* Node.js 24.x (see `.nvmrc`) for backend, frontend and CI;
+* MongoDB: a local `mongod` on `localhost:27017` for development and tests,
+  MongoDB Atlas in production.
 
 Install dependencies:
 
@@ -450,21 +451,25 @@ cd ../frontend
 npm ci
 ```
 
-Configure the required environment variables for the selected environment.
+Copy `backend/.env.example` to `backend/.env` (and
+`backend/.env.test.example` to `backend/.env.test` for tests), then fill in
+the values.
 
-Important configuration categories include:
+The most important variables:
 
 ```text
 MONGODB_URI
 JWT_SECRET
-ADMIN_API_KEY          # also the seeded admin password
-FRONTEND_URL           # CORS + CSRF allowed origin
+ADMIN_API_KEY          # password of the seeded "admin" account
+FRONTEND_URL           # extra CORS + CSRF allowed origin
+OPENAI_API_KEY / GEMINI_API_KEY   # AI documentation (at least one)
 PUBLIC_API_URL         # frontend, build time: API URL and CSP connect-src
 RATE_LIMIT_MAX         # optional, default 100 req/min per client
 LOGIN_RATE_LIMIT_MAX   # optional, default 5 logins/min per client
 ```
 
-See [Deployment](docs/deployment.md#7-environment-variables) for details.
+The complete list is in
+[Deployment](docs/deployment.md#7-environment-variables).
 
 Never commit real production credentials.
 
@@ -486,8 +491,9 @@ cd frontend
 npm run dev
 ```
 
-The frontend and backend use separate development servers and communicate
-through the configured API URL.
+The frontend (http://localhost:2003) and backend (port from `PORT`) use
+separate development servers and communicate through `PUBLIC_API_URL`; set it
+to your local backend, otherwise the frontend reads the production API.
 
 ---
 
@@ -527,11 +533,16 @@ npm run metrics   # rewrites docs/metrics.md
 ## Lighthouse
 
 ```bash
-npx lighthouse https://www.aesoul0.com \
-  --output json \
-  --output-path ./lighthouse-home.json \
+# desktop (omit --preset for mobile); run 2-3 times and record the median
+npx lighthouse https://www.aesoul0.com/ \
+  --preset=desktop \
+  --output=json \
+  --output-path=./lighthouse-desktop.json \
   --chrome-flags="--headless"
 ```
+
+Record the result in `docs/metrics-lighthouse.json`; report files matching
+`lighthouse*.json` are git-ignored.
 
 ---
 
@@ -679,15 +690,16 @@ Measured results: [docs/metrics.md](docs/metrics.md).
 
 # Remaining Engineering Work
 
-The core application engineering work for the 90/100 roadmap is substantially
-complete.
-
-Known open items:
+The 90/100 roadmap is complete: every engineering item is implemented,
+tested and measured. What remains is evidence that needs real-user data and
+accepted limitations:
 
 1. Record a production INP measurement (requires real-user field data).
-2. Two moderate advisories remain in `@tailwindcss/typography` (build-time
+2. A manual screen-reader and keyboard-only review (automated axe and
+   Lighthouse checks pass).
+3. Two moderate advisories remain in `@tailwindcss/typography` (build-time
    only; the fix requires a breaking downgrade). No high/critical advisories.
-3. JWTs cannot be revoked before their 24 h expiry.
+4. JWTs cannot be revoked before their 24 h expiry.
 
 ---
 
@@ -724,6 +736,3 @@ This project and its source code are proprietary and belong exclusively to
 
 Unauthorized copying, modification, distribution or commercial use is
 prohibited.
-
-```
-```

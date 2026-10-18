@@ -27,7 +27,8 @@ that can be rendered efficiently on the server.
 Use Astro as the primary frontend framework.
 
 Use React selectively for interactive components rather than making the entire
-application client-rendered.
+application client-rendered. *(Superseded: see the 2026-10-12 amendment
+below; no UI framework is used.)*
 
 Use Astro server output with the Vercel adapter for dynamic production
 functionality.

@@ -8,6 +8,7 @@ body {
 }
 
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @keyframes tap-pulse {
     0%,
@@ -162,6 +163,17 @@ body {
     code
 ):not(:where(pre *)) {
     font-weight: 600;
+}
+
+/* The typography plugin wraps inline code in backticks; inline code is
+   styled as a pill instead. */
+.prose :where(
+    code
+):not(:where(pre *))::before,
+.prose :where(
+    code
+):not(:where(pre *))::after {
+    content: none;
 }
 
 .project-prose :where(

@@ -23,7 +23,7 @@ Latest production Lighthouse result:
 
 ```text
 Accessibility: 100/100
-````
+```
 
 Latest Playwright accessibility scenarios:
 
@@ -303,7 +303,9 @@ The suite includes keyboard navigation scenarios.
 The accessibility suite uses axe-core through Playwright.
 
 The tests validate the rendered application for automatically detectable
-accessibility violations.
+accessibility violations on the public pages, every admin page and every
+admin dialog (`accessibility.spec.ts`, `admin.spec.ts`). Any violation fails
+the run.
 
 Current result:
 
@@ -406,11 +408,11 @@ automated score.
 * [x] Lighthouse accessibility 100/100
 * [x] Playwright accessibility tests
 
-## Manual
+## Manual (see section 22)
 
-* [x] Screen-reader review
-* [x] Full keyboard-only manual review
-* [x] Mobile accessibility review
+* [ ] Screen-reader review
+* [ ] Full keyboard-only manual review
+* [ ] Mobile accessibility review
 
 ---
 

@@ -14,20 +14,6 @@ updates:
     commit-message:
       prefix: "chore(deps-frontend)"
 
-  - package-ecosystem: "docker"
-    directory: "/backend"
-    schedule:
-      interval: "weekly"
-    commit-message:
-      prefix: "chore(deps-docker-backend)"
-
-  - package-ecosystem: "docker"
-    directory: "/frontend"
-    schedule:
-      interval: "weekly"
-    commit-message:
-      prefix: "chore(deps-docker-frontend)"
-
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

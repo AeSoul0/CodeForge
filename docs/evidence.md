@@ -31,9 +31,12 @@ PASS
 npm run typecheck
 PASS
 
+npm run test:cov
+PASS
+
 npm run build
 PASS
-````
+```
 
 ## Backend
 
@@ -58,9 +61,8 @@ Current numbers: see [metrics.md](metrics.md).
 
 ## Dependency Security
 
-Latest local audits:
-
-Current numbers: see [metrics.md](metrics.md).
+Latest audits: [security.md § 3](security.md#3-dependency-status) (no high or
+critical advisories).
 
 ---
 
@@ -168,12 +170,10 @@ CORS restrictions
 
 ## Dependency Audit
 
-Latest local results:
+Latest results: [security.md § 3](security.md#3-dependency-status).
 
-Current numbers: see [metrics.md](metrics.md).
-
-No current High or Critical dependency vulnerability is reported by the
-local audit commands used during the final review.
+No High or Critical dependency vulnerability is reported; CI fails if one
+appears (`npm audit --audit-level=high`).
 
 ---
 
@@ -206,9 +206,11 @@ The E2E suite currently verifies:
 * invalid authentication;
 * protected route redirects;
 * authenticated dashboard access;
+* project and experience CRUD, including logo upload;
+* API playground and system status pages;
 * logout;
 * API failure handling;
-* accessibility checks;
+* accessibility checks on public and admin pages;
 * keyboard navigation.
 
 ## Accessibility E2E
@@ -283,11 +285,12 @@ CLS:         0
 TTFB:        680 ms
 ```
 
-## Current Measurement
+## After ISR
 
-After enabling Vercel ISR:
-
-Current numbers: see [metrics.md](metrics.md).
+```text
+Performance: 96/100
+LCP:         2.2 s
+```
 
 ## Measured Improvement
 
@@ -298,8 +301,11 @@ Performance: +8 points
 LCP:         -0.8 seconds
 ```
 
-The TTFB value varies between captures and should therefore be monitored over
-multiple runs rather than optimized based on a single sample.
+## Current Measurement (2026-10-12)
+
+Desktop and mobile, median of 3 runs each: [metrics.md](metrics.md).
+TTFB stayed between 58 and 213 ms across six runs
+([performance.md](performance.md)).
 
 ## Performance Implementation Evidence
 
@@ -336,10 +342,8 @@ Latest production homepage result:
 Best Practices: 100/100
 ```
 
-The application passes the relevant Lighthouse best-practice audits except
-for the checks reflected in the remaining four-point gap.
-
-No unsupported claim of 100/100 is made.
+Desktop and mobile both score 100/100 (2026-10-12), with the hash-based CSP
+active.
 
 ---
 
@@ -375,6 +379,8 @@ commands.
 ```text
 Lint:      PASS
 Typecheck: PASS
+Tests:     PASS
+Coverage:  PASS
 Build:     PASS
 ```
 
@@ -417,7 +423,10 @@ The performance measurement changed from:
 
 to:
 
-Current numbers: see [metrics.md](metrics.md).
+```text
+96/100 Performance
+2.2s LCP
+```
 
 The optimization therefore has direct measurable evidence.
 
@@ -439,6 +448,8 @@ Current local quality evidence:
 ```text
 Frontend lint          PASS
 Frontend typecheck     PASS
+Frontend tests         PASS
+Frontend coverage      PASS
 Frontend build         PASS
 
 Backend lint           PASS
@@ -455,7 +466,9 @@ Lighthouse             PASS
 
 The repository has an automated GitHub Actions quality pipeline.
 
-The workflow successfully runs the validation, build, testing, and E2E stages using the correct MongoDB service container.
+The workflow (Node.js 24.x, MongoDB service container) runs the validation,
+test, coverage, build, E2E and audit stages on every push to `main` and
+every pull request, and publishes `docs/metrics.md` in the job summary.
 
 Therefore:
 
@@ -475,6 +488,7 @@ verified:
 | ------------------------------------ | ---------- |
 | INP (requires field data)            | ⚠️ Pending |
 | Manual screen-reader review          | ⚠️ Pending |
+| Manual keyboard-only and mobile review | ⚠️ Pending |
 
 These are evidence gaps, not evidence of application failure.
 
@@ -500,6 +514,7 @@ cd frontend
 
 npm run lint
 npm run typecheck
+npm run test:cov
 npm run build
 npm run test:e2e
 npm audit --audit-level=high
@@ -507,25 +522,8 @@ npm audit --audit-level=high
 
 ## Lighthouse
 
-```powershell
-npx lighthouse https://www.aesoul0.com `
-  --output json `
-  --output-path .\lighthouse-home.json `
-  --chrome-flags="--headless"
-```
-
-The JSON output can then be inspected for:
-
-```text
-Performance
-Accessibility
-Best Practices
-SEO
-LCP
-INP
-CLS
-TTFB
-```
+See [performance.md § 18](performance.md#18-recommended-measurement-process)
+for the desktop and mobile commands and the fields to extract.
 
 ---
 
@@ -546,13 +544,13 @@ Result:
 Example:
 
 ```text
-Commit: <commit SHA>
-Date: 2026-08-26
-Environment: Local Windows / Node 24
+Commit: 3bc9ca3 (deployed main)
+Date: 2026-10-12
+Environment: Local Windows / Node 24, headless Chrome
 Route: https://www.aesoul0.com/
-Command: npx lighthouse ...
-Tool: Lighthouse
-Result: Performance 93 / Accessibility 100 / Best Practices 100 / SEO 100
+Command: npx lighthouse ... (--preset=desktop and mobile, 3 runs each)
+Tool: Lighthouse 13.4.1 CLI
+Result: Desktop 99/100/100/100, Mobile 95/100/100/100
 ```
 
 The same policy applies to:
@@ -587,14 +585,11 @@ The strongest verified results are:
 
 Current numbers: see [metrics.md](metrics.md).
 
-The remaining evidence gaps are:
+The GitHub Actions workflow is green and the mobile Lighthouse result is
+recorded. The remaining evidence gaps (section 13) need real users or a
+human reviewer:
 
 ```text
-1. Fully green GitHub Actions workflow
-2. Mobile Lighthouse result
-3. INP measurement
+1. Field INP measurement
+2. Manual screen-reader, keyboard-only and mobile review
 ```
-
-Until those are completed, the repository should describe itself as having
-strong verified local engineering evidence rather than claiming that every
-remote quality gate is fully green.

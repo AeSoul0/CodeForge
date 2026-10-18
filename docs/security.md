@@ -15,18 +15,37 @@ their behavior through automated tests and dependency audits.
 
 The security model can be represented as:
 
-Current numbers: see [metrics.md](metrics.md).
-
-Current local dependency status:
-
 ```text
-Critical: 0
-High:     0
-Moderate: 0
-Low:      0 reported by audit
-Total:    0
+Browser
+   ↓  HTTPS, HSTS, hash-based CSP
+Vercel (Astro)
+   ↓  CORS allowlist, credentials
+Fastify API
+   ↓  Helmet headers · rate limiting
+   ↓  CSRF guard (origin + X-Requested-With)
+   ↓  JWT cookie verification
+   ↓  JSON schema validation
+Controllers → Services → Repositories
+   ↓
+MongoDB Atlas (credentials from environment)
 ```
 
+Test results that back these controls: [metrics.md](metrics.md).
+
+---
+
+# 3. Dependency Status
+
+`npm audit` on 2026-10-12:
+
+```text
+Backend:   0 vulnerabilities
+Frontend:  2 moderate, 0 high, 0 critical
+           @tailwindcss/typography → postcss-selector-parser
+           (build-time only; the fix requires a breaking downgrade)
+```
+
+CI fails on any high or critical advisory (`npm audit --audit-level=high`).
 Dependency audits should be repeated after dependency changes.
 
 ---
@@ -133,7 +152,7 @@ CodeForge uses JWT-based authentication.
 The authentication flow is:
 
 ```text
-POST /login
+POST /api/auth/login
      │
      ▼
 Credential verification
@@ -251,9 +270,14 @@ The expected security model is:
 | Expired token                    |                           401 |
 | Tampered token                   |                           401 |
 | Valid authenticated request      |             2xx where allowed |
-| Insufficient privilege           |                           403 |
-| Wrong protected operation        | 403/404 according to contract |
+| Mutation without CSRF header     |                           403 |
+| Mutation from a foreign origin   |                           403 |
+| Missing resource                 |                           404 |
 | Valid authorized admin operation |                           2xx |
+
+There is a single administrative role (`admin`), so every authenticated
+session may perform every admin operation; the token's audience (`admin`)
+and issuer (`codeforge`) are still verified.
 
 The automated backend security suite verifies unauthorized and authentication
 failure paths.
@@ -389,9 +413,12 @@ Critical domain actions are recorded by the audit logging layer.
 Examples include:
 
 ```text
-LOGIN_ATTEMPT
 CREATE_PROJECT
+UPDATE_EXPERIENCE_IMAGE
+DELETE_PROJECT
 ```
+
+Rejected CSRF and authentication attempts are logged as warnings.
 
 Audit logging provides traceability for sensitive operations without exposing
 security-sensitive information to public clients.
@@ -465,11 +492,9 @@ rendered by the frontend; authorization remains a backend responsibility.
 
 # 25. Dependency Security Evidence
 
-Latest local results:
-
-Current numbers: see [metrics.md](metrics.md).
-
-This supersedes older audit results recorded before dependency upgrades.
+Latest results: see [section 3](#3-dependency-status). Dependabot opens
+weekly update PRs for both npm packages and the GitHub Actions; CodeQL and
+Dependency Review run on every pull request.
 
 Future dependency changes must trigger another security audit.
 
@@ -567,15 +592,11 @@ Audit logging
 Secret handling
 ```
 
-The latest local dependency audits report:
+Dependency audits: no high or critical advisories (see
+[section 3](#3-dependency-status)).
 
-Current numbers: see [metrics.md](metrics.md).
-
-The backend security test suite passes as part of the complete:
-
-Current numbers: see [metrics.md](metrics.md).
-
-The repository-level security evidence is fully verified via local execution and green remote GitHub Actions workflows.
+The backend security test suite passes as part of the complete test run
+([metrics.md](metrics.md)), locally and in GitHub Actions.
 
 Security should therefore be described as **verified and strongly
 architected**, with all automated quality gates passing.
