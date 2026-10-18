@@ -35,12 +35,12 @@
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.62.1",
     "@types/node": "^26.4.0",
-    "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/coverage-v8": "^5.0.5",
     "eslint": "^10.9.1",
     "happy-dom": "^21.0.1",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.71.2",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.5"
   },
   "overrides": {
     "path-to-regexp": "6.3.0"
