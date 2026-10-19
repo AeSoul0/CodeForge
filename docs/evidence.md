@@ -332,6 +332,11 @@ SEO: 100/100
 The measured audit validates the primary Lighthouse SEO checks for the tested
 production route.
 
+Crawling: `robots.txt` points to `https://aesoul0.com/sitemap.xml` and keeps
+`/admin/` out of the index. The sitemap is generated on request from the live
+project list (`frontend/src/pages/sitemap.xml.ts`), so projects added from the
+admin dashboard are listed without a rebuild.
+
 ---
 
 # 8. Best Practices Evidence

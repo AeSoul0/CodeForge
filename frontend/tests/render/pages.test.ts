@@ -6,6 +6,7 @@ import ParticleCanvas from '../../src/components/ParticleCanvas.astro';
 import Layout from '../../src/layouts/Layout.astro';
 import { GET as health } from '../../src/pages/api/health';
 import HomePage from '../../src/pages/index.astro';
+import { GET as sitemap } from '../../src/pages/sitemap.xml';
 import ProjectPage from '../../src/pages/projects/[slug].astro';
 import CodeForgePage from '../../src/pages/projects/codeforge.astro';
 import { mockFetch, renderAstro } from '../helpers';
@@ -197,5 +198,32 @@ describe('/api/health', () => {
         expect(response.status).toBe(200);
         expect(response.headers.get('Content-Type')).toBe('application/json');
         expect(await response.json()).toMatchObject({ status: 'ok' });
+    });
+});
+
+describe('/sitemap.xml', () => {
+    const site = new URL('https://aesoul0.com');
+
+    it('lists the static pages and every project page', async () => {
+        mockFetch({ 'GET /api/projects': { body: projects } });
+
+        const response = await sitemap({ site });
+        const xml = await response.text();
+
+        expect(response.headers.get('Content-Type')).toContain('application/xml');
+        expect(xml).toContain('<loc>https://aesoul0.com/</loc>');
+        expect(xml).toContain('<loc>https://aesoul0.com/projects/codeforge</loc>');
+        expect(xml).toContain('<loc>https://aesoul0.com/projects/citta-digitale</loc>');
+        expect(xml).toContain('<loc>https://aesoul0.com/projects/embedded-sensor</loc>');
+    });
+
+    it('still lists the static pages when the backend is down', async () => {
+        mockFetch({ 'GET /api/projects': { status: 503 } });
+        vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        const xml = await (await sitemap({ site: undefined })).text();
+
+        expect(xml).toContain('<loc>https://aesoul0.com/</loc>');
+        expect(xml).not.toContain('citta-digitale');
     });
 });

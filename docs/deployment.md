@@ -114,6 +114,16 @@ Fastify
 The production process is built from TypeScript and executed from the generated
 production output.
 
+Render reads the Node version from the root `.nvmrc` and, as its deploy log
+shows, starts the service with `node dist/src/index.js`; that is the output
+layout of `tsconfig.json` (`rootDir: "."`). Locally, `npm run build` uses
+`tsconfig.build.json` (`rootDir: "./src"`) and `npm run start` runs
+`dist/index.js`, which is what Playwright uses. Setting Render's build and
+start commands to `npm ci && npm run build` and `npm run start` would make the
+two paths identical.
+
+Swagger UI is not exposed in production (see [API § 17](api.md#17-swagger--openapi)).
+
 ---
 
 # 5. Database Deployment

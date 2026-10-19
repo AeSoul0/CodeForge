@@ -23,6 +23,11 @@ export default defineConfig({
     output: 'server',
 
     /**
+     * Canonical production origin, used by the sitemap.
+     */
+    site: 'https://aesoul0.com',
+
+    /**
      * Content Security Policy.
      *
      * Astro hashes every script and style it emits and writes the policy
@@ -58,11 +63,6 @@ export default defineConfig({
      */
     markdown: {
         syntaxHighlight: false,
-    },
-
-    redirects: {
-        '/docs':
-            'https://codeforge-ukq5.onrender.com/docs',
     },
 
     vite: {
