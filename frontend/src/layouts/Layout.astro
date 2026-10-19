@@ -27,7 +27,7 @@ const ogImageUrl = new URL(
 ---
 
 <html
-    lang="it"
+    lang="en"
     class="scroll-smooth"
 >
     <head>
@@ -908,12 +908,16 @@ const ogImageUrl = new URL(
         >
         </div>
 
+        <slot name="header" />
+
         <main
             id="main-content"
             class="relative z-10 flex-1 w-full flex flex-col"
         >
             <slot />
         </main>
+
+        <slot name="footer" />
 
         <script>
             import {
