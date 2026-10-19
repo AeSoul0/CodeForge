@@ -425,7 +425,7 @@ MongoDB
 ```
 
 Swagger/OpenAPI support is included for API exploration and contract
-documentation.
+documentation; the Swagger UI is served at `/api-docs` in development only.
 
 See:
 
@@ -610,7 +610,7 @@ CodeForge/
 │
 ├── frontend/
 │   ├── src/
-│   │   ├── pages/              public pages, /admin, /api/health
+│   │   ├── pages/              public pages, /admin, /api/health, /sitemap.xml
 │   │   ├── components/  layouts/
 │   │   ├── lib/                API client, DOM/format/Markdown helpers
 │   │   │   └── admin/          admin dashboard modules
@@ -700,6 +700,8 @@ accepted limitations:
 3. Two moderate advisories remain in `@tailwindcss/typography` (build-time
    only; the fix requires a breaking downgrade). No high/critical advisories.
 4. JWTs cannot be revoked before their 24 h expiry.
+5. TypeScript 7 is on hold until `@astrojs/check` and `typescript-eslint`
+   accept it as a peer dependency.
 
 ---
 

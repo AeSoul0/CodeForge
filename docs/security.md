@@ -36,7 +36,7 @@ Test results that back these controls: [metrics.md](metrics.md).
 
 # 3. Dependency Status
 
-`npm audit` on 2026-10-12:
+`npm audit` on 2026-10-19 (after the Dependabot updates):
 
 ```text
 Backend:   0 vulnerabilities
