@@ -78,7 +78,19 @@ Insights), so:
 INP: PENDING (field data)
 ```
 
-No estimated INP value is published.
+No estimated INP value is published. On 2026-10-19 PageSpeed Insights still
+reported too little CrUX data for `aesoul0.com`.
+
+Lab interaction latency, measured the same day:
+
+* **Method.** Playwright on production, reading the Event Timing API.
+  * Pages: `/`, `/projects/codeforge` and `/admin/login`.
+  * Interactions: project filter clicks, typing and Tab navigation.
+* **Results.** The slowest interaction took 64 ms on desktop and 112 ms on a
+  412 px mobile viewport with 4x CPU throttling.
+
+Both results are below the 200 ms "good" threshold. They are supporting
+evidence, not a substitute for field INP.
 
 ---
 

@@ -497,6 +497,23 @@ verified:
 
 These are evidence gaps, not evidence of application failure.
 
+Interim evidence (2026-10-19):
+
+* **INP.** PageSpeed Insights reports that CrUX has too little real-user data
+  for `aesoul0.com`, so field INP cannot be measured yet. A lab proxy
+  (Playwright on production, Event Timing API, filter clicks, typing and Tab
+  navigation on `/`, `/projects/codeforge` and `/admin/login`) gave a slowest
+  interaction of 64 ms on desktop and 112 ms on a mobile viewport with 4x CPU
+  throttling, under the 200 ms "good" threshold.
+* **Screen-reader structure.** A review of the production accessibility tree
+  found and fixed:
+  * the page language was declared as Italian on English content;
+  * the navigation and footer were nested inside `<main>`;
+  * project pages had a second, nested `<main>`;
+  * three identical "View Case Study" link names.
+
+  A pass with a real screen reader (NVDA or VoiceOver) is still pending.
+
 ---
 
 # 14. Evidence Reproduction

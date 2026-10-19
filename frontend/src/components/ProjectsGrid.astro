@@ -215,8 +215,8 @@ function proofPoint(title: string): string {
 										const slug = slugify(project.titolo);
 										return (
 											<a href={`/projects/${slug}`} class="text-xs font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors group/link uppercase tracking-wider">
-												View Case Study 
-												<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover/link:translate-x-1 transition-transform"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+												View Case Study<span class="sr-only">: {project.titolo}</span>
+												<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="group-hover/link:translate-x-1 transition-transform"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
 											</a>
 										);
 									})()}

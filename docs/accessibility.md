@@ -96,6 +96,16 @@ sections
 This allows assistive technologies to navigate the application more
 efficiently.
 
+`Layout.astro` owns the page's single `<main id="main-content">`, which is also
+the skip-link target. The public navigation and footer render through the
+layout's `header` and `footer` slots, beside `<main>` rather than inside it.
+Pages must not add a second `<main>`. Render tests enforce both rules.
+
+The document language is `lang="en"`, matching the English content, so screen
+readers pick the right voice and pronunciation. Repeated link labels such as
+"View Case Study" carry the project name as `sr-only` text so that each link is
+distinguishable in a links list.
+
 ---
 
 # 6. Keyboard Navigation

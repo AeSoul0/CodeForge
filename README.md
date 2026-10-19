@@ -694,9 +694,12 @@ The 90/100 roadmap is complete: every engineering item is implemented,
 tested and measured. What remains is evidence that needs real-user data and
 accepted limitations:
 
-1. Record a production INP measurement (requires real-user field data).
-2. A manual screen-reader and keyboard-only review (automated axe and
-   Lighthouse checks pass).
+1. Record a production INP measurement. This needs real-user field data;
+   measured lab interaction latency is 64–112 ms
+   ([performance.md](docs/performance.md#inp)).
+2. A manual screen-reader and keyboard-only review. Automated axe and
+   Lighthouse checks pass, and an accessibility-tree review fixed the page
+   language and the landmark structure.
 3. Two moderate advisories remain in `@tailwindcss/typography` (build-time
    only; the fix requires a breaking downgrade). No high/critical advisories.
 4. JWTs cannot be revoked before their 24 h expiry.

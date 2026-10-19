@@ -81,6 +81,14 @@ describe('homepage', () => {
         expect(html).not.toContain('href="/projects/codeforge" class="text-xs');
         // Only one particle canvas per page.
         expect(html.match(/id="particleCanvas"/g)).toHaveLength(1);
+        // Navigation and footer sit beside <main>, not inside it, and case
+        // study links carry the project name for screen readers.
+        const main = html.slice(html.indexOf('<main'), html.indexOf('</main>'));
+        expect(html.match(/<main\b/g)).toHaveLength(1);
+        expect(html).toContain('<nav');
+        expect(main).not.toContain('<nav');
+        expect(main).not.toContain('<footer');
+        expect(html).toMatch(/View Case Study<span class="sr-only"[^>]*>: Città Digitale<\/span>/);
     });
 
     it('renders the API error state when the backend is down', async () => {
@@ -136,6 +144,8 @@ describe('project detail page', () => {
         expect(html).not.toContain('javascript:');
         expect(html).toContain('https://github.com/x/citta');
         expect(html).toContain('/api/projects/1/image');
+        // Layout.astro owns the single <main> landmark.
+        expect(html.match(/<main\b/g)).toHaveLength(1);
     });
 
     it('shows the pending state while AI docs are generated', async () => {
@@ -167,6 +177,7 @@ describe('project detail page', () => {
 describe('static pages and layout', () => {
     it('renders the CodeForge case study', async () => {
         const html = await renderAstro(CodeForgePage);
+        expect(html.match(/<main\b/g)).toHaveLength(1);
 
         expect(html).toContain('CodeForge');
     });
@@ -177,6 +188,7 @@ describe('static pages and layout', () => {
         expect(html).toContain('<title>T</title>');
         expect(html).toContain('content="D"');
         expect(html).toContain('id="initial-loader"');
+        expect(html).toContain('<html lang="en"');
     });
 
     it('omits the particle canvas in E2E mode', async () => {

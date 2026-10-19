@@ -114,13 +114,19 @@ Fastify
 The production process is built from TypeScript and executed from the generated
 production output.
 
-Render reads the Node version from the root `.nvmrc` and, as its deploy log
-shows, starts the service with `node dist/src/index.js`; that is the output
-layout of `tsconfig.json` (`rootDir: "."`). Locally, `npm run build` uses
-`tsconfig.build.json` (`rootDir: "./src"`) and `npm run start` runs
-`dist/index.js`, which is what Playwright uses. Setting Render's build and
-start commands to `npm ci && npm run build` and `npm run start` would make the
-two paths identical.
+Render reads the Node version from the root `.nvmrc` and uses the same scripts
+as local development, CI and Playwright (since 2026-10-19):
+
+```text
+Root directory: ./backend
+Build command:  npm ci --include=dev && npm run build   (tsc -p tsconfig.build.json)
+Start command:  npm run start                           (node dist/index.js)
+```
+
+`--include=dev` keeps TypeScript installed even if `NODE_ENV=production` is
+set for the build. A start-command change alone redeploys the previous build
+artifact, so a change to the output layout needs a full build ("Clear build
+cache & deploy").
 
 Swagger UI is not exposed in production (see [API § 17](api.md#17-swagger--openapi)).
 
