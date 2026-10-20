@@ -91,7 +91,7 @@ describe('homepage', () => {
         expect(main).not.toContain('<footer');
         expect(html).toMatch(/View Case Study<span class="sr-only"[^>]*>: Città Digitale<\/span>/);
         // The header logo links home and has an accessible name.
-        expect(html).toMatch(/<a href="\/" aria-label="ÆSoul, home"[^>]*>\s*<img src="\/AeSoul_logo-mark\.webp" alt=""/);
+        expect(html).toMatch(/<a href="\/" aria-label="ÆSoul, home"[^>]*>\s*<span[^>]*>\s*<img src="\/AeSoul_logo-mark\.webp" alt=""/);
     });
 
     it('renders the API error state when the backend is down', async () => {
