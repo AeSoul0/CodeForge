@@ -90,9 +90,9 @@ describe('homepage', () => {
         expect(main).not.toContain('<nav');
         expect(main).not.toContain('<footer');
         expect(html).toMatch(/View Case Study<span class="sr-only"[^>]*>: Città Digitale<\/span>/);
-        // The header logo links home and has an accessible name.
+        // The header logo is a static image (not a link) with an accessible name.
         // The squircle outline is decorative and hidden from assistive tech.
-        expect(html).toMatch(/<a href="\/" aria-label="ÆSoul, home"[^>]*>\s*<svg[^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/svg>\s*<img src="\/AeSoul_logo-mark\.webp" alt=""/);
+        expect(html).toMatch(/<div class="brand-squircle"[^>]*>\s*<svg[^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/svg>\s*<img src="\/AeSoul_logo-mark\.webp" alt="ÆSoul"/);
     });
 
     it('renders the API error state when the backend is down', async () => {
