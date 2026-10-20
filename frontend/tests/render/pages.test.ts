@@ -92,7 +92,8 @@ describe('homepage', () => {
         expect(html).toMatch(/View Case Study<span class="sr-only"[^>]*>: Città Digitale<\/span>/);
         // The header logo is a static image (not a link) with an accessible name.
         // The squircle outline is decorative and hidden from assistive tech.
-        expect(html).toMatch(/<div class="brand-squircle"[^>]*>\s*<svg[^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/svg>\s*<img src="\/AeSoul_logo-mark\.webp" alt="ÆSoul"/);
+        // The logo is a bundled asset, so its URL is fingerprinted rather than fixed.
+        expect(html).toMatch(/<div class="brand-squircle"[^>]*>\s*<svg[^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/svg>\s*<img src="[^"]*AeSoul_logo-mark[^"]*\.webp[^"]*" alt="ÆSoul"/);
     });
 
     it('renders the API error state when the backend is down', async () => {
