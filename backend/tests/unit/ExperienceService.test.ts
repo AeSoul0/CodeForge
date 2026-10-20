@@ -387,6 +387,35 @@ describe(
         );
 
         it(
+            'normalizes legacy month labels to ISO dates',
+            async () => {
+                repository.create
+                    .mockResolvedValue({
+                        _id: { toString: () => 'legacy-1' },
+                        role: 'Engineer',
+                        company: 'SRT',
+                        description: 'Legacy record',
+                        startDate: 'Oct. 2025',
+                        endDate: 'not a date',
+                        current: false,
+                        createdAt,
+                        updatedAt,
+                    });
+
+                const result =
+                    await service.createExperience({
+                        role: 'Engineer',
+                        company: 'SRT',
+                        description: 'Legacy record',
+                        startDate: 'Oct. 2025',
+                    });
+
+                expect(result.startDate).toBe('2025-10-01T00:00:00.000Z');
+                expect(result.endDate).toBe('not a date');
+            },
+        );
+
+        it(
             'updateExperience returns mapped DTO',
             async () => {
                 const input = {
