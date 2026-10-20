@@ -25,14 +25,14 @@ Enforced thresholds: backend 85/80/85/85, frontend 90/90/90/90
 
 ## Lighthouse
 
-Recorded manually on 2026-10-12 against https://www.aesoul0.com/ (Lighthouse 13.4.1 CLI, median of 3 runs).
+Recorded manually on 2026-10-20 against https://www.aesoul0.com/ (Lighthouse 13.4.1 CLI, median of 3 runs).
 Lighthouse is not run in CI; update `docs/metrics-lighthouse.json` after each audit.
 
 | Metric | Desktop | Mobile |
 |---|---:|---:|
-| Performance | 99/100 | 95/100 |
+| Performance | 99/100 | 92/100 |
 | Accessibility | 100/100 | 100/100 |
 | Best Practices | 100/100 | 100/100 |
 | SEO | 100/100 | 100/100 |
-| LCP | 0.6 s | 2.3 s |
+| LCP | 0.7 s | 2.4 s |
 | CLS | 0 | 0 |

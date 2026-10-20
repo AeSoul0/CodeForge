@@ -46,14 +46,22 @@ Current numbers: see [metrics.md](metrics.md).
 Scores, LCP and CLS (desktop and mobile, median of 3 runs):
 [metrics.md](metrics.md).
 
-Details of the 2026-10-12 audit (Lighthouse 13.4.1, 3 desktop + 3 mobile
+Details of the 2026-10-20 audit (Lighthouse 13.4.1, 3 desktop + 3 mobile
 runs) that `metrics.md` does not list:
 
 | Metric | Desktop runs | Mobile runs |
 |---|---|---|
-| TTFB (server response) | 58–213 ms | 75–107 ms |
-| Total Blocking Time | 0–40 ms | 0–20 ms |
-| First Contentful Paint | 0.5–0.6 s | 1.8–1.9 s |
+| Performance score | 97–99 | 87–94 |
+| TTFB (server response) | 60–91 ms | 84–202 ms |
+| Total Blocking Time | 0–5 ms | 200–366 ms |
+| First Contentful Paint | 0.6–0.7 s | 1.8–1.9 s |
+
+Mobile Performance was 95 on 2026-10-12 and 92 on 2026-10-20. The difference
+is Total Blocking Time (0–20 ms then, 200–366 ms now), coming from the
+homepage's inline scripts and the style and layout work they trigger under
+the 4x CPU slowdown. The 2026-10-12 reports were not kept, so it is not yet
+known whether the site or the measuring machine changed; both scores stay
+above the 90 target.
 
 ## LCP
 
@@ -435,11 +443,12 @@ Performance: +8 points
 LCP: -0.8 seconds
 ```
 
-## Current (2026-10-12)
+## Current (2026-10-20)
 
 See [metrics.md](metrics.md). The 2026-10 frontend changes (bundled scripts,
 single particle canvas, hash-based CSP) raised mobile Performance from 90 to
-95 with no regression on desktop.
+95 on 2026-10-12 with no regression on desktop; the 2026-10-20 re-run gave 92
+on mobile (see § 4).
 
 ---
 
