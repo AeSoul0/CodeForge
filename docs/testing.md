@@ -22,7 +22,8 @@ Audit           npm audit · CodeQL
   CSRF, metrics), `AppError`, database connection and admin seeding.
 - **API**: Fastify `inject()` against a real MongoDB database
   (`codeforge_test`), covering authentication, validation, security headers,
-  CSRF rejection and rate limiting.
+  CSRF rejection and rate limiting, plus a backup dump/restore round trip
+  (`backup.test.ts`).
 - Thresholds (V8): statements 85%, branches 80%, functions 85%, lines 85%.
 
 ```bash

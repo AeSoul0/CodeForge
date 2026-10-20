@@ -12,6 +12,26 @@ security, testing, accessibility and performance.
 
 **Live:** https://aesoul0.com
 
+| Homepage | Experience timeline | Mobile |
+|---|---|---|
+| [![Homepage](docs/screenshots/home-desktop.webp)](docs/screenshots/home-desktop.webp) | [![Experience timeline with the derived duration](docs/screenshots/experience-desktop.webp)](docs/screenshots/experience-desktop.webp) | [![Homepage on a phone](docs/screenshots/home-mobile.webp)](docs/screenshots/home-mobile.webp) |
+
+## Quick Start
+
+Requires Node.js 24 (`.nvmrc`) and a local MongoDB on `localhost:27017`.
+
+```bash
+cd backend && npm ci && cp .env.example .env    # fill in JWT_SECRET, ADMIN_API_KEY, ...
+npm run dev                                      # API on the port in PORT
+
+# in a second terminal
+cd frontend && npm ci
+PUBLIC_API_URL=http://localhost:<PORT> npm run dev   # site on http://localhost:2003
+```
+
+Full setup: [Environment Setup](#environment-setup). Checks to run before a
+PR: [Verification Commands](#verification-commands).
+
 ---
 
 ## Engineering Snapshot
@@ -598,6 +618,23 @@ useful diagnostics without introducing unnecessary infrastructure complexity.
 
 ---
 
+# Operations
+
+[docs/operations.md](docs/operations.md) covers what happens when things
+fail and how to recover:
+
+* **Failure behaviour:** what visitors and the admin see when the API,
+  MongoDB or the AI providers are down, each row linked to the test that
+  proves it.
+* **Backup and restore:** `npm run db:backup -- dump|restore <dir>` in
+  `backend/`, round-trip tested against a real database.
+* **Deploy rollback:** Vercel instant rollback, Render rollback, or
+  `git revert` on `main`.
+* **Session revocation:** rotate `JWT_SECRET` to end every session; change
+  `ADMIN_API_KEY` to change the admin password.
+
+---
+
 # Project Structure
 
 ```text
@@ -607,7 +644,8 @@ CodeForge/
 │   │   ├── controllers/  routes/  services/  repositories/  models/
 │   │   ├── dtos/  errors/  config/   payload types, AppError, MongoDB connection
 │   │   ├── middlewares/        auth, CSRF guard, metrics
-│   │   └── utils/              AI, audit log, admin seed, Vercel deploy hook
+│   │   └── utils/              AI, audit log, admin seed, Vercel deploy hook, backup
+│   ├── scripts/db-backup.ts    npm run db:backup (dump / restore)
 │   └── tests/                  unit/ and api/ (Vitest)
 │
 ├── frontend/
@@ -627,7 +665,8 @@ CodeForge/
 │   ├── metrics-lighthouse.json manual Lighthouse record
 │   ├── accessibility.md  api.md  architecture.md  deployment.md
 │   ├── developer-experience.md  engineering-scorecard.md  evidence.md
-│   ├── performance.md  roadmap.md  security.md  testing.md
+│   ├── operations.md  performance.md  roadmap.md  security.md  testing.md
+│   ├── screenshots/            images used in this README
 │   └── case-studies/
 │
 ├── scripts/
@@ -651,6 +690,7 @@ The repository maintains dedicated evidence documentation:
 * [Testing](docs/testing.md)
 * [Performance](docs/performance.md)
 * [Deployment](docs/deployment.md)
+* [Operations](docs/operations.md)
 * [API](docs/api.md)
 * [Professional Roadmap](docs/roadmap.md)
 
@@ -693,20 +733,28 @@ Measured results: [docs/metrics.md](docs/metrics.md).
 # Remaining Engineering Work
 
 The 90/100 roadmap is complete: every engineering item is implemented,
-tested and measured. What remains is evidence that needs real-user data and
-accepted limitations:
+tested and measured. No new technology is planned just to add features; what
+remains is verification, tracked in
+[operations.md § 6](docs/operations.md#6-open-verification-items):
 
-1. Record a production INP measurement. This needs real-user field data;
-   measured lab interaction latency is 64–112 ms
+1. **Screen reader:** a manual NVDA/VoiceOver pass. Keyboard-only navigation
+   was checked on 2026-10-20 (logical order, visible focus, no traps), and
+   automated axe and Lighthouse checks pass.
+2. **Field performance:** a production INP measurement needs real-user data;
+   lab interaction latency is 64–112 ms
    ([performance.md](docs/performance.md#inp)).
-2. A manual screen-reader and keyboard-only review. Automated axe and
-   Lighthouse checks pass, and an accessibility-tree review fixed the page
-   language and the landmark structure.
-3. Two moderate advisories remain in `@tailwindcss/typography` (build-time
-   only; the fix requires a breaking downgrade). No high/critical advisories.
-4. JWTs cannot be revoked before their 24 h expiry.
-5. TypeScript 7 is on hold until `@astrojs/check` and `typescript-eslint`
-   accept it as a peer dependency.
+3. **Independent security review:** not done yet; CodeQL, `npm audit`,
+   Dependabot and the API security tests run in CI.
+
+Accepted limitations:
+
+* JWTs cannot be revoked one by one before their 24 h expiry; all sessions
+  can be ended by rotating `JWT_SECRET`
+  ([operations.md § 5](docs/operations.md#5-session-revocation)).
+* Two moderate advisories remain in `@tailwindcss/typography` (build-time
+  only; the fix requires a breaking downgrade). No high/critical advisories.
+* TypeScript 7 is on hold until `@astrojs/check` and `typescript-eslint`
+  accept it as a peer dependency.
 
 ---
 
@@ -738,8 +786,7 @@ measured, secured and maintained like a professional engineering project.
 
 © 2026 ÆSoul. All rights reserved.
 
-This project and its source code are proprietary and belong exclusively to
-ÆSoul.
-
-Unauthorized copying, modification, distribution or commercial use is
-prohibited.
+The repository is public so that the code, tests and documentation can be
+read and evaluated. That is the only permission given: no open-source
+licence applies, and the code may not be copied, modified, redistributed or
+used commercially without written permission from ÆSoul.
