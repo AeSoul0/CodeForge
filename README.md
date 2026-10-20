@@ -12,6 +12,8 @@ security, testing, accessibility and performance.
 
 **Live:** https://aesoul0.com
 
+![Scroll tour of the live site: hero, projects, experience, then back to the top](docs/screenshots/readme-tour.gif)
+
 | Homepage | Experience timeline | Mobile |
 |---|---|---|
 | [![Homepage](docs/screenshots/home-desktop.webp)](docs/screenshots/home-desktop.webp) | [![Experience timeline with the derived duration](docs/screenshots/experience-desktop.webp)](docs/screenshots/experience-desktop.webp) | [![Homepage on a phone](docs/screenshots/home-mobile.webp)](docs/screenshots/home-mobile.webp) |
@@ -666,7 +668,7 @@ CodeForge/
 │   ├── accessibility.md  api.md  architecture.md  deployment.md
 │   ├── developer-experience.md  engineering-scorecard.md  evidence.md
 │   ├── operations.md  performance.md  roadmap.md  security.md  testing.md
-│   ├── screenshots/            images used in this README
+│   ├── screenshots/            images and the scroll-tour GIF used in this README
 │   └── case-studies/
 │
 ├── scripts/
