@@ -18,8 +18,8 @@ Audit           npm audit · CodeQL
 
 ## Backend (`backend/tests`)
 
-- **Unit**: services, repositories, controllers, middleware (auth, CSRF,
-  metrics, error handler), configuration.
+- **Unit**: services, repositories, controllers, routes, middleware (auth,
+  CSRF, metrics), `AppError`, database connection and admin seeding.
 - **API**: Fastify `inject()` against a real MongoDB database
   (`codeforge_test`), covering authentication, validation, security headers,
   CSRF rejection and rate limiting.

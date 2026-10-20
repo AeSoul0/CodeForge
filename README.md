@@ -4,13 +4,13 @@
 [![Backend](https://img.shields.io/badge/backend-Fastify-000000?logo=fastify)](https://fastify.dev/)
 [![Frontend](https://img.shields.io/badge/frontend-Astro-FF5D01?logo=astro)](https://astro.build/)
 [![Node.js](https://img.shields.io/badge/Node.js-24.x-339933?logo=nodedotjs)](https://nodejs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.x-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 
 A production-oriented full-stack portfolio and administrative platform built
 to demonstrate modern software engineering practices across architecture,
 security, testing, accessibility and performance.
 
-**Live:** https://www.aesoul0.com
+**Live:** https://aesoul0.com
 
 ---
 
@@ -28,7 +28,8 @@ count alone. Every push runs the same quality gates in CI:
 
 **Current numbers live in one place: [docs/metrics.md](docs/metrics.md).**
 That file is generated from test output by `npm run metrics` and republished
-in the CI job summary, so no other document repeats them.
+in the CI job summary; other documents link to it instead of repeating the
+current numbers (dated historical measurements excepted).
 
 ---
 
@@ -534,7 +535,7 @@ npm run metrics   # rewrites docs/metrics.md
 
 ```bash
 # desktop (omit --preset for mobile); run 2-3 times and record the median
-npx lighthouse https://www.aesoul0.com/ \
+npx lighthouse https://aesoul0.com/ \
   --preset=desktop \
   --output=json \
   --output-path=./lighthouse-desktop.json \
@@ -604,8 +605,9 @@ CodeForge/
 ├── backend/
 │   ├── src/
 │   │   ├── controllers/  routes/  services/  repositories/  models/
+│   │   ├── dtos/  errors/  config/   payload types, AppError, MongoDB connection
 │   │   ├── middlewares/        auth, CSRF guard, metrics
-│   │   └── utils/
+│   │   └── utils/              AI, audit log, admin seed, Vercel deploy hook
 │   └── tests/                  unit/ and api/ (Vitest)
 │
 ├── frontend/

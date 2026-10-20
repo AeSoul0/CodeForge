@@ -1,6 +1,6 @@
 # Case Study: CodeForge
 
-Published on the site at [/projects/codeforge](https://www.aesoul0.com/projects/codeforge).
+Published on the site at [/projects/codeforge](https://aesoul0.com/projects/codeforge).
 Numbers: [metrics.md](../metrics.md).
 
 ## Problem

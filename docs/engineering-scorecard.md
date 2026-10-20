@@ -4,7 +4,7 @@
 
 **Repository:** `AeSoul0/CodeForge`
 **Review scope:** Architecture, Backend, Frontend, Security, Testing & QA, CI/CD, Performance, Maintainability, Documentation, UX/Accessibility
-**Status:** Roadmap complete (2026-10-12); only field INP evidence pending
+**Status:** Roadmap complete (2026-10-12); open evidence: field INP and a manual screen-reader review
 **Target:** 90+/100
 
 ---
@@ -815,6 +815,9 @@ The remaining blockers to a strict final **90+/100 evidence-based claim** are:
 ```text
 1. INP measurement (requires CrUX field data)
 ```
+
+A manual screen-reader review is still recommended, but it is optional evidence
+rather than a blocker (see [roadmap § 7.4](roadmap.md#74-screen-reader-foundations)).
 
 No final score should be claimed above the evidence-supported level until these
 remaining repository-level items are closed.

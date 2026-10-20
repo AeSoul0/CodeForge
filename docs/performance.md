@@ -26,6 +26,8 @@ https://www.aesoul0.com/
 ```
 
 The current baseline represents the deployed production homepage.
+`www.aesoul0.com` now redirects (308) to `https://aesoul0.com/`, so new
+measurements target the apex domain directly (see § 18).
 
 ---
 
@@ -372,11 +374,11 @@ For reproducible Lighthouse measurements:
 
 ```bash
 # desktop
-npx lighthouse https://www.aesoul0.com/ --preset=desktop --output=json \
+npx lighthouse https://aesoul0.com/ --preset=desktop --output=json \
   --output-path=./lighthouse-desktop.json --chrome-flags="--headless"
 
 # mobile (the CLI default)
-npx lighthouse https://www.aesoul0.com/ --output=json \
+npx lighthouse https://aesoul0.com/ --output=json \
   --output-path=./lighthouse-mobile.json --chrome-flags="--headless"
 ```
 
