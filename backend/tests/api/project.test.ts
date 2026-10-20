@@ -123,6 +123,47 @@ describe('Project API', () => {
     });
 
     /**
+     * Verify that ordinary GitHub URLs pass schema validation on create and
+     * update, and that non-HTTP values are rejected.
+     */
+    it('should accept a GitHub URL on create and update', async () => {
+        const send = (method: 'POST' | 'PATCH', url: string, payload: object) =>
+            app.inject({
+                method,
+                url,
+                cookies: { token },
+                headers: { 'x-requested-with': 'CodeForge' },
+                payload,
+            });
+
+        const created = await send('POST', '/api/projects', {
+            titolo: 'Linked Project',
+            descrizione: 'Project with a repository link',
+            tecnologie: ['Fastify'],
+            linkGithub: 'https://github.com/AeSoul0/CodeForge',
+        });
+
+        expect(created.statusCode).toBe(201);
+
+        const url = `/api/projects/${encodeURIComponent('Linked Project')}`;
+
+        const updated = await send('PATCH', url, {
+            linkGithub: 'https://github.com/AeSoul0/NL-to-SQL',
+        });
+
+        expect(updated.statusCode).toBe(200);
+        expect(JSON.parse(updated.payload).data.linkGithub).toBe(
+            'https://github.com/AeSoul0/NL-to-SQL',
+        );
+
+        const rejected = await send('PATCH', url, {
+            linkGithub: 'github.com/AeSoul0/NL-to-SQL',
+        });
+
+        expect(rejected.statusCode).toBe(400);
+    });
+
+    /**
      * Verify that project creation is rejected when no authentication
      * token is provided.
      */
