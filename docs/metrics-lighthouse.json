@@ -1,13 +1,13 @@
 {
-    "date": "2026-10-12",
+    "date": "2026-10-20",
     "url": "https://www.aesoul0.com/",
     "tool": "Lighthouse 13.4.1 CLI, median of 3 runs",
     "scores": {
-        "Performance": { "desktop": "99/100", "mobile": "95/100" },
+        "Performance": { "desktop": "99/100", "mobile": "92/100" },
         "Accessibility": { "desktop": "100/100", "mobile": "100/100" },
         "Best Practices": { "desktop": "100/100", "mobile": "100/100" },
         "SEO": { "desktop": "100/100", "mobile": "100/100" },
-        "LCP": { "desktop": "0.6 s", "mobile": "2.3 s" },
+        "LCP": { "desktop": "0.7 s", "mobile": "2.4 s" },
         "CLS": { "desktop": "0", "mobile": "0" }
     }
 }

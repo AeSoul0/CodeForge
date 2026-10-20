@@ -48,8 +48,8 @@ little context about a project's architecture, decisions and quality.
 
 - Vercel ISR raised desktop Performance from 88 to 96 and cut LCP from 3.0 s
   to 2.2 s.
-- 2026-10-12 production audit (median of 3 runs): Performance 99 desktop /
-  95 mobile, Accessibility, Best Practices and SEO 100, CLS 0.
+- 2026-10-20 production audit (median of 3 runs): Performance 99 desktop /
+  92 mobile, Accessibility, Best Practices and SEO 100, CLS 0.
 
 ## Results
 

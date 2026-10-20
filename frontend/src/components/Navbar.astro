@@ -9,22 +9,29 @@
 <nav
     class="max-w-6xl mx-auto px-6 py-8 w-full flex justify-between items-center z-50 relative pointer-events-auto"
 >
-    <!-- AS monogram cropped from AeSoul_logo.svg, shown inside a squircle badge. -->
+    <!-- AS monogram cropped from AeSoul_logo.svg, in a glass squircle that
+         matches the "Find me on" pill (same height, fill and hairline border). -->
     <a
         href="/"
         aria-label="ÆSoul, home"
         class="brand-squircle"
     >
-        <span class="brand-squircle-inner">
-            <img
-                src="/AeSoul_logo-mark.webp"
-                alt=""
-                width="256"
-                height="256"
-                decoding="async"
-                class="h-full w-full object-contain"
-            />
-        </span>
+        <svg
+            class="brand-squircle-shape"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+            focusable="false"
+        >
+            <path d="M100.00 50.00 L99.96 66.80 L99.83 72.14 L99.61 76.01 L99.31 79.12 L98.92 81.75 L98.44 84.05 L97.87 86.08 L97.20 87.89 L96.44 89.52 L95.58 91.00 L94.61 92.33 L93.53 93.53 L92.33 94.61 L91.00 95.58 L89.52 96.44 L87.89 97.20 L86.08 97.87 L84.05 98.44 L81.75 98.92 L79.12 99.31 L76.01 99.61 L72.14 99.83 L66.80 99.96 L50.00 100.00 L33.20 99.96 L27.86 99.83 L23.99 99.61 L20.88 99.31 L18.25 98.92 L15.95 98.44 L13.92 97.87 L12.11 97.20 L10.48 96.44 L9.00 95.58 L7.67 94.61 L6.47 93.53 L5.39 92.33 L4.42 91.00 L3.56 89.52 L2.80 87.89 L2.13 86.08 L1.56 84.05 L1.08 81.75 L0.69 79.12 L0.39 76.01 L0.17 72.14 L0.04 66.80 L0.00 50.00 L0.04 33.20 L0.17 27.86 L0.39 23.99 L0.69 20.88 L1.08 18.25 L1.56 15.95 L2.13 13.92 L2.80 12.11 L3.56 10.48 L4.42 9.00 L5.39 7.67 L6.47 6.47 L7.67 5.39 L9.00 4.42 L10.48 3.56 L12.11 2.80 L13.92 2.13 L15.95 1.56 L18.25 1.08 L20.88 0.69 L23.99 0.39 L27.86 0.17 L33.20 0.04 L50.00 0.00 L66.80 0.04 L72.14 0.17 L76.01 0.39 L79.12 0.69 L81.75 1.08 L84.05 1.56 L86.08 2.13 L87.89 2.80 L89.52 3.56 L91.00 4.42 L92.33 5.39 L93.53 6.47 L94.61 7.67 L95.58 9.00 L96.44 10.48 L97.20 12.11 L97.87 13.92 L98.44 15.95 L98.92 18.25 L99.31 20.88 L99.61 23.99 L99.83 27.86 L99.96 33.20 Z"></path>
+        </svg>
+        <img
+            src="/AeSoul_logo-mark.webp"
+            alt=""
+            width="256"
+            height="256"
+            decoding="async"
+        />
     </a>
 
     <div
@@ -131,45 +138,72 @@
 
     /* ======================================================
        SQUIRCLE BADGE
-       Superellipse (|x|^5 + |y|^5 = 1) sampled as a polygon.
-       The outer layer is the cyan ring; the inner layer is the dark face.
+       Superellipse (|x|^5 + |y|^5 = 1) sampled as a polygon. The anchor is
+       clipped to it (so the backdrop blur follows the shape) and the SVG
+       path draws the same outline as fill + hairline, like the social pill.
        ====================================================== */
     .brand-squircle {
-        display: block;
-        flex-shrink: 0;
-        box-sizing: border-box;
-        padding: 2px;
-
-        width: 44px;
-        height: 44px;
-
-        clip-path: polygon(100.00% 50.00%, 99.96% 66.80%, 99.83% 72.14%, 99.61% 76.01%, 99.31% 79.12%, 98.92% 81.75%, 98.44% 84.05%, 97.87% 86.08%, 97.20% 87.89%, 96.44% 89.52%, 95.58% 91.00%, 94.61% 92.33%, 93.53% 93.53%, 92.33% 94.61%, 91.00% 95.58%, 89.52% 96.44%, 87.89% 97.20%, 86.08% 97.87%, 84.05% 98.44%, 81.75% 98.92%, 79.12% 99.31%, 76.01% 99.61%, 72.14% 99.83%, 66.80% 99.96%, 50.00% 100.00%, 33.20% 99.96%, 27.86% 99.83%, 23.99% 99.61%, 20.88% 99.31%, 18.25% 98.92%, 15.95% 98.44%, 13.92% 97.87%, 12.11% 97.20%, 10.48% 96.44%, 9.00% 95.58%, 7.67% 94.61%, 6.47% 93.53%, 5.39% 92.33%, 4.42% 91.00%, 3.56% 89.52%, 2.80% 87.89%, 2.13% 86.08%, 1.56% 84.05%, 1.08% 81.75%, 0.69% 79.12%, 0.39% 76.01%, 0.17% 72.14%, 0.04% 66.80%, 0.00% 50.00%, 0.04% 33.20%, 0.17% 27.86%, 0.39% 23.99%, 0.69% 20.88%, 1.08% 18.25%, 1.56% 15.95%, 2.13% 13.92%, 2.80% 12.11%, 3.56% 10.48%, 4.42% 9.00%, 5.39% 7.67%, 6.47% 6.47%, 7.67% 5.39%, 9.00% 4.42%, 10.48% 3.56%, 12.11% 2.80%, 13.92% 2.13%, 15.95% 1.56%, 18.25% 1.08%, 20.88% 0.69%, 23.99% 0.39%, 27.86% 0.17%, 33.20% 0.04%, 50.00% 0.00%, 66.80% 0.04%, 72.14% 0.17%, 76.01% 0.39%, 79.12% 0.69%, 81.75% 1.08%, 84.05% 1.56%, 86.08% 2.13%, 87.89% 2.80%, 89.52% 3.56%, 91.00% 4.42%, 92.33% 5.39%, 93.53% 6.47%, 94.61% 7.67%, 95.58% 9.00%, 96.44% 10.48%, 97.20% 12.11%, 97.87% 13.92%, 98.44% 15.95%, 98.92% 18.25%, 99.31% 20.88%, 99.61% 23.99%, 99.83% 27.86%, 99.96% 33.20%);
-        background: linear-gradient(135deg, rgba(34, 211, 238, 0.9), rgba(59, 130, 246, 0.55));
-    }
-
-    .brand-squircle-inner {
+        position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-shrink: 0;
 
-        width: 100%;
-        height: 100%;
+        width: 50px;
+        height: 50px;
+        padding: 5px;
+        box-sizing: border-box;
 
         clip-path: polygon(100.00% 50.00%, 99.96% 66.80%, 99.83% 72.14%, 99.61% 76.01%, 99.31% 79.12%, 98.92% 81.75%, 98.44% 84.05%, 97.87% 86.08%, 97.20% 87.89%, 96.44% 89.52%, 95.58% 91.00%, 94.61% 92.33%, 93.53% 93.53%, 92.33% 94.61%, 91.00% 95.58%, 89.52% 96.44%, 87.89% 97.20%, 86.08% 97.87%, 84.05% 98.44%, 81.75% 98.92%, 79.12% 99.31%, 76.01% 99.61%, 72.14% 99.83%, 66.80% 99.96%, 50.00% 100.00%, 33.20% 99.96%, 27.86% 99.83%, 23.99% 99.61%, 20.88% 99.31%, 18.25% 98.92%, 15.95% 98.44%, 13.92% 97.87%, 12.11% 97.20%, 10.48% 96.44%, 9.00% 95.58%, 7.67% 94.61%, 6.47% 93.53%, 5.39% 92.33%, 4.42% 91.00%, 3.56% 89.52%, 2.80% 87.89%, 2.13% 86.08%, 1.56% 84.05%, 1.08% 81.75%, 0.69% 79.12%, 0.39% 76.01%, 0.17% 72.14%, 0.04% 66.80%, 0.00% 50.00%, 0.04% 33.20%, 0.17% 27.86%, 0.39% 23.99%, 0.69% 20.88%, 1.08% 18.25%, 1.56% 15.95%, 2.13% 13.92%, 2.80% 12.11%, 3.56% 10.48%, 4.42% 9.00%, 5.39% 7.67%, 6.47% 6.47%, 7.67% 5.39%, 9.00% 4.42%, 10.48% 3.56%, 12.11% 2.80%, 13.92% 2.13%, 15.95% 1.56%, 18.25% 1.08%, 20.88% 0.69%, 23.99% 0.39%, 27.86% 0.17%, 33.20% 0.04%, 50.00% 0.00%, 66.80% 0.04%, 72.14% 0.17%, 76.01% 0.39%, 79.12% 0.69%, 81.75% 1.08%, 84.05% 1.56%, 86.08% 2.13%, 87.89% 2.80%, 89.52% 3.56%, 91.00% 4.42%, 92.33% 5.39%, 93.53% 6.47%, 94.61% 7.67%, 95.58% 9.00%, 96.44% 10.48%, 97.20% 12.11%, 97.87% 13.92%, 98.44% 15.95%, 98.92% 18.25%, 99.31% 20.88%, 99.61% 23.99%, 99.83% 27.86%, 99.96% 33.20%);
-        background: #020617;
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
     }
 
-    @media (min-width: 768px) {
-        .brand-squircle {
-            width: 48px;
-            height: 48px;
-        }
+    .brand-squircle-shape {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
     }
 
+    /* The stroke is centred on the clipped edge, so 2px shows as 1px. */
+    .brand-squircle-shape path {
+        fill: rgba(15, 23, 42, 0.3);
+        stroke: rgba(255, 255, 255, 0.1);
+        stroke-width: 2;
+        vector-effect: non-scaling-stroke;
+        transition:
+            fill 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+            stroke 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .brand-squircle img {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .brand-squircle:hover .brand-squircle-shape path {
+        fill: rgba(34, 211, 238, 0.08);
+        stroke: rgba(34, 211, 238, 0.45);
+    }
+
+    .brand-squircle:hover img {
+        transform: scale(1.06);
+    }
+
+    /* clip-path would hide an outline, so focus is drawn on the outline itself. */
     .brand-squircle:focus-visible {
-        outline: 2px solid rgb(103, 232, 249);
-        outline-offset: 3px;
+        outline: none;
     }
+
+    .brand-squircle:focus-visible .brand-squircle-shape path {
+        stroke: rgb(103, 232, 249);
+        stroke-width: 4;
+    }
+
     /* ======================================================
        FLUID TRANSITION OVERRIDES
        Sovrascrive il bounce globale con un ease-out super fluido

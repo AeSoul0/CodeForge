@@ -91,7 +91,8 @@ describe('homepage', () => {
         expect(main).not.toContain('<footer');
         expect(html).toMatch(/View Case Study<span class="sr-only"[^>]*>: Città Digitale<\/span>/);
         // The header logo links home and has an accessible name.
-        expect(html).toMatch(/<a href="\/" aria-label="ÆSoul, home"[^>]*>\s*<span[^>]*>\s*<img src="\/AeSoul_logo-mark\.webp" alt=""/);
+        // The squircle outline is decorative and hidden from assistive tech.
+        expect(html).toMatch(/<a href="\/" aria-label="ÆSoul, home"[^>]*>\s*<svg[^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/svg>\s*<img src="\/AeSoul_logo-mark\.webp" alt=""/);
     });
 
     it('renders the API error state when the backend is down', async () => {
@@ -183,6 +184,9 @@ describe('static pages and layout', () => {
         expect(html.match(/<main\b/g)).toHaveLength(1);
 
         expect(html).toContain('CodeForge');
+        // Lighthouse results name the form factor next to each score.
+        expect(html).toMatch(/<dt[^>]*>Desktop<\/dt>\s*<dd[^>]*>99<\/dd>/);
+        expect(html).toMatch(/<dt[^>]*>Mobile<\/dt>\s*<dd[^>]*>92<\/dd>/);
     });
 
     it('renders the layout with SEO metadata and a single loader', async () => {

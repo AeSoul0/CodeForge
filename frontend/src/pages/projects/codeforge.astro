@@ -83,11 +83,12 @@ const securityModel = [
     }
 ];
 
+// Lighthouse scores out of 100; keep in sync with docs/metrics-lighthouse.json.
 const measuredResults = [
-    { label: "Performance", value: "99 / 95" },
-    { label: "Accessibility", value: "100 / 100" },
-    { label: "Best Practices", value: "100 / 100" },
-    { label: "SEO", value: "100 / 100" }
+    { label: "Performance", desktop: 99, mobile: 92 },
+    { label: "Accessibility", desktop: 100, mobile: 100 },
+    { label: "Best Practices", desktop: 100, mobile: 100 },
+    { label: "SEO", desktop: 100, mobile: 100 }
 ];
 ---
 
@@ -489,7 +490,7 @@ Persisted Markdown → Project Case Study`}</code></pre>
             <p>
                 The result is a portfolio platform that demonstrates full-stack engineering through the system
                 itself rather than through screenshots. Production Lighthouse audit of the homepage on
-                12 October 2026 (desktop / mobile, median of three runs):
+                20 October 2026: scores out of 100, median of three runs on desktop and three on mobile.
             </p>
 
             <div class="not-prose my-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -499,9 +500,16 @@ Persisted Markdown → Project Case Study`}</code></pre>
                             <span class="mb-2 block text-xs font-semibold uppercase tracking-widest text-slate-500">
                                 {item.label}
                             </span>
-                            <span class="text-lg font-bold text-white">
-                                {item.value}
-                            </span>
+                            <dl class="flex gap-6">
+                                <div>
+                                    <dt class="text-xs text-slate-500">Desktop</dt>
+                                    <dd class="text-2xl font-bold text-white">{item.desktop}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-xs text-slate-500">Mobile</dt>
+                                    <dd class="text-2xl font-bold text-white">{item.mobile}</dd>
+                                </div>
+                            </dl>
                         </div>
                     ))
                 }
