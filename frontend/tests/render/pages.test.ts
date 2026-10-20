@@ -73,6 +73,7 @@ describe('homepage', () => {
         expect(html).toContain('data-filter="full-stack"');
         expect(html).toContain('Embedded Systems Engineer');
         expect(html).toContain('Sep 2023 - Feb 2024');
+        expect(html).toContain('0.5+ yrs');
         expect(html).toContain('Sep 2020 - Present');
         expect(html).toContain('What changed (Outcome)');
         expect(html).toContain('Mentored two juniors.');
