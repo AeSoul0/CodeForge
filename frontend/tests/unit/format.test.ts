@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
     collectCategories,
+    formatExperienceDuration,
     formatPeriod,
     formatRelativeTime,
     getCategoryLabel,
@@ -22,6 +23,27 @@ describe('formatPeriod', () => {
     it('handles invalid dates', () => {
         expect(formatPeriod('nope')).toBe('Date unavailable');
         expect(formatPeriod('2025-01-01', 'nope')).toBe('Jan 2025 - Present');
+    });
+});
+
+describe('formatExperienceDuration', () => {
+    const now = new Date('2026-10-20T12:00:00.000Z');
+
+    it('counts inclusive months as decimal years', () => {
+        // Oct 2025 - Nov 2026 = 14 months.
+        expect(formatExperienceDuration('2025-10-01T00:00:00.000Z', '2026-11-01T00:00:00.000Z')).toBe('1.2+ yrs');
+        expect(formatExperienceDuration('2023-09-01T00:00:00.000Z', '2024-02-01T00:00:00.000Z')).toBe('0.5+ yrs');
+        expect(formatExperienceDuration('2020-01-01T00:00:00.000Z', '2021-12-01T00:00:00.000Z')).toBe('2.0+ yrs');
+    });
+
+    it('runs ongoing roles until now', () => {
+        expect(formatExperienceDuration('2025-10-01T00:00:00.000Z', null, true, now)).toBe('1.1+ yrs');
+        expect(formatExperienceDuration('2025-10-01T00:00:00.000Z', 'nope', false, now)).toBe('1.1+ yrs');
+    });
+
+    it('returns null for unusable or future dates', () => {
+        expect(formatExperienceDuration('nope')).toBeNull();
+        expect(formatExperienceDuration('2027-01-01T00:00:00.000Z', null, true, now)).toBeNull();
     });
 });
 

@@ -25,7 +25,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
             <caption class="sr-only">Professional experiences</caption>
             <thead class="text-xs text-slate-300 uppercase bg-black/30 border-b border-white/10">
                 <tr>
-                    <th scope="col" class="px-6 py-4 font-medium"><span class="sr-only">Logo</span></th>
+                    <th scope="col" class="pl-6 pr-2 py-4 w-20 font-medium"><span class="sr-only">Logo</span></th>
                     <th scope="col" class="px-6 py-4 font-medium">Role / Company</th>
                     <th scope="col" class="px-6 py-4 font-medium">Period</th>
                     <th scope="col" class="px-6 py-4 font-medium text-right">Actions</th>
@@ -84,9 +84,15 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
                     <label for="e-current" class="text-sm font-medium text-slate-300">I currently work here</label>
                 </div>
 
-                <div>
-                    <label for="e-image" class="admin-label">Organisation logo (JPEG, PNG or WebP, max 7 MB)</label>
-                    <input id="e-image" type="file" accept="image/jpeg,image/png,image/webp" class="admin-field text-xs" />
+                <div class="flex items-center gap-4">
+                    <div class="w-20 h-20 shrink-0 rounded-xl overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center">
+                        <img id="e-imagePreview" alt="Logo preview" class="hidden w-full h-full object-contain bg-white p-1.5 transition-opacity" />
+                        <span id="e-imagePlaceholder" class="text-[10px] font-semibold uppercase tracking-wider text-slate-500">No logo</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <label for="e-image" class="admin-label">Organisation logo (JPEG, PNG or WebP, max 7 MB)</label>
+                        <input id="e-image" type="file" accept="image/jpeg,image/png,image/webp" class="admin-field text-xs" />
+                    </div>
                 </div>
 
                 <div data-remove-image class="hidden flex items-center gap-2">

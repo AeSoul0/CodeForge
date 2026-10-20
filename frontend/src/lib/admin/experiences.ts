@@ -15,6 +15,7 @@ import {
 } from '../dom';
 
 import {
+    formatExperienceDuration,
     formatPeriod,
     parseList,
     resolveImageUrl,
@@ -249,15 +250,15 @@ export function renderExperienceRows(
                 },
                 h(
                     'td',
-                    { class: 'px-6 py-4 w-14' },
+                    { class: 'pl-6 pr-2 py-4 w-20' },
                     logo
                         ? h('img', {
                             src: logo,
                             alt: '',
-                            class: 'w-10 h-10 rounded-lg object-contain bg-white/5',
+                            class: 'block w-12 h-12 max-w-none rounded-lg object-contain bg-white p-1 ring-1 ring-white/10',
                             loading: 'lazy',
                         })
-                        : h('div', { class: 'w-10 h-10 rounded-lg bg-white/5', 'aria-hidden': 'true' }),
+                        : h('div', { class: 'w-12 h-12 rounded-lg bg-white/5', 'aria-hidden': 'true' }),
                 ),
                 h(
                     'td',
@@ -268,7 +269,12 @@ export function renderExperienceRows(
                 h(
                     'td',
                     { class: 'px-6 py-4 whitespace-nowrap' },
-                    formatPeriod(experience.startDate, experience.endDate, experience.current),
+                    h('div', {}, formatPeriod(experience.startDate, experience.endDate, experience.current)),
+                    h(
+                        'div',
+                        { class: 'text-xs text-slate-400' },
+                        formatExperienceDuration(experience.startDate, experience.endDate, experience.current) ?? '',
+                    ),
                 ),
                 h(
                     'td',
@@ -373,6 +379,25 @@ export async function uploadExperienceImage(
         : `Logo upload failed: ${result.message}`;
 }
 
+/**
+ * Show a logo in the dialog preview, or the "No logo" placeholder.
+ */
+export function setLogoPreview(
+    src: string | null,
+    doc: Document = document,
+): void {
+    const preview = byId<HTMLImageElement>('e-imagePreview', doc);
+
+    if (src) {
+        preview.src = src;
+    } else {
+        preview.removeAttribute('src');
+    }
+
+    preview.classList.toggle('hidden', !src);
+    byId('e-imagePlaceholder', doc).classList.toggle('hidden', Boolean(src));
+}
+
 export function initExperiencesPage(
     doc: Document = document,
 ): { reload: () => Promise<void> } {
@@ -387,6 +412,11 @@ export function initExperiencesPage(
     const count = byId('expCount', doc);
 
     let editing: AdminExperience | null = null;
+
+    // Fade the current logo while "Remove current logo" is ticked.
+    const syncRemoveState = () => {
+        byId('e-imagePreview', doc).classList.toggle('opacity-30', removeImage.checked);
+    };
 
     const reload = async () => {
         const result = await apiRequest<AdminExperience[]>('/api/experiences?limit=100');
@@ -407,6 +437,8 @@ export function initExperiencesPage(
         writeExperienceForm(experienceToForm(experience), doc);
         setFormError(errorBox, null);
         removeImage.closest('[data-remove-image]')?.classList.toggle('hidden', !experience?.image);
+        setLogoPreview(resolveImageUrl(experience?.image, getApiUrl()), doc);
+        syncRemoveState();
         title.textContent = experience ? 'Edit Experience' : 'New Experience';
         openDialog(dialog);
         byId<HTMLInputElement>('e-role', doc).focus();
@@ -441,6 +473,22 @@ export function initExperiencesPage(
     };
 
     byId('e-current', doc).addEventListener('change', () => syncEndDateState(doc));
+
+    // Preview a newly selected logo before it is uploaded.
+    imageInput.addEventListener('change', async () => {
+        const file = imageInput.files?.[0];
+        const fileError = file ? validateImageFile(file) : null;
+
+        setFormError(errorBox, fileError);
+
+        if (file && !fileError) {
+            setLogoPreview(await readFileAsDataUrl(file), doc);
+            removeImage.checked = false;
+            syncRemoveState();
+        }
+    });
+
+    removeImage.addEventListener('change', syncRemoveState);
 
     form.addEventListener('submit', async (event) => {
         event.preventDefault();

@@ -608,10 +608,12 @@ The strongest verified results are:
 Current numbers: see [metrics.md](metrics.md).
 
 The GitHub Actions workflow is green and the mobile Lighthouse result is
-recorded. The remaining evidence gaps (section 13) need real users or a
-human reviewer:
+recorded. The remaining evidence gaps (section 13 and
+[operations.md § 6](operations.md#6-open-verification-items)) need real users
+or a human reviewer:
 
 ```text
 1. Field INP measurement
-2. Manual screen-reader, keyboard-only and mobile review
+2. Manual screen-reader and mobile review (keyboard-only pass done 2026-10-20)
+3. Independent security review
 ```

@@ -196,6 +196,10 @@ An algorithm allowlist prevents accepting unexpected token algorithms.
 Issuer and audience validation prevent tokens created for an unrelated service
 or security context from being accepted accidentally.
 
+Tokens are not stored server-side, so they cannot be revoked one by one. The
+revocation procedures (rotating `JWT_SECRET`, changing `ADMIN_API_KEY`) are in
+[operations.md § 5](operations.md#5-session-revocation).
+
 ---
 
 # 11. Cookie Security

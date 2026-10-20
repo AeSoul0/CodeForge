@@ -149,7 +149,7 @@ export default async function projectRoutes(
                 linkGithub: {
                     type: 'string',
                     maxLength: 500,
-                    pattern: '^https?:\\\\/\\\\/.+',
+                    pattern: '^https?://.+',
                 },
 
                 image: {
@@ -250,7 +250,7 @@ export default async function projectRoutes(
                         {
                             type: 'string',
                             maxLength: 500,
-                            pattern: '^https?:\\\\/\\\\/.+',
+                            pattern: '^https?://.+',
                         },
                         {
                             type: 'null',

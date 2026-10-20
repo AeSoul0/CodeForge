@@ -57,6 +57,49 @@ export function formatPeriod(
 }
 
 /**
+ * Experience length in years with one decimal, e.g. "1.2+ yrs" for 14 months.
+ *
+ * Derived from the stored dates (nothing is saved): months are counted
+ * inclusively in UTC, so Oct 2025 - Nov 2026 is 14 months, and ongoing roles
+ * run until `now`. Returns null when the start date is unusable.
+ */
+export function formatExperienceDuration(
+    startDate: string,
+    endDate?: string | null,
+    current = false,
+    now: Date = new Date(),
+): string | null {
+    const start =
+        new Date(startDate);
+
+    if (Number.isNaN(start.getTime())) {
+        return null;
+    }
+
+    const parsedEnd =
+        current || !endDate
+            ? now
+            : new Date(endDate);
+
+    const end =
+        Number.isNaN(parsedEnd.getTime())
+            ? now
+            : parsedEnd;
+
+    const months =
+        (end.getUTCFullYear() - start.getUTCFullYear()) * 12 +
+        end.getUTCMonth() -
+        start.getUTCMonth() +
+        1;
+
+    if (months < 1) {
+        return null;
+    }
+
+    return `${(Math.round((months / 12) * 10) / 10).toFixed(1)}+ yrs`;
+}
+
+/**
  * Convert a project title into the URL slug used by /projects/[slug].
  *
  * "Città Digitale" -> "citta-digitale"

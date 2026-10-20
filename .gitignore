@@ -315,3 +315,6 @@ frontend/lh-report*.json
 *lh-report*.json
 runs.json
 test-results.json
+
+# Local database dumps (npm run db:backup)
+backend/backups/

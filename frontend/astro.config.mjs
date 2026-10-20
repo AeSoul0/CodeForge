@@ -65,6 +65,13 @@ export default defineConfig({
         syntaxHighlight: false,
     },
 
+    /**
+     * Project URLs are derived from titles; keep renamed projects reachable.
+     */
+    redirects: {
+        '/projects/nt-to-sql': '/projects/nl-to-sql',
+    },
+
     vite: {
         plugins: [
             tailwindcss(),

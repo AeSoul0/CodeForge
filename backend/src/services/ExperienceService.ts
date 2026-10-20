@@ -52,7 +52,22 @@ function normalizeDate(
         return value.toISOString();
     }
 
-    return value;
+    if (/^\d{4}-\d{2}/.test(value)) {
+        return value;
+    }
+
+    // Legacy records store labels such as "Oct. 2025". Clients parse them in
+    // their own time zone (a Rome browser reads Sep 30, 22:00 UTC), so send
+    // the same calendar day as UTC midnight instead.
+    const parsed = new Date(value);
+
+    if (Number.isNaN(parsed.getTime())) {
+        return value;
+    }
+
+    return new Date(
+        Date.UTC(parsed.getFullYear(), parsed.getMonth(), parsed.getDate()),
+    ).toISOString();
 }
 
 function normalizeOptionalDate(

@@ -10,7 +10,7 @@
  */
 
 import { getApiUrl } from "../lib/api";
-import { formatPeriod, resolveImageUrl } from "../lib/format";
+import { formatExperienceDuration, formatPeriod, resolveImageUrl } from "../lib/format";
 
 export interface ExperienceItem {
     id?: string;
@@ -33,6 +33,11 @@ interface Props {
 const { experiences = [], apiError = false } = Astro.props;
 
 const apiUrl = getApiUrl();
+
+// Computed from the dates at render time; not stored in the database.
+const durations = experiences.map((exp) =>
+    formatExperienceDuration(exp.startDate, exp.endDate, exp.current),
+);
 ---
 
 <section
@@ -134,6 +139,12 @@ const apiUrl = getApiUrl();
                                         loading="lazy"
                                     />
                                 </div>
+                            )}
+
+                            {durations[index] && (
+                                <span class="experience-duration">
+                                    {durations[index]}
+                                </span>
                             )}
 
                         </div>
@@ -347,6 +358,25 @@ const apiUrl = getApiUrl();
         text-transform: uppercase;
 
         text-align: center;
+        white-space: nowrap;
+    }
+
+    .experience-duration {
+        display: inline-block;
+
+        margin-top: 14px;
+        padding: 4px 14px;
+
+        color: rgb(103, 232, 249);
+        background: rgba(34, 211, 238, 0.1);
+        border: 1px solid rgba(34, 211, 238, 0.3);
+        border-radius: 9999px;
+        box-shadow: 0 0 14px rgba(34, 211, 238, 0.15);
+
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
         white-space: nowrap;
     }
 

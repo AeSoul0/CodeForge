@@ -142,6 +142,7 @@ describe('renderExperienceRows', () => {
         const rows = tbody.querySelectorAll('tr');
         expect(rows[0].querySelector('img')!.getAttribute('src')).toBe('http://api/api/experiences/e1/image');
         expect(rows[0].textContent).toContain('Sep 2023 - Feb 2024');
+        expect(rows[0].textContent).toContain('0.5+ yrs');
         expect(rows[0].textContent).toContain('ACME <b>');
         expect(rows[1].querySelector('img')).toBeNull();
         expect(rows[1].getAttribute('data-experience-id')).toBe('e2');
@@ -263,6 +264,45 @@ describe('initExperiencesPage', () => {
         await submit();
         expect(field('expFormError').textContent).toContain('JPEG, PNG or WebP');
         expect(store).toHaveLength(1);
+    });
+
+    it('previews the current logo and a newly selected one', async () => {
+        await initExperiencesPage().reload();
+        const preview = field<HTMLImageElement>('e-imagePreview');
+        const placeholder = field('e-imagePlaceholder');
+
+        field('newExpBtn').click();
+        expect(preview.classList.contains('hidden')).toBe(true);
+        expect(preview.hasAttribute('src')).toBe(false);
+        expect(placeholder.classList.contains('hidden')).toBe(false);
+        field('expDialog').querySelector<HTMLButtonElement>('[data-dialog-close]')!.click();
+
+        document.querySelector<HTMLButtonElement>('[data-action="edit"]')!.click();
+        expect(preview.getAttribute('src')).toContain('/api/experiences/e1/image');
+        expect(preview.classList.contains('hidden')).toBe(false);
+        expect(placeholder.classList.contains('hidden')).toBe(true);
+
+        field('e-removeImage').checked = true;
+        field('e-removeImage').dispatchEvent(new Event('change'));
+        expect(preview.classList.contains('opacity-30')).toBe(true);
+
+        setFiles(field('e-image'), [pngFile(5, 'image/gif')]);
+        field('e-image').dispatchEvent(new Event('change'));
+        await flush();
+        expect(field('expFormError').textContent).toContain('JPEG, PNG or WebP');
+        expect(preview.getAttribute('src')).toContain('/api/experiences/e1/image');
+
+        setFiles(field('e-image'), [pngFile()]);
+        field('e-image').dispatchEvent(new Event('change'));
+        await flush(10);
+        expect(preview.getAttribute('src')).toMatch(/^data:image\/png/);
+        expect(field('e-removeImage').checked).toBe(false);
+        expect(preview.classList.contains('opacity-30')).toBe(false);
+
+        setFiles(field('e-image'), []);
+        field('e-image').dispatchEvent(new Event('change'));
+        await flush();
+        expect(preview.getAttribute('src')).toMatch(/^data:image\/png/);
     });
 
     it('shows API errors in the dialog', async () => {
