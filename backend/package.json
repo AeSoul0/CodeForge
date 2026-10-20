@@ -18,6 +18,7 @@
     "test:cov": "vitest run --coverage",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
+    "db:backup": "dotenvx run -f .env -- tsx scripts/db-backup.ts",
     "test:ci": "vitest run --coverage --reporter=default --reporter=json --outputFile.json=test-results.json"
   },
   "keywords": [
