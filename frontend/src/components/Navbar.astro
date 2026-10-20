@@ -19,10 +19,10 @@
             <img
                 src="/AeSoul_logo-mark.webp"
                 alt=""
-                width="120"
-                height="80"
+                width="256"
+                height="256"
                 decoding="async"
-                class="h-8 md:h-9 w-auto"
+                class="h-full w-full object-contain"
             />
         </span>
     </a>
@@ -137,6 +137,8 @@
     .brand-squircle {
         display: block;
         flex-shrink: 0;
+        box-sizing: border-box;
+        padding: 2px;
 
         width: 44px;
         height: 44px;
