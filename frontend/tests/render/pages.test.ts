@@ -151,6 +151,8 @@ describe('project detail page', () => {
         expect(html).not.toContain('javascript:');
         expect(html).toContain('https://github.com/x/citta');
         expect(html).toContain('/api/projects/1/image');
+        // Same brand suffix as the homepage and the case study.
+        expect(html).toMatch(/<title>[^<]+ \| ÆSoul<\/title>/);
         // Layout.astro owns the single <main> landmark.
         expect(html.match(/<main\b/g)).toHaveLength(1);
     });
