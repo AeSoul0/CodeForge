@@ -1,0 +1,40 @@
+---
+/**
+ * @file src/components/ErrorState.astro
+ * @description Error panel shared by the 404 and 500 pages and the
+ * project page's not-found / unavailable states. It renders inside
+ * Layout.astro, so the error pages keep the site background and particles.
+ */
+
+export interface Props {
+    code: number;
+    title: string;
+    message: string;
+}
+
+const { code, title, message } = Astro.props;
+---
+
+<section class="rounded-3xl border border-white/10 bg-white/[0.03] p-8 md:p-10 backdrop-blur-md">
+    <p class="text-sm font-semibold uppercase tracking-widest text-cyan-400">
+        Error {code}
+    </p>
+
+    <h1 class="mt-3 text-3xl font-black tracking-[-0.03em] text-white md:text-4xl">
+        {title}
+    </h1>
+
+    <p class="mt-4 max-w-2xl text-base leading-7 text-white/50">
+        {message}
+    </p>
+
+    <div class="mt-8 flex flex-wrap gap-3">
+        <a href="/" class="btn-explore">
+            Back to home
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+            </svg>
+        </a>
+    </div>
+</section>

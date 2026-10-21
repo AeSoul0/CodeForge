@@ -11,12 +11,15 @@ import ParticleCanvas from "../components/ParticleCanvas.astro";
 export interface Props {
     title?: string;
     description?: string;
+    /** Error pages ask search engines not to index them. */
+    noindex?: boolean;
 }
 
 const {
     title = "CodeForge | ÆSoul",
     description =
         "Portfolio ufficiale di ÆSoul - Full-Stack Developer & Software Architect.",
+    noindex = false,
 } = Astro.props;
 
 const canonicalUrl = Astro.url.href;
@@ -60,6 +63,8 @@ const ogImageUrl = new URL(
             name="author"
             content="AeSoul"
         />
+
+        {noindex && <meta name="robots" content="noindex" />}
 
         <link
             rel="canonical"
