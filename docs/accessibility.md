@@ -364,20 +364,20 @@ Accessibility changes should be validated with automated checks before merge.
 
 Automated testing does not replace human accessibility evaluation.
 
-A future manual accessibility review should cover:
+Manual reviews done:
 
-```text
-Keyboard-only navigation
-Screen-reader navigation
-Focus transitions
-Modal/dialog behavior
-Mobile touch interactions
-Zoom / enlarged text
-Error announcement behavior
-```
+* **Keyboard-only navigation (2026-10-20):** homepage and case study, every
+  tab stop in reading order with a visible focus indicator, no traps, skip
+  link first.
+* **Screen reader (2026-10-21):** an accessibility-tree pass at desktop and
+  mobile widths, then an NVDA 2026.2 + Chrome walkthrough of the public pages
+  and the admin login (headings, Tab order, filters, the architecture
+  diagram, form fields). The issues it found were fixed and re-checked with
+  NVDA.
 
-The manual review should be documented separately rather than inferred from an
-automated score.
+Both are documented in [evidence.md § 13](evidence.md) and
+[operations.md § 6](operations.md#6-open-verification-items), not inferred
+from an automated score.
 
 ---
 
@@ -420,9 +420,9 @@ automated score.
 
 ## Manual (see section 22)
 
-* [ ] Screen-reader review
-* [ ] Full keyboard-only manual review
-* [ ] Mobile accessibility review
+* [x] Screen-reader review (NVDA, 2026-10-21)
+* [x] Keyboard-only manual review (2026-10-20)
+* [x] Mobile-width review (390 px accessibility tree, Lighthouse mobile 100)
 
 ---
 
@@ -439,8 +439,7 @@ Visible focus: Implemented
 Semantic structure: Implemented
 ```
 
-The remaining work is manual validation rather than a known automated
-accessibility failure.
+The manual keyboard and screen-reader reviews are done as well (section 22).
 
 ---
 

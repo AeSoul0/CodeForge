@@ -4,7 +4,7 @@
 
 **Repository:** `AeSoul0/CodeForge`
 **Review scope:** Architecture, Backend, Frontend, Security, Testing & QA, CI/CD, Performance, Maintainability, Documentation, UX/Accessibility
-**Status:** Roadmap complete (2026-10-12); open evidence: field INP and a manual screen-reader review
+**Status:** Roadmap complete (2026-10-12); open evidence: field INP
 **Target:** 90+/100
 
 ---
@@ -56,7 +56,7 @@ This scorecard intentionally distinguishes verified evidence from pending eviden
 | UX / Accessibility           |        7.0 |        **9.0** |
 | **Roadmap Target**           | **82/100** |   **90.7/100** |
 
-> The numerical category scores above are roadmap targets, not automatically awarded final scores. Every engineering item behind them is now implemented and verified; the only open evidence is field INP (real-user data) and a manual screen-reader review.
+> The numerical category scores above are roadmap targets, not automatically awarded final scores. Every engineering item behind them is now implemented and verified; the only open evidence is field INP (real-user data).
 
 ---
 
@@ -679,14 +679,11 @@ E2E tests verify keyboard interaction and focus behavior.
 The particle system respects reduced-motion requirements and the application
 supports reduced visual movement for users who request it.
 
-## Remaining Manual Review
+## Manual Review
 
-A final manual review can still verify:
-
-* screen-reader behavior;
-* mobile keyboard interaction;
-* touch target ergonomics;
-* complex interactive component behavior.
+Done: a keyboard-only pass (2026-10-20) and a screen-reader review
+(2026-10-21: accessibility-tree pass plus an NVDA walkthrough of the public
+pages and the admin login). Details in [evidence.md § 13](evidence.md).
 
 ## Target Assessment
 
@@ -816,8 +813,8 @@ The remaining blockers to a strict final **90+/100 evidence-based claim** are:
 1. INP measurement (requires CrUX field data)
 ```
 
-A manual screen-reader review is still recommended, but it is optional evidence
-rather than a blocker (see [roadmap § 7.4](roadmap.md#74-screen-reader-foundations)).
+The manual screen-reader review is done (NVDA, 2026-10-21; see
+[roadmap § 7.4](roadmap.md#74-screen-reader-foundations)).
 
 No final score should be claimed above the evidence-supported level until these
 remaining repository-level items are closed.

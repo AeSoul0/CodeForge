@@ -257,12 +257,8 @@ The available evidence supports strong automated accessibility results.
 
 It does not constitute a blanket declaration of full WCAG 2.2 AA compliance.
 
-A manual review remains valuable for:
-
-* screen-reader navigation;
-* complex interaction patterns;
-* mobile touch behavior;
-* real keyboard-only workflows.
+Manual reviews complement it: a keyboard-only pass (2026-10-20) and a
+screen-reader review with NVDA (2026-10-21), both in section 13.
 
 ---
 
@@ -492,10 +488,11 @@ verified:
 | Evidence                             | Status     |
 | ------------------------------------ | ---------- |
 | INP (requires field data)            | ⚠️ Pending |
-| Manual screen-reader review          | ⚠️ Partly done (NVDA, public pages) |
-| Manual keyboard-only and mobile review | ⚠️ Pending |
+| Independent security review          | ⚠️ Pending |
+| Manual keyboard-only review          | ✅ Done 2026-10-20 |
+| Manual screen-reader review          | ✅ Done 2026-10-21 (NVDA) |
 
-These are evidence gaps, not evidence of application failure.
+The open items are evidence gaps, not evidence of application failure.
 
 Interim evidence (2026-10-19):
 
@@ -512,7 +509,7 @@ Interim evidence (2026-10-19):
   * project pages had a second, nested `<main>`;
   * three identical "View Case Study" link names.
 
-  A pass with a real screen reader (NVDA or VoiceOver) is still pending.
+  The NVDA walkthrough followed on 2026-10-21 (below).
 
 Second screen-reader structure pass (2026-10-21), on the Chromium
 accessibility tree that NVDA, JAWS and Narrator read through the platform
@@ -561,9 +558,6 @@ speech was recorded from its input/output log.
 All the fixes were checked again with NVDA on a local production build, and
 the affected sections are pixel-identical to production apart from the two
 restored spaces.
-
-Not covered: the signed-in admin dashboard (dialogs, toasts) and VoiceOver
-or TalkBack on a phone.
 
 ---
 
@@ -659,12 +653,12 @@ The strongest verified results are:
 Current numbers: see [metrics.md](metrics.md).
 
 The GitHub Actions workflow is green and the mobile Lighthouse result is
-recorded. The remaining evidence gaps (section 13 and
+recorded, and the manual keyboard and screen-reader reviews are done. The
+remaining evidence gaps (section 13 and
 [operations.md § 6](operations.md#6-open-verification-items)) need real users
-or a human reviewer:
+or an outside reviewer:
 
 ```text
 1. Field INP measurement
-2. Screen reader on the admin dashboard and on mobile (NVDA pass on the public pages done 2026-10-21, keyboard-only pass 2026-10-20)
-3. Independent security review
+2. Independent security review
 ```

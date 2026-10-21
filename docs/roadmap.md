@@ -4,7 +4,7 @@
 **Baseline:** 82/100  
 **Target:** 90+/100  
 **Approach:** milestone-based, evidence-driven, without artificial time constraints  
-**Status:** ✅ Complete (2026-10-12); open evidence: field INP and a manual screen-reader review
+**Status:** ✅ Complete (2026-10-12); open evidence: field INP
 
 ---
 
@@ -573,9 +573,8 @@ Implemented:
 
 Status:
 
-✅ Strong automated evidence
-
-Manual screen-reader validation remains optional future evidence.
+✅ Strong automated evidence, plus a manual NVDA walkthrough (2026-10-21)
+whose findings were fixed ([evidence.md § 13](evidence.md)).
 
 ---
 
