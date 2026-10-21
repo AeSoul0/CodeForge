@@ -739,15 +739,10 @@ tested and measured. No new technology is planned just to add features; what
 remains is verification, tracked in
 [operations.md § 6](docs/operations.md#6-open-verification-items):
 
-1. **Screen reader:** an NVDA walkthrough of the public pages and the admin
-   login was done on 2026-10-21 and the issues it found were fixed
-   ([evidence.md § 13](docs/evidence.md#13-evidence-that-is-still-pending)).
-   Still open: the signed-in admin dashboard (dialogs, toasts) and VoiceOver
-   or TalkBack on a phone.
-2. **Field performance:** a production INP measurement needs real-user data;
+1. **Field performance:** a production INP measurement needs real-user data;
    lab interaction latency is 64–112 ms
    ([performance.md](docs/performance.md#inp)).
-3. **Independent security review:** not done yet; CodeQL, `npm audit`,
+2. **Independent security review:** not done yet; CodeQL, `npm audit`,
    Dependabot and the API security tests run in CI.
 
 Accepted limitations:
