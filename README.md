@@ -739,9 +739,10 @@ tested and measured. No new technology is planned just to add features; what
 remains is verification, tracked in
 [operations.md § 6](docs/operations.md#6-open-verification-items):
 
-1. **Screen reader:** a manual NVDA/VoiceOver pass. Keyboard-only navigation
-   was checked on 2026-10-20 (logical order, visible focus, no traps), and
-   automated axe and Lighthouse checks pass.
+1. **Screen reader:** listening with NVDA or VoiceOver. The accessibility
+   tree was reviewed on 2026-10-21 (landmarks, headings, names, labels, tab
+   order; the issues found were fixed), keyboard-only navigation was checked
+   on 2026-10-20, and automated axe and Lighthouse checks pass.
 2. **Field performance:** a production INP measurement needs real-user data;
    lab interaction latency is 64–112 ms
    ([performance.md](docs/performance.md#inp)).

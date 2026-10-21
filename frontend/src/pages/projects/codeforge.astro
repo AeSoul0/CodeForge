@@ -145,34 +145,36 @@ const measuredResults = [
                 </p>
             </div>
 
-            <div class="mt-12 grid grid-cols-2 gap-6 border-y border-white/10 py-8 md:grid-cols-4">
+            <!-- Label/value pairs, not section headings: a definition list keeps the
+                 heading outline h1 -> h2 for screen-reader users. -->
+            <dl class="mt-12 grid grid-cols-2 gap-6 border-y border-white/10 py-8 md:grid-cols-4">
                 <div>
-                    <h3 class="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-500">
+                    <dt class="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-500">
                         Role
-                    </h3>
-                    <p class="text-sm font-medium text-slate-300">
+                    </dt>
+                    <dd class="text-sm font-medium text-slate-300">
                         Full-Stack Engineer
-                    </p>
+                    </dd>
                 </div>
 
                 <div>
-                    <h3 class="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-500">
+                    <dt class="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-500">
                         Timeline
-                    </h3>
-                    <p class="text-sm font-medium text-slate-300">
+                    </dt>
+                    <dd class="text-sm font-medium text-slate-300">
                         May 2026 – Present
-                    </p>
+                    </dd>
                 </div>
 
                 <div class="col-span-2">
-                    <h3 class="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-500">
+                    <dt class="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-500">
                         Stack
-                    </h3>
-                    <p class="text-sm font-medium text-slate-300">
+                    </dt>
+                    <dd class="text-sm font-medium text-slate-300">
                         Astro · Tailwind CSS · Fastify · TypeScript · MongoDB · Vercel · Render
-                    </p>
+                    </dd>
                 </div>
-            </div>
+            </dl>
         </header>
 
         <article
@@ -268,7 +270,13 @@ const measuredResults = [
             </p>
 
             <div class="not-prose my-8 rounded-2xl border border-white/10 bg-black/40 p-6">
-                <pre class="overflow-x-auto text-sm leading-relaxed text-slate-300"><code>{`Browser
+                <!-- Screen readers would spell out every box-drawing character, so the
+                     diagram is exposed as one image with a prose description. -->
+                <pre
+                    role="img"
+                    aria-label="Architecture diagram. The browser connects over HTTPS, with HSTS and a hash-based CSP, to Vercel, which runs Astro SSR with 300-second ISR and serves bundled TypeScript modules. Next, REST requests with an HttpOnly cookie reach the Fastify API on Render, which applies a CORS allowlist, a CSRF guard, JWT verification and JSON schemas, then passes requests through controllers, services and repositories to MongoDB Atlas via Mongoose. In the background, AI documentation reads GitHub metadata, the README and package.json, uses OpenAI with Gemini as a fallback, and stores Markdown that becomes the project case study."
+                    class="overflow-x-auto text-sm leading-relaxed text-slate-300"
+                ><code>{`Browser
    │  HTTPS · HSTS · hash-based CSP
    ▼
 Vercel ── Astro SSR + ISR (300 s)
