@@ -37,4 +37,17 @@ describe('project filter', () => {
         broken.click();
         expect([...cards].every((card) => !card.classList.contains('hidden'))).toBe(true);
     });
+
+    it('announces how many projects are shown', () => {
+        document.body.innerHTML = `${markup}<p id="project-filter-status" role="status"></p>`;
+        initProjectFilter();
+
+        const [all, ai] = document.querySelectorAll<HTMLButtonElement>('.cat-btn');
+        const status = document.getElementById('project-filter-status');
+
+        ai.click();
+        expect(status?.textContent).toBe('Showing 1 project');
+        all.click();
+        expect(status?.textContent).toBe('Showing 3 projects');
+    });
 });

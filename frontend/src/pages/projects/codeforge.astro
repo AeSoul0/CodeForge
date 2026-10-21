@@ -262,8 +262,8 @@ const measuredResults = [
             <h2>04. Architecture</h2>
 
             <p>
-                The backend follows a
-                <strong> Routes → Controllers → Services → Repositories</strong>
+                The backend follows a{" "}
+                <strong>Routes → Controllers → Services → Repositories</strong>{" "}
                 architecture to keep HTTP concerns, business logic and persistence separate.
                 The Fastify application is built separately from the server bootstrap, so the test suite imports
                 the fully configured app and exercises it with <code>inject()</code> without opening a network port.
@@ -430,7 +430,7 @@ Persisted Markdown → Project Case Study`}</code></pre>
                 </li>
                 <li>
                     <strong>Observability:</strong>{" "}
-                    structured request logs with request ids, an audit log for every content change, and
+                    structured request logs with request ids, an audit log for every content change, and{" "}
                     <code>/live</code>, <code>/ready</code> and <code>/metrics</code> endpoints.
                 </li>
                 <li>
