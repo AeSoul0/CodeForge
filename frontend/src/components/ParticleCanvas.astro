@@ -43,7 +43,7 @@ const isE2E =
                 if ("requestIdleCallback" in window) {
                     window.requestIdleCallback(start, { timeout: 1000 });
                 } else {
-                    window.setTimeout(start, 200);
+                    setTimeout(start, 200);
                 }
             </script>
         </>
