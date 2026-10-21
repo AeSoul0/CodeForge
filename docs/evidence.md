@@ -514,6 +514,27 @@ Interim evidence (2026-10-19):
 
   A pass with a real screen reader (NVDA or VoiceOver) is still pending.
 
+Second screen-reader structure pass (2026-10-21), on the Chromium
+accessibility tree that NVDA, JAWS and Narrator read through the platform
+APIs, for `/`, `/projects/codeforge`, `/projects/nl-to-sql`, a 404 page and
+`/admin/login` at 1440 px and 390 px:
+
+* passed: `lang="en"`, page titles, one `h1` per page, skip link first,
+  landmarks, named links (e.g. "View Case Study: NL-to-SQL") and buttons,
+  image alternatives, labelled login fields, a logical tab order, and no axe
+  WCAG 2.2 AA violations;
+* fixed:
+  * decorative SVG icons were exposed as unnamed images; all are now
+    `aria-hidden`;
+  * the case-study architecture diagram (box-drawing characters in a `<pre>`)
+    would be spelled out symbol by symbol; it is now one image with a prose
+    description;
+  * heading levels skipped from `h1` to `h3`: the case-study Role/Timeline/Stack
+    labels are now a definition list, and `renderMarkdown` shifts project
+    documentation so its top heading is an `h2` (pages are pixel-identical).
+
+Listening with a real screen reader is still the remaining step.
+
 ---
 
 # 14. Evidence Reproduction

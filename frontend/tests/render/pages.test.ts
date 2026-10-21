@@ -144,7 +144,7 @@ describe('project detail page', () => {
 
         const html = await render('citta-digitale');
 
-        expect(html).toContain('<h1>Overview</h1>');
+        expect(html).toContain('<h2>Overview</h2>');
         expect(html).not.toContain('<script>alert(1)</script>');
         expect(html).not.toContain('javascript:');
         expect(html).toContain('https://github.com/x/citta');

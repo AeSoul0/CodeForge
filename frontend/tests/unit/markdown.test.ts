@@ -30,10 +30,23 @@ describe('renderMarkdown', () => {
     it('renders GitHub-flavoured Markdown', () => {
         const html = renderMarkdown('# Title\n\n**bold** and `code`\n\n- a\n- b');
 
-        expect(html).toContain('<h1>Title</h1>');
+        // The page owns the <h1>, so the top Markdown heading becomes an <h2>.
+        expect(html).toContain('<h2>Title</h2>');
         expect(html).toContain('<strong>bold</strong>');
         expect(html).toContain('<code>code</code>');
         expect(html).toContain('<li>a</li>');
+    });
+
+    it('shifts headings so the highest is an h2 and no level is skipped', () => {
+        // AI-generated docs often start at ###.
+        expect(renderMarkdown('### Overview\n\n#### Detail\n\n### Next')).toBe(
+            '<h2>Overview</h2>\n<h3>Detail</h3>\n<h2>Next</h2>\n',
+        );
+        // Relative levels are kept and capped at h6; nested headings are shifted too.
+        expect(renderMarkdown('# A\n\n###### Deep\n\n> ## Quoted')).toBe(
+            '<h2>A</h2>\n<h6>Deep</h6>\n<blockquote>\n<h3>Quoted</h3>\n</blockquote>\n',
+        );
+        expect(renderMarkdown('No headings here.')).toBe('<p>No headings here.</p>\n');
     });
 
     it('escapes raw HTML blocks and inline tags', () => {

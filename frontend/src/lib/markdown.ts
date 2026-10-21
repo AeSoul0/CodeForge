@@ -93,11 +93,34 @@ const markdown =
 
 /**
  * Render Markdown to HTML that is safe to insert with `set:html`.
+ *
+ * The page around the documentation already has its own `<h1>`, so headings
+ * are shifted until the highest one is an `<h2>` (relative levels are kept,
+ * capped at `<h6>`). A document starting at `###` no longer skips a level,
+ * and a `#` no longer adds a second `<h1>` for screen-reader users.
  */
 export function renderMarkdown(
     source: string,
 ): string {
-    return markdown.parse(source, {
-        async: false,
+    const tokens =
+        markdown.lexer(source);
+
+    const headings: Tokens.Heading[] = [];
+
+    markdown.walkTokens(tokens, (token) => {
+        if (token.type === 'heading') {
+            headings.push(token as Tokens.Heading);
+        }
     });
+
+    if (headings.length > 0) {
+        const shift =
+            2 - Math.min(...headings.map((heading) => heading.depth));
+
+        for (const heading of headings) {
+            heading.depth = Math.min(6, heading.depth + shift);
+        }
+    }
+
+    return markdown.parser(tokens);
 }
