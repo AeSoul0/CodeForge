@@ -18,19 +18,20 @@
         <div class="hidden md:block absolute top-0 bottom-0 left-[25%] w-px bg-white/5" aria-hidden="true"></div>
 
         <!-- Left Column: Details -->
-        <div class="md:col-span-3 space-y-10">
+        <!-- Label/value pairs, not headings: screen readers list them as terms. -->
+        <dl class="md:col-span-3 space-y-10">
             <!-- Role -->
             <div>
-                <h3 class="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">Role</h3>
-                <p class="text-sm sm:text-base text-slate-300 font-medium">Full-stack Engineer / Product Designer</p>
+                <dt class="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">Role</dt>
+                <dd class="text-sm sm:text-base text-slate-300 font-medium">Full-stack Engineer / Product Designer</dd>
             </div>
-            
+
             <!-- Stack (Optional but good) -->
             <div>
-                <h3 class="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">Stack</h3>
-                <p class="text-sm sm:text-base text-slate-300">Astro · Fastify · MongoDB</p>
+                <dt class="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">Stack</dt>
+                <dd class="text-sm sm:text-base text-slate-300">Astro · Fastify · MongoDB</dd>
             </div>
-        </div>
+        </dl>
 
         <!-- Right Column: Narrative -->
         <div class="md:col-span-9 md:pl-8 space-y-10">

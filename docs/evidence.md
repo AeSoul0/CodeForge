@@ -492,7 +492,7 @@ verified:
 | Evidence                             | Status     |
 | ------------------------------------ | ---------- |
 | INP (requires field data)            | ⚠️ Pending |
-| Manual screen-reader review          | ⚠️ Pending |
+| Manual screen-reader review          | ⚠️ Partly done (NVDA, public pages) |
 | Manual keyboard-only and mobile review | ⚠️ Pending |
 
 These are evidence gaps, not evidence of application failure.
@@ -533,7 +533,37 @@ APIs, for `/`, `/projects/codeforge`, `/projects/nl-to-sql`, a 404 page and
     labels are now a definition list, and `renderMarkdown` shifts project
     documentation so its top heading is an `h2` (pages are pixel-identical).
 
-Listening with a real screen reader is still the remaining step.
+NVDA walkthrough (2026-10-21): NVDA 2026.2 with Chrome on Windows 11, on
+production `/`, `/projects/codeforge`, `/projects/nl-to-sql`, a 404 page and
+`/admin/login`. The pages were navigated with real keystrokes (H and 2 for
+headings, G for graphics, Tab, arrows, Space on the filters), and NVDA's
+speech was recorded from its input/output log.
+
+* worked as intended: the skip link, landmarks, the heading outline on every
+  page, link and button names, the filter buttons' pressed state, the
+  architecture diagram (read once as its description), the Desktop/Mobile
+  results, and the login fields (labelled, "required", "protected");
+* fixed:
+  * the homepage `h1` was read "Software EngineerEmbedded": the two lines
+    are blocks with nothing between them, so a hidden comma now separates
+    them;
+  * words glued by HTML compression in the case study ("Repositories"
+    followed by "architecture", "and" followed by `/live`);
+  * category and stack tags were read as one word ("AIFULL STACK"); they
+    are now lists ("Categories, list with 2 items");
+  * the featured project's Role and Stack labels were headings; they are now
+    a definition list;
+  * choosing a project filter only said "pressed"; a polite live region now
+    says "Showing 2 projects";
+  * the GitHub icon links were read twice (name, then a different tooltip);
+    the tooltip now matches the name.
+
+All the fixes were checked again with NVDA on a local production build, and
+the affected sections are pixel-identical to production apart from the two
+restored spaces.
+
+Not covered: the signed-in admin dashboard (dialogs, toasts) and VoiceOver
+or TalkBack on a phone.
 
 ---
 
@@ -635,6 +665,6 @@ or a human reviewer:
 
 ```text
 1. Field INP measurement
-2. Manual screen-reader and mobile review (keyboard-only pass done 2026-10-20)
+2. Screen reader on the admin dashboard and on mobile (NVDA pass on the public pages done 2026-10-21, keyboard-only pass 2026-10-20)
 3. Independent security review
 ```

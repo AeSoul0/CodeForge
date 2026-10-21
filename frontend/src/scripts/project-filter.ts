@@ -32,7 +32,8 @@ export function applyProjectFilter(
 }
 
 /**
- * Wire the `.cat-btn` buttons inside `root` to filter `.project-card`s.
+ * Wire the `.cat-btn` buttons inside `root` to filter `.project-card`s and
+ * announce the result in `#project-filter-status` (a polite live region).
  */
 export function initProjectFilter(
     root: ParentNode = document,
@@ -43,6 +44,9 @@ export function initProjectFilter(
     const cards =
         Array.from(root.querySelectorAll('.project-card'));
 
+    const status =
+        root.querySelector<HTMLElement>('#project-filter-status');
+
     for (const button of buttons) {
         button.addEventListener('click', () => {
             for (const other of buttons) {
@@ -52,10 +56,15 @@ export function initProjectFilter(
                 other.setAttribute('aria-pressed', String(active));
             }
 
-            applyProjectFilter(
+            const visible = applyProjectFilter(
                 button.getAttribute('data-filter') || 'all',
                 cards,
             );
+
+            if (status) {
+                status.textContent =
+                    `Showing ${visible} ${visible === 1 ? 'project' : 'projects'}`;
+            }
         });
     }
 }

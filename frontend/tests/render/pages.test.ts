@@ -94,6 +94,8 @@ describe('homepage', () => {
         // The squircle outline is decorative and hidden from assistive tech.
         // The logo is a bundled asset, so its URL is fingerprinted rather than fixed.
         expect(html).toMatch(/<div class="brand-squircle"[^>]*>\s*<svg[^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/svg>\s*<img src="[^"]*AeSoul_logo-mark[^"]*\.webp[^"]*" alt="ÆSoul"/);
+        // The two hero lines are separated for screen readers ("Software Engineer, Embedded ...").
+        expect(html).toMatch(/Software Engineer<span class="sr-only"[^>]*>,<\/span>/);
     });
 
     it('renders the API error state when the backend is down', async () => {
@@ -188,6 +190,9 @@ describe('static pages and layout', () => {
         // Lighthouse results name the form factor next to each score.
         expect(html).toMatch(/<dt[^>]*>Desktop<\/dt>\s*<dd[^>]*>99<\/dd>/);
         expect(html).toMatch(/<dt[^>]*>Mobile<\/dt>\s*<dd[^>]*>92<\/dd>/);
+        // Words around inline tags keep their spaces after HTML compression.
+        expect(html).toMatch(/follows a <strong>Routes → Controllers → Services → Repositories<\/strong> architecture/);
+        expect(html).toMatch(/content change, and <code>\/live<\/code>/);
     });
 
     it('renders the layout with SEO metadata and a single loader', async () => {

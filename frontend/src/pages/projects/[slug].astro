@@ -204,13 +204,13 @@ const renderedDescription =
 					     =========================================================== -->
 
 					<header class="max-w-4xl">
-						<div class="mb-5 flex flex-wrap gap-2">
+						<ul class="mb-5 flex flex-wrap gap-2" aria-label="Categories">
 							{categories.map((category) => (
-								<span class="rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300">
+								<li class="rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300">
 									{category}
-								</span>
+								</li>
 							))}
-						</div>
+						</ul>
 
 						<h1
 							class="max-w-5xl text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl md:text-6xl lg:text-7xl"
