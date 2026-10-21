@@ -94,6 +94,11 @@ Neither policy allows `'unsafe-inline'`.
   `frame-ancestors 'none'`. All client code is bundled from modules; there are
   no inline event handlers or `style` attributes. The policy only applies to
   production builds (`astro dev` does not emit it).
+- **Cloudflare Web Analytics** is the one reviewed third party: the Cloudflare
+  proxy injects its cookie-less beacon to collect real-user Core Web Vitals
+  (including INP). The policy allows exactly its two hosts:
+  `script-src https://static.cloudflareinsights.com` (the beacon script) and
+  `connect-src https://cloudflareinsights.com` (where it reports).
 
 Any future third-party integration must be reviewed against these policies
 instead of broadly weakening them.

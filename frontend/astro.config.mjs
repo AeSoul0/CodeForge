@@ -34,12 +34,20 @@ export default defineConfig({
      * into a <meta http-equiv="content-security-policy"> tag, so neither
      * script-src nor style-src needs 'unsafe-inline'. The policy is only
      * applied to production builds (not `astro dev`).
+     *
+     * Cloudflare Web Analytics (real-user Core Web Vitals, including INP)
+     * is injected by the Cloudflare proxy in front of aesoul0.com: its
+     * beacon script loads from static.cloudflareinsights.com and reports
+     * to cloudflareinsights.com.
      */
     security: {
         csp: {
+            scriptDirective: {
+                resources: ["'self'", 'https://static.cloudflareinsights.com'],
+            },
             directives: [
                 "default-src 'self'",
-                `connect-src 'self' ${apiOrigin}`,
+                `connect-src 'self' ${apiOrigin} https://cloudflareinsights.com`,
                 "img-src 'self' data: https:",
                 "font-src 'self' data:",
                 "object-src 'none'",
