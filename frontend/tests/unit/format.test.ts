@@ -10,6 +10,7 @@ import {
     normalizeCategory,
     parseList,
     resolveImageUrl,
+    selectGridProjects,
     slugify,
 } from '../../src/lib/format';
 
@@ -120,5 +121,15 @@ describe('formatRelativeTime', () => {
 
     it('uses the current time by default', () => {
         expect(formatRelativeTime(new Date())).toBe('just now');
+    });
+});
+
+describe('selectGridProjects', () => {
+    it('skips the featured project by slug and caps the grid at four', () => {
+        const titles = ['CodeForge', 'A', 'B', 'CodeForge Tools', 'C', 'D'];
+        const selected = selectGridProjects(titles.map((titolo) => ({ titolo })));
+
+        // Only the exact featured slug is skipped; a similar title stays.
+        expect(selected.map((p) => p.titolo)).toEqual(['A', 'B', 'CodeForge Tools', 'C']);
     });
 });

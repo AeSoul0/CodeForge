@@ -10,6 +10,7 @@ import {
 	getCategoryLabel,
 	getProjectCategories,
 	normalizeCategory,
+	selectGridProjects,
 	slugify,
 } from "../lib/format";
 
@@ -124,9 +125,7 @@ function proofPoint(title: string): string {
 					</p>
 				</div>
 			) : (
-				projects
-					.filter(p => !p.titolo.toLowerCase().includes('codeforge'))
-					.slice(0, 4) // Show only Tier 2 projects (max 4)
+				selectGridProjects(projects)
 					.map((project) => {
 					const categories = [
 						...new Set(getProjectCategories(project).map(normalizeCategory)),

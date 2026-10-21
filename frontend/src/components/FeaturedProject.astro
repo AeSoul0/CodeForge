@@ -3,6 +3,8 @@
  * @file src/components/FeaturedProject.astro
  * @description Featured project section highlighting CodeForge.
  */
+
+import { FEATURED_PROJECT_SLUG } from "../lib/format";
 ---
 
 <section class="relative w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-16 sm:py-24">
@@ -58,7 +60,7 @@
             <!-- Link to Case Study -->
             <div class="pt-4">
                 <a
-                    href="/projects/codeforge"
+                    href={`/projects/${FEATURED_PROJECT_SLUG}`}
                     class="inline-flex items-center gap-2 text-sm font-semibold text-white hover:text-cyan-400 transition-colors"
                 >
                     Read the case study

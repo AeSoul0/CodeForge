@@ -115,6 +115,27 @@ export function slugify(
         .replace(/(^-|-$)+/g, '');
 }
 
+/**
+ * Slug of the project shown in the "Featured project" section. It has its
+ * own hand-written case study (/projects/codeforge), so the grid skips it.
+ */
+export const FEATURED_PROJECT_SLUG = 'codeforge';
+
+/** Maximum number of cards in the "Recent Projects" grid. */
+export const MAX_GRID_PROJECTS = 4;
+
+/**
+ * Projects for the "Recent Projects" grid: everything except the featured
+ * project, in API order, capped at {@link MAX_GRID_PROJECTS}.
+ */
+export function selectGridProjects<T extends { titolo: string }>(
+    projects: T[],
+): T[] {
+    return projects
+        .filter((project) => slugify(project.titolo) !== FEATURED_PROJECT_SLUG)
+        .slice(0, MAX_GRID_PROJECTS);
+}
+
 const CATEGORY_LABELS: Record<string, string> = {
     'full-stack': 'Full Stack',
     embedded: 'Embedded',
