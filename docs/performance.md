@@ -63,6 +63,19 @@ the 4x CPU slowdown. The 2026-10-12 reports were not kept, so it is not yet
 known whether the site or the measuring machine changed; both scores stay
 above the 90 target.
 
+Follow-up (2026-10-21), from a mobile trace and three local runs per side:
+
+* the particle background read `innerWidth`/`innerHeight` while its module
+  was evaluated, forcing a full layout during page load; it now starts on
+  `requestIdleCallback` (it is hidden behind the loader at first). Local
+  production build, mobile, median of 3: score 95 → 96, TBT 0 ms in both,
+  and the forced layout is gone from the trace;
+* on the local build (no Cloudflare in front) median TBT is already 0 ms, so
+  most of the production TBT comes from scripts Cloudflare injects: the Web
+  Analytics beacon (about 120 ms of script work in the unthrottled trace) and
+  the email-obfuscation decoder. The beacon is what records field INP, so it
+  stays.
+
 ## LCP
 
 Below the 2.5 s target on both form factors. The mobile value is dominated by

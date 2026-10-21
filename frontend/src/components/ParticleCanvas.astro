@@ -31,8 +31,19 @@ const isE2E =
 
                 const canvas = document.getElementById("particleCanvas");
 
-                if (canvas instanceof HTMLCanvasElement) {
-                    initParticleCanvas(canvas);
+                // Decorative, and hidden behind the loader at first: start when the
+                // browser is idle, so reading the viewport size does not force a
+                // full layout while the page is still loading.
+                const start = () => {
+                    if (canvas instanceof HTMLCanvasElement) {
+                        initParticleCanvas(canvas);
+                    }
+                };
+
+                if ("requestIdleCallback" in window) {
+                    window.requestIdleCallback(start, { timeout: 1000 });
+                } else {
+                    window.setTimeout(start, 200);
                 }
             </script>
         </>
