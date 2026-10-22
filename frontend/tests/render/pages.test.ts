@@ -5,6 +5,8 @@ import ProjectsGrid from '../../src/components/ProjectsGrid.astro';
 import ParticleCanvas from '../../src/components/ParticleCanvas.astro';
 import Layout from '../../src/layouts/Layout.astro';
 import { GET as health } from '../../src/pages/api/health';
+import NotFoundPage from '../../src/pages/404.astro';
+import ServerErrorPage from '../../src/pages/500.astro';
 import HomePage from '../../src/pages/index.astro';
 import { GET as sitemap } from '../../src/pages/sitemap.xml';
 import ProjectPage from '../../src/pages/projects/[slug].astro';
@@ -176,10 +178,33 @@ describe('project detail page', () => {
         vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
         mockFetch({ 'GET /api/projects': { body: { data: projects } } });
-        expect(await render('missing')).toMatch(/not found/i);
+        const missing = await render('missing');
+        expect(missing).toMatch(/not found/i);
+        expect(missing).toContain('Error 404');
+        expect(missing).toContain('<meta name="robots" content="noindex">');
 
         mockFetch({ 'GET /api/projects': { status: 500 } });
-        expect(await render('citta-digitale')).toMatch(/unavailable|try again/i);
+        const unavailable = await render('citta-digitale');
+        expect(unavailable).toMatch(/unavailable|try again/i);
+        expect(unavailable).toContain('Error 503');
+    });
+});
+
+describe('error pages', () => {
+    it.each([
+        [NotFoundPage, 'Error 404', 'Page not found | ÆSoul'],
+        [ServerErrorPage, 'Error 500', 'Something went wrong | ÆSoul'],
+    ])('render inside the site layout (%#)', async (Page, code, title) => {
+        const html = await renderAstro(Page);
+
+        expect(html).toContain(code);
+        expect(html).toContain(`<title>${title}</title>`);
+        expect(html).toContain('<meta name="robots" content="noindex">');
+        expect(html).toContain('href="/"');
+        // Same background as the rest of the site.
+        expect(html).toContain('particleCanvas');
+        expect(html).toContain('ambient-background');
+        expect(html.match(/<main\b/g)).toHaveLength(1);
     });
 });
 

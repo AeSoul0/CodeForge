@@ -1,0 +1,22 @@
+---
+/**
+ * @file src/pages/404.astro
+ * @description Not-found page, rendered by Astro for every unknown URL.
+ */
+
+import Layout from "../layouts/Layout.astro";
+import ErrorState from "../components/ErrorState.astro";
+import "../styles/global.css";
+
+Astro.response.status = 404;
+---
+
+<Layout title="Page not found | ÆSoul" noindex>
+    <div class="relative z-10 mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-6 py-24">
+        <ErrorState
+            code={404}
+            title="Page not found"
+            message="The page you are looking for does not exist or has been moved."
+        />
+    </div>
+</Layout>

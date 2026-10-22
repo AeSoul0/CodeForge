@@ -1,0 +1,23 @@
+---
+/**
+ * @file src/pages/500.astro
+ * @description Server-error page, rendered by Astro when a page throws.
+ * It must not call the backend, so it still renders when the API is down.
+ */
+
+import Layout from "../layouts/Layout.astro";
+import ErrorState from "../components/ErrorState.astro";
+import "../styles/global.css";
+
+Astro.response.status = 500;
+---
+
+<Layout title="Something went wrong | ÆSoul" noindex>
+    <div class="relative z-10 mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-6 py-24">
+        <ErrorState
+            code={500}
+            title="Something went wrong"
+            message="An unexpected error occurred on the server. Please try again in a moment."
+        />
+    </div>
+</Layout>

@@ -20,6 +20,7 @@
 
 
 import Layout from "../../layouts/Layout.astro";
+import ErrorState from "../../components/ErrorState.astro";
 import "../../styles/global.css";
 import { getApiUrl } from "../../lib/api";
 import { fetchProjects } from "../../lib/content";
@@ -149,6 +150,7 @@ const renderedDescription =
 				? "Project service unavailable | ÆSoul"
 				: "Project not found | ÆSoul"
 	}
+	noindex={!project}
 >
 	<!-- ==============================================================
 	     AMBIENT BACKGROUND
@@ -377,19 +379,13 @@ const renderedDescription =
 					</div>
 				</>
 			) : (
-				<section class="rounded-3xl border border-white/10 bg-white/[0.03] p-8 md:p-10">
-					<h1 class="text-3xl font-black tracking-[-0.03em] text-white">
-						{projectFetchFailed
-							? "Project service unavailable"
-							: "Project not found"}
-					</h1>
-
-					<p class="mt-4 max-w-2xl text-base leading-7 text-white/50">
-						{projectFetchFailed
-							? "The backend project service could not be reached."
-							: "The requested project could not be found."}
-					</p>
-				</section>
+				<ErrorState
+					code={projectFetchFailed ? 503 : 404}
+					title={projectFetchFailed ? "Project service unavailable" : "Project not found"}
+					message={projectFetchFailed
+						? "The backend project service could not be reached."
+						: "The requested project could not be found."}
+				/>
 			)
 		}
 	</div>
