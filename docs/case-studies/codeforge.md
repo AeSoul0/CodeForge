@@ -33,10 +33,13 @@ little context about a project's architecture, decisions and quality.
 - Experience logos stored in MongoDB and served by the API.
 - Structured request logs, audit log for content changes, `/live`, `/ready`
   and `/metrics` endpoints.
+- Custom 404 and 500 pages inside the site layout.
 
 ## Security
 
-- JWT (HS256, issuer/audience, 24 h) in an HttpOnly, Secure cookie.
+- JWT (HS256, issuer/audience, 24 h) in an HttpOnly, Secure cookie; logout
+  revokes the token server-side (hashed denylist that a TTL index empties when
+  each token expires).
 - `SameSite=None` is required across the two sites, so a CSRF guard checks the
   origin and requires `X-Requested-With: CodeForge` on authenticated
   mutations.

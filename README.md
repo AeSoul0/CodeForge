@@ -155,6 +155,7 @@ Additional architecture documentation:
 * [Operations](docs/operations.md)
 * [API](docs/api.md)
 * [Professional Roadmap](docs/roadmap.md)
+* [Security Policy](SECURITY.md): how to report a vulnerability
 
 Documents separate what is implemented, verified, measured and still pending,
 so targets are never presented as measurements.

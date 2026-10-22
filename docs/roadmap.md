@@ -4,7 +4,7 @@
 **Baseline:** 82/100  
 **Target:** 90+/100  
 **Approach:** milestone-based, evidence-driven, without artificial time constraints  
-**Status:** ✅ Complete (2026-10-12); open evidence: field INP
+**Status:** ✅ Complete (2026-10-12); open evidence: field INP and an independent security review
 
 ---
 

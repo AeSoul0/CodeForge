@@ -536,15 +536,19 @@ CodeForge/
 │   ├── metrics-lighthouse.json manual Lighthouse record
 │   ├── accessibility.md  api.md  architecture.md  deployment.md
 │   ├── developer-experience.md  engineering-scorecard.md  evidence.md
-│   ├── operations.md  performance.md  roadmap.md  security.md  testing.md
+│   ├── operations.md  performance.md  project-guide.md  roadmap.md
+│   ├── security.md  testing.md
 │   ├── screenshots/            images and the scroll-tour GIF used in this README
 │   └── case-studies/
 │
 ├── scripts/
 │   └── collect-metrics.mjs     builds docs/metrics.md
 │
+├── SECURITY.md                 how to report a vulnerability
+│
 └── .github/
-    └── workflows/              ci.yml, security.yml
+    ├── workflows/              ci.yml, security.yml
+    └── dependabot.yml
 ```
 
 ---

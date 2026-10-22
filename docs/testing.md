@@ -19,10 +19,11 @@ Audit           npm audit · CodeQL
 ## Backend (`backend/tests`)
 
 - **Unit**: services, repositories, controllers, routes, middleware (auth,
-  CSRF, metrics), `AppError`, database connection and admin seeding.
+  CSRF, metrics), token revocation, `AppError`, database connection and admin seeding.
 - **API**: Fastify `inject()` against a real MongoDB database
-  (`codeforge_test`), covering authentication, validation, security headers,
-  CSRF rejection and rate limiting, plus a backup dump/restore round trip
+  (`codeforge_test`), covering authentication, token revocation at logout
+  (`revocation.test.ts`), validation, security headers, CSRF rejection and
+  rate limiting, plus a backup dump/restore round trip
   (`backup.test.ts`).
 - Thresholds (V8): statements 85%, branches 80%, functions 85%, lines 85%.
 
@@ -38,7 +39,7 @@ npm run test:cov  # with coverage thresholds
 |---|---|---|
 | `unit/` | Node / happy-dom | API client, DOM helpers, formatting, safe Markdown, content loaders, particle animation, page effects, project filter |
 | `admin/` | `happy-dom-ssr` | Every admin page: the real page is rendered with the Astro Container API, mounted into happy-dom, then its client module runs against mocked `fetch` |
-| `render/` | Node | Public pages and components rendered with the Container API (home, project detail incl. 404/503, case study, layout, `/api/health`) |
+| `render/` | Node | Public pages and components rendered with the Container API (home, project detail incl. 404/503, the 404 and 500 error pages, case study, layout, `/api/health`) |
 
 `happy-dom-ssr` (`tests/environments/happy-dom-ssr.ts`) provides DOM globals
 while keeping Vite's SSR transform, which `.astro` rendering needs.

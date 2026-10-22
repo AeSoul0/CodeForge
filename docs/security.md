@@ -36,7 +36,7 @@ Test results that back these controls: [metrics.md](metrics.md).
 
 # 3. Dependency Status
 
-`npm audit` on 2026-10-19 (after the Dependabot updates):
+`npm audit` on 2026-10-22 (unchanged since the 2026-10-19 Dependabot updates):
 
 ```text
 Backend:   0 vulnerabilities
@@ -466,8 +466,6 @@ External-service failures are isolated inside service-level integration paths.
 
 # 23. Security Test Evidence
 
-The latest local backend test execution reported:
-
 Current numbers: see [metrics.md](metrics.md).
 
 Security-focused scenarios include:
@@ -477,7 +475,10 @@ Security-focused scenarios include:
 400 Bad Request
 429 Too Many Requests
 Successful authenticated operations
+401 after logout with the same token
 ```
+
+Token revocation is covered by `backend/tests/api/revocation.test.ts`.
 
 The security suite therefore validates actual failure behavior instead of only
 checking that authentication middleware exists.
@@ -540,6 +541,7 @@ Sensitive information disclosure
 * [x] Issuer validated
 * [x] Audience validated
 * [x] Expiration enforced
+* [x] Server-side revocation at logout (hashed, TTL-expiring denylist)
 * [x] HttpOnly cookie
 * [x] Secure production cookie
 * [x] SameSite cookie policy plus origin and custom-header CSRF checks

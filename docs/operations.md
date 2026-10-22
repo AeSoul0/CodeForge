@@ -30,6 +30,7 @@ deliberate non-goal until traffic justifies it.
 |---|---|---|
 | Backend API down or returning 5xx | Homepage still renders, with a "Backend Connection Failed" panel in place of projects and experience. | `frontend/tests/render/pages.test.ts` ("renders the API error state"), `frontend/e2e/api-errors.spec.ts` |
 | API down on a project page | `503` page saying the project service is unavailable; unknown slugs return `404`. | `pages.test.ts` ("returns 404 for unknown projects and 503 when the API fails") |
+| Unknown URL, or a page throws while rendering | Custom 404 or 500 page inside the site layout (background, particles, "Back to home"), sent with `noindex`. | `pages.test.ts` ("error pages render inside the site layout") |
 | API down while building the sitemap | `/sitemap.xml` still lists the static pages. | `pages.test.ts` ("still lists the static pages when the backend is down") |
 | API down in the admin | The projects and experiences pages show "Failed to load …" in the table instead of breaking. | `frontend/tests/admin/projects.test.ts`, `experiences.test.ts` |
 | MongoDB down | `/ready` returns `503`; the API returns errors, which the frontend handles as above. | `backend/tests/unit/healthController.test.ts` |
@@ -119,5 +120,5 @@ with its expiry, and other sessions are unaffected).
 |---|---|
 | Keyboard-only navigation | Done 2026-10-20 on the homepage and the case study (production build): 24 and 4 tab stops in reading order, each with a visible focus indicator, no traps, and the skip link first. Automated keyboard checks also run in `frontend/e2e/keyboard.spec.ts`. |
 | Screen reader | Done 2026-10-21. Accessibility-tree pass on production (home, case study, a project page, 404, admin login; desktop and mobile): language, title, one `h1`, landmarks, link and button names, image alternatives, form labels and tab order are correct, and axe reports no WCAG 2.2 AA violations. It found and fixed unnamed decorative icons, the case-study ASCII diagram being read symbol by symbol, and skipped heading levels (see [evidence.md § 13](evidence.md)). NVDA 2026.2 walkthrough done 2026-10-21 with Chrome on the same pages: headings (H), Tab order, project filters, the architecture diagram and the login form were listened to, and the fixes it led to are in evidence.md § 13. |
-| Field performance (INP from real users) | Pending until CrUX has enough traffic for aesoul0.com; lab INP is in [performance.md](performance.md#inp). |
+| Field performance (INP from real users) | Pending enough visits. Cloudflare Web Analytics collects real-user INP from every visitor since 2026-10-21 (CrUX still has too little data); lab INP is in [performance.md](performance.md#inp). |
 | Independent security review | Pending. Automated coverage today: CodeQL, `npm audit`, Dependabot, and the API security tests in `backend/tests/api/security.test.ts`. A reviewer should start from [security.md § 27](security.md#27-security-review-checklist). |
