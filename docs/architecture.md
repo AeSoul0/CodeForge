@@ -344,6 +344,8 @@ Authenticated request
      ↓
 JWT verification middleware
      ↓
+Revocation check (denylist)
+     ↓
 Authorization
      ↓
 Protected operation
@@ -355,6 +357,7 @@ Current JWT controls include:
 * issuer;
 * audience;
 * expiration;
+* server-side revocation at logout (hashed, TTL-expiring denylist);
 * secure cookie configuration;
 * HttpOnly;
 * SameSite protection.
@@ -677,7 +680,7 @@ Query and index discipline remain important as data complexity increases.
 
 ### Benefits
 
-* stateless authentication;
+* stateless signature verification (plus one indexed revocation lookup);
 * HttpOnly cookie protection;
 * straightforward browser integration;
 * no access token exposure to application JavaScript.

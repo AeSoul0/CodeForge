@@ -448,6 +448,11 @@ describe(
                 expect(
                     sign,
                 ).toHaveBeenCalledWith({
+                    // Unique per login, so logout revokes only this token.
+                    jti:
+                        expect.stringMatching(
+                            /^[0-9a-f-]{36}$/,
+                        ),
                     id:
                         'admin-id',
                     username:

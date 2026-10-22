@@ -1,6 +1,7 @@
 // tests/unit/authMiddleware.test.ts
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { authenticateAdmin } from '../../src/middlewares/auth';
+import { tokenRevocationService } from '../../src/services/TokenRevocationService';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 
 describe('authenticateAdmin middleware', () => {
@@ -45,6 +46,23 @@ describe('authenticateAdmin middleware', () => {
     await authenticateAdmin(request as FastifyRequest, reply as FastifyReply);
     expect(reply.status).toHaveBeenCalledWith(403);
     expect(reply.send).toHaveBeenCalledWith({ success: false, error: 'Forbidden: Admin access required' });
+  });
+
+  it('fails with 401 when the token was revoked at logout', async () => {
+    const spy = vi.spyOn(tokenRevocationService, 'isRequestRevoked').mockResolvedValue(true);
+    (request.jwtVerify as any).mockResolvedValue({ role: 'admin' });
+    await authenticateAdmin(request as FastifyRequest, reply as FastifyReply);
+    expect(reply.status).toHaveBeenCalledWith(401);
+    expect(reply.send).toHaveBeenCalledWith({ success: false, error: 'Unauthorized: Invalid or missing token' });
+    spy.mockRestore();
+  });
+
+  it('fails closed with 401 when the revocation check errors', async () => {
+    const spy = vi.spyOn(tokenRevocationService, 'isRequestRevoked').mockRejectedValue(new Error('db down'));
+    (request.jwtVerify as any).mockResolvedValue({ role: 'admin' });
+    await authenticateAdmin(request as FastifyRequest, reply as FastifyReply);
+    expect(reply.status).toHaveBeenCalledWith(401);
+    spy.mockRestore();
   });
 
   it('passes through when JWT is valid admin', async () => {
