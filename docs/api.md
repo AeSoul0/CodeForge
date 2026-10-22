@@ -39,7 +39,7 @@ The API is consumed by the Astro frontend and the admin dashboard.
 |---|---|:---:|---|
 | `POST` | `/api/auth/login` | — | Log in, set the session cookie |
 | `GET` | `/api/auth/me` | cookie | Current session |
-| `POST` | `/api/auth/logout` | — | Clear the session cookie |
+| `POST` | `/api/auth/logout` | — | Revoke the token, clear the session cookie |
 | `GET` | `/api/projects` | — | List projects (paginated) |
 | `POST` | `/api/projects` | cookie | Create a project |
 | `PATCH` | `/api/projects/:id` | cookie | Update a project |
@@ -190,13 +190,15 @@ default 1) and `limit` (1–100, default 10). Out-of-range values return `400`.
 POST /api/auth/logout
 ```
 
-Clears the session cookie.
+Revokes the session token server-side and clears the cookie.
 
 ```text
 200 OK
 ```
 
-JWTs are stateless: a copied token stays valid until it expires (24 h).
+After logout the same token is rejected with `401`, even before its 24 h
+expiry. The revocation entry is deleted automatically when the token would
+have expired.
 
 ---
 

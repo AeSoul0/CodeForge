@@ -500,8 +500,9 @@ fail and how to recover:
   `backend/`, round-trip tested against a real database.
 * **Deploy rollback:** Vercel instant rollback, Render rollback, or
   `git revert` on `main`.
-* **Session revocation:** rotate `JWT_SECRET` to end every session; change
-  `ADMIN_API_KEY` to change the admin password.
+* **Session revocation:** logout revokes its token server-side (TTL denylist,
+  cleared after the 24 h expiry); rotate `JWT_SECRET` to end every session;
+  change `ADMIN_API_KEY` to change the admin password.
 
 ---
 

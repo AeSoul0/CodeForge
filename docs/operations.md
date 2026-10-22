@@ -96,17 +96,20 @@ first (section 3) when a change alters stored data.
 ## 5. Session revocation
 
 Sessions are JWTs (HS256, issuer and audience checked, 24 h expiry) in an
-HttpOnly cookie. The server keeps no session list, so a token stays valid
-until it expires.
+HttpOnly cookie. Logout revokes the token on the server: its SHA-256 hash goes
+into the `revokedtokens` collection until the token's own expiry, and a MongoDB
+TTL index deletes the entry after that, so the denylist holds at most 24 hours
+of logouts. Every admin request checks it, and a failed check is refused.
 
 | Need | Procedure | Effect |
 |---|---|---|
-| Normal sign-out | **Logout** in the admin. | Clears the cookie in that browser. A copied token would remain valid until expiry. |
+| Normal sign-out | **Logout** in the admin. | Clears the cookie and revokes that token server-side: a copied cookie stops working immediately. Other sessions stay open. |
 | Revoke every session (lost device, suspected leak) | Change `JWT_SECRET` in the Render environment and redeploy. | Every existing token fails verification; all browsers are sent back to the login page. |
 | Change the admin password | Change `ADMIN_API_KEY` in Render and redeploy. | `seedAdmin` rehashes it on boot. Combine with a new `JWT_SECRET` to also end open sessions. |
 
-Per-token revocation (a denylist) is not implemented. For a single-admin site
-the secret rotation above is the accepted approach.
+Verified by `backend/tests/api/revocation.test.ts` (a token works, is
+rejected after logout on `/me` and on protected routes, is stored as a hash
+with its expiry, and other sessions are unaffected).
 
 ---
 

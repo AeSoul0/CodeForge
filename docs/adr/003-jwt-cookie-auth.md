@@ -84,8 +84,9 @@ Not justified for the current administrative scope.
 ### Costs
 
 * cookie authentication requires careful SameSite/CORS handling;
-* JWT invalidation requires an explicit policy if immediate revocation becomes
-  necessary.
+* immediate invalidation needs server state: logout stores a hash of the
+  token in a TTL-indexed denylist until its 24 h expiry (added 2026-10-22),
+  so every admin request does one indexed database lookup.
 
 ## Security Requirements
 

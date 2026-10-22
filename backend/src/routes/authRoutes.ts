@@ -6,12 +6,16 @@
  * - Authenticate administrator credentials.
  * - Issue an HttpOnly JWT session cookie.
  * - Return the authenticated administrator identity.
- * - Clear the session cookie during logout.
+ * - Revoke the token server-side and clear the session cookie at logout.
  *
  * Cookie security:
  * - test/development HTTP: Secure=false;
  * - production HTTPS: Secure=true.
  */
+
+import {
+    randomUUID,
+} from 'node:crypto';
 
 import {
     FastifyInstance,
@@ -20,6 +24,11 @@ import {
 import {
     adminService,
 } from '../services/AdminService';
+
+import {
+    getRequestToken,
+    tokenRevocationService,
+} from '../services/TokenRevocationService';
 
 import {
     positiveInteger,
@@ -114,6 +123,12 @@ export default async function authRoutes(
 
             const token =
                 fastify.jwt.sign({
+                    /**
+                     * Unique per login, so two logins in the same second
+                     * get different tokens and logout revokes only its own.
+                     */
+                    jti:
+                        randomUUID(),
                     id:
                         admin._id,
                     username:
@@ -178,6 +193,16 @@ export default async function authRoutes(
                     };
 
                 if (
+                    await tokenRevocationService.isRequestRevoked(
+                        request,
+                    )
+                ) {
+                    throw new Error(
+                        'Token revoked',
+                    );
+                }
+
+                if (
                     decoded.role !==
                     'admin'
                 ) {
@@ -221,9 +246,42 @@ export default async function authRoutes(
     fastify.post(
         '/logout',
         async (
-            _request,
+            request,
             reply,
         ) => {
+            /**
+             * Revoke the session token on the server until it expires, so
+             * a copy of the cookie stops working after logout. An invalid
+             * or expired token has nothing to revoke.
+             */
+            const token =
+                getRequestToken(request);
+
+            let expiresAtSeconds:
+                number | undefined;
+
+            try {
+                expiresAtSeconds =
+                    (
+                        await request.jwtVerify() as {
+                            exp?: number;
+                        }
+                    ).exp;
+            } catch {
+                expiresAtSeconds =
+                    undefined;
+            }
+
+            if (
+                token &&
+                expiresAtSeconds
+            ) {
+                await tokenRevocationService.revoke(
+                    token,
+                    expiresAtSeconds,
+                );
+            }
+
             const isProduction =
                 process.env.NODE_ENV ===
                 'production';

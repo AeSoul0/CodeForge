@@ -13,6 +13,10 @@ import {
     FastifyRequest,
 } from 'fastify';
 
+import {
+    tokenRevocationService,
+} from '../services/TokenRevocationService';
+
 /**
  * Verify the administrator JWT.
  *
@@ -56,6 +60,30 @@ export async function authenticateAdmin(
             await request.jwtVerify() as {
                 role?: string;
             };
+
+        /**
+         * A token revoked at logout is rejected even before it expires.
+         * A database error lands in the catch below: fail closed.
+         */
+        if (
+            await tokenRevocationService.isRequestRevoked(
+                request,
+            )
+        ) {
+            request.log.warn(
+                '[AUTH] Token was revoked at logout.',
+            );
+
+            return reply
+                .status(401)
+                .send({
+                    success:
+                        false,
+
+                    error:
+                        'Unauthorized: Invalid or missing token',
+                });
+        }
 
         if (
             decoded.role !==

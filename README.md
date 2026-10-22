@@ -176,9 +176,6 @@ remains is verification, tracked in
 
 Accepted limitations:
 
-* JWTs cannot be revoked one by one before their 24 h expiry; all sessions
-  can be ended by rotating `JWT_SECRET`
-  ([operations.md § 5](docs/operations.md#5-session-revocation)).
 * Two moderate advisories remain in `@tailwindcss/typography` (build-time
   only; the fix requires a breaking downgrade). No high/critical advisories.
 * TypeScript 7 is on hold until `@astrojs/check` and `typescript-eslint`
