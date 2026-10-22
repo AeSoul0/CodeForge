@@ -323,6 +323,10 @@ Mongoose is used to provide:
 The database layer is isolated behind repositories so that application services
 do not depend directly on persistence implementation details.
 
+Collections: `projects`, `experiences`, `admins` and `revokedtokens` (hashes
+of JWTs revoked at logout; a TTL index deletes each entry when its token
+expires).
+
 ---
 
 # 13. Authentication Architecture
@@ -441,6 +445,11 @@ The error-handling layer is responsible for:
 * preventing sensitive implementation details from leaking to clients.
 
 The production application should not expose internal stack traces to users.
+
+On the frontend, unknown URLs and page errors render custom 404 and 500 pages
+(`src/pages/404.astro`, `500.astro`) inside the normal layout, with the same
+background and particles, a link home and `noindex`. The 500 page makes no API
+call, so it still renders when the backend is down.
 
 ---
 

@@ -59,7 +59,7 @@ const qualityChecks = [
 const securityModel = [
     {
         label: "Authentication",
-        text: "JWT (HS256, issuer and audience checked, 24 h expiry) in an HttpOnly, Secure cookie; bcrypt-hashed admin password."
+        text: "JWT (HS256, issuer and audience checked, 24 h expiry) in an HttpOnly, Secure cookie, revoked server-side at logout; bcrypt-hashed admin password."
     },
     {
         label: "CSRF Protection",

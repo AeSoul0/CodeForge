@@ -349,8 +349,10 @@ optimization.
 
 ## INP
 
-Record a field INP value once real-user data is available (CrUX or Vercel
-Speed Insights). Representative interactions:
+Record a field INP value once enough real-user data is available. Cloudflare
+Web Analytics (Core Web Vitals, including INP) has collected it from every
+visitor since 2026-10-21; CrUX will follow once traffic is high enough.
+Representative interactions:
 
 ```text
 Navigation
