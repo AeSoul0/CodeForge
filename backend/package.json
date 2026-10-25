@@ -31,7 +31,7 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
-    "@dotenvx/dotenvx": "^2.21.0",
+    "@dotenvx/dotenvx": "^2.38.2",
     "@fastify/cookie": "^11.1.2",
     "@fastify/cors": "^11.3.0",
     "@fastify/helmet": "^13.1.1",
